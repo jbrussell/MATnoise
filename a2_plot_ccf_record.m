@@ -1,64 +1,25 @@
-% Plot the cross-spectra in the time domain for the individual station pairs
+% Plot the cross-spectra in the time domain for the individual station pairs. Filter is built using a Tukey taper with sharpness controlled by costap_wid. The typical butterworth filter is not precise enough for the higest frequencies
 %
-% NJA, 04/08/2016
-% JBR, 6/17/2016
-clear all;
+% https://github.com/jbrussell
+
+clear;
 setup_parameters;
 IsFigure = 0;
 IsFigure_GAUS = 0; % Plot frequency domain filtered and unfiltered
 
 %======================= PARAMETERS =======================%
 comp = 'ZZ'; %'ZZ'; %'RR'; %'TT';
-coperiod = [14 25]; %[3 10]; %[4 10]; %[5 25]; %[2 8]; %[2 16]; %[5 25]; %[ 8 30 ]; % Periods to filter between
-amp = 8e0*2;
-windir = 'window3hr_Z'; %'window3hr_LH_Zcorr'; %'window3hr_LH_Zcorr_tiltonly'; %'window3hr_LH_whitesm'; %'window3hr_LH_Zcorr'; %'window0.2hr'; %'window24hr_specwhite';
-windir_for_SNR = 'window3hr_Z'; % Data to use for calculating SNR threshold (for plotting purposes)
+coperiod = [5 10]; % Periods to filter between
+amp = 8e0;
+windir = 'window3hr';
+windir_for_SNR = 'window3hr'; % Data to use for calculating SNR threshold (for plotting purposes)
 trace_space = 0; % km
 snr_thresh = 2.5;
-dep_tol = [0 0]; % [sta1, sta2];
+dep_tol = [0 0]; % [sta1, sta2] OBS Depth tolerance;
 max_grv = inf; %5.5;
-min_grv = 1.4; %1.6 %0.2; %2.2;
+min_grv = 1.4; %1.6
 xlims = [-250 250];
 ylims = [0 450];
-
-% comp = 'ZZ'; %'ZZ'; %'RR'; %'TT';
-% coperiod = [5 10]; %[3 10]; %[4 10]; %[5 25]; %[2 8]; %[2 16]; %[5 25]; %[ 8 30 ]; % Periods to filter between
-% amp = 8e0;
-% windir = 'window3hr'; %'window3hr_LH_Zcorr'; %'window3hr_LH_Zcorr_tiltonly'; %'window3hr_LH_whitesm'; %'window3hr_LH_Zcorr'; %'window0.2hr'; %'window24hr_specwhite';
-% windir_for_SNR = 'window3hr_Zcorr_tiltcomp'; % Data to use for calculating SNR threshold (for plotting purposes)
-% trace_space = 0; % km
-% snr_thresh = 2.5;
-% dep_tol = [0 0]; % [sta1, sta2];
-% max_grv = inf; %5.5;
-% min_grv = 1.4; %1.6 %0.2; %2.2;
-% xlims = [-250 250];
-% ylims = [0 450];
-
-% comp = 'TT'; %'ZZ'; %'RR'; %'TT';
-% coperiod = [3 9]; %[3 10]; %[4 10]; %[5 25]; %[2 8]; %[2 16]; %[5 25]; %[ 8 30 ]; % Periods to filter between
-% amp = 8e0;
-% windir = 'window3hr'; %'window3hr_LH_Zcorr'; %'window3hr_LH_Zcorr_tiltonly'; %'window3hr_LH_whitesm'; %'window3hr_LH_Zcorr'; %'window0.2hr'; %'window24hr_specwhite';
-% windir_for_SNR = 'window3hr'; % Data to use for calculating SNR threshold (for plotting purposes)
-% trace_space = 0; % km
-% snr_thresh = 2.5;
-% dep_tol = [0 0]; % [sta1, sta2];
-% max_grv = inf; %5.5;
-% min_grv = 1.4; %1.6 %0.2; %2.2;
-% xlims = [-250 250];
-% ylims = [0 450];
-
-% comp = 'RR'; %'ZZ'; %'RR'; %'TT';
-% coperiod = [5 10]; %[3 10]; %[4 10]; %[5 25]; %[2 8]; %[2 16]; %[5 25]; %[ 8 30 ]; % Periods to filter between
-% amp = 8e0;
-% windir = 'window3hr'; %'window3hr_LH_Zcorr'; %'window3hr_LH_Zcorr_tiltonly'; %'window3hr_LH_whitesm'; %'window3hr_LH_Zcorr'; %'window0.2hr'; %'window24hr_specwhite';
-% windir_for_SNR = 'window3hr'; % Data to use for calculating SNR threshold (for plotting purposes)
-% trace_space = 0; % km
-% snr_thresh = 2.5;
-% dep_tol = [0 0]; % [sta1, sta2];
-% max_grv = inf; %5.5;
-% min_grv = 1.4; %1.6 %0.2; %2.2;
-% xlims = [-250 250];
-% ylims = [0 450];
 
 %%% --- Parameters to build up gaussian filters --- %%% 
 % (effects the width of the filter in the frequency domain)
@@ -67,16 +28,12 @@ costap_wid = 0.2; % 0 => box filter; 1 => Hann window
 isplotwin = 0; %1;
 isploth20 = 0;
 isfigure_snr = 0;
-% Window Velocities
-% max_grv = 10; %5.5;
-% min_grv = 1.6; %2.2;
 
 h20_grv = 1.5;
 %==========================================================%
 
 dt = parameters.dt;
 stalist = parameters.stalist;
-% stalist =  stalist(1:21);
 nsta = parameters.nsta;
 nsta = length(stalist);
 winlength = parameters.winlength;
@@ -105,7 +62,6 @@ if ~exist(figpath)
     mkdir(figpath)
 end
 
-%% Load Depths
 %% Load Depths
 STAS = stalist;
 LATS = stalat;
@@ -168,10 +124,6 @@ for ista1=1:nsta % loop over all stations
         %----------- FILTER DATA (FREQUENCY DOMAIN) -------------%
         f1 = 1/coperiod(2);
         f2 = 1/coperiod(1);
-%         [b, a] = butter(2,[f1 f2]); % Butterworth Filter
-%         ccf_filt{nstapair} =  filtfilt(b,a,ccf_ifft);
-
-%         [ccf_gaus,faxis] = gaus_filt(ccf,coperiod,dt,min_width,max_width);
         
         [ ccf_filtered ] = tukey_filt( ccf,coperiod,dt,costap_wid );
         [ ccf_filtered_SNR ] = tukey_filt( ccf_SNR,coperiod,dt,costap_wid );
@@ -247,9 +199,7 @@ for ista1=1:nsta % loop over all stations
         for istapair = 1: nstapair % loop over station pairs
             ccf_waveform = ccf_filt{istapair}(indtime(1):indtime(end)); % ccf at -500 to 500 seconds
             plot(time(indtime(1):indtime(end)),ccf_waveform*amp+sta1sta2_dist(istapair),'-k'); hold on;
-            %             text(0,stapairdist(istapair),dumsta2{istapair})
-            %             return
-            %             pause
+%             text(0,stapairdist(istapair),dumsta2{istapair})
         end
         xlim([-500 500])
         xlabel('lag time (s)','fontsize',18,'fontweight','bold');
@@ -259,18 +209,6 @@ for ista1=1:nsta % loop over all stations
         pause;
 %         print(f101,'-dpdf',[figpath,'ccf',comp,'_',sta1,'.pdf']); % Save figure
     end
-    %----------- PLOT GROUP VELOCITIES (needs to be updated) -------------%
-    % Plot lines of group velocity for hte first overtone and fundamental mode.
-    % x1st = stapairdist/vel_1st;
-    % x0st = stapairdist/vel_0st;
-    % ydum = stapairdist;
-%     figure(101)
-%     hold on
-    % plot(x1st,ydum,'-r','linewidth',1)
-    % plot(x0st,ydum,'-b','linewidth',1)
-    % plot(x1st*-1,ydum,'-r','linewidth',1)
-    % plot(x0st*-1,ydum,'-b','linewidth',1)
-    %     pause
 end % ista1
 
 

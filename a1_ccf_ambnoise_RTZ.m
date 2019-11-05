@@ -1,17 +1,17 @@
-% inpu sac files should removed instrument response and down sample
-
-% Calculate ambient noise cross correlation record from multiple stationpairs
-% Calculate for radial and transverse components
+% Calculate ambient noise cross correlation record from multiple stationpairs for Z, R, and T
+% !! Currently requires data to be downsampled to 1 Hz !!
 %
+% Expects files organized like so:
+%       {datadirectory}/{station}/{station}.{yyyy}.{jday}.{hh}.{mm}.{SS}.{COMP}.sac
+%  e.g.: mydata/CC05/CC05.2018.112.00.00.00.BDH.sac
+%
+%   (NOTE: FUNCTIONIZE IN THE FUTURE)
 % Patty Lin -- 10/2014
-% Modified by NJA 11/5/2014
-% Modified by JBR 6/16/2016
-%             JBR 2/11/2018 - Add option to cosine taper each data chunk
-
-clear
-
+% Natalie Accardo
+% Josh Russell
+% https://github.com/jbrussell
+clear;
 setup_parameters;
-
 
 IsFigure1 = 1;
 IsFigure2 = 0;
@@ -25,7 +25,6 @@ IsRemoveIR = 0; % remove instrument response
 IsDetrend = 1; % detrend the data
 IsSpecWhiten = 1; % Whiten spectrum
 IsTaper = 1; % Apply cosine taper to data chunks
-
 
 % input path
 datadir = parameters.datapath;
@@ -114,13 +113,11 @@ stalist = parameters.stalist;
 nsta=parameters.nsta; % number of target stations to calculate for
 
 % READ OBS ORIENTATIONS
-% orientation = load([orientation_path,'Orientation_Rayleigh.mat']); % rayleigh orientations are left handed!
 [slist, orientations] = textread(orientation_path,'%s%f\n');
 
 for ista1=1:nsta
 
     sta1=char(stalist(ista1,:));
-    %ccf_cstadir = [ccf_path,sta1]
     % Build station directories
     for ipath = 1:length(PATHS)
         ccfR_path = [PATHS{ipath},'ccfRR/'];
@@ -241,16 +238,6 @@ for ista1=1:nsta
             data2cZ =  [datadir,sta2,'/',year,'/',data2cZ.name];
 
             %------------------- TEST IF DATA EXIST------------------------
-
-%             if length(data1cH1) < length(datadir)+20 || length(data1cH2) < length(datadir)+20 || length(data1cZ) < length(datadir)+20
-%                 disp(['no data sac files for ',hdayid,' ',sta1]);
-%                 continue
-%             elseif length(data2cH1) < length(datadir)+20 || length(data2cH2) < length(datadir)+20 || length(data2cZ) < length(datadir)+20
-%                 disp(['no data sac files for ',hdayid,' ',sta2]);
-%                 continue
-%             end
-
-            %tcut=[60:dt:npts]'; % new time axis to cut to
             [S1H1t,S1H1raw]=readsac(data1cH1);
             [S1H2t,S1H2raw]=readsac(data1cH2);
             [S1Zt,S1Zraw]=readsac(data1cZ);
@@ -260,16 +247,12 @@ for ista1=1:nsta
 
             %------------------- Remove instrument response ------------------------
         if IsRemoveIR
-            % Locate pzfiles -
-%             pzfile1 = dir([PZpath,'*',sta1,'*sacpz']);
-%             pzfile2 = dir([PZpath,'*',sta2,'*sacpz']);
             pzfile1 = dir([PZpath,'SAC_PZs_*',sta1,'_*H1_*']); % PZ for H1 and H2 are identical
             pzfile2 = dir([PZpath,'SAC_PZs_*',sta2,'_*H1_*']);
 
             % do lazy checks to make sure only one PZ file is found for each station
             if length(pzfile1) ~= 1
                 pzfile = pzfile1;
-%                                 disp('More than one reseponse found!')
 
                 % Figure out which response to read
                 for ii = 1:length(pzfile)
@@ -281,7 +264,6 @@ for ista1=1:nsta
                     ind = ind(end)-1;
                 end
                 pzfile = pzfile(ind);
-%                 disp(['Using ',pzfile.name])
                 pzfile1 = pzfile;
 
             elseif length(pzfile2) ~= 1
@@ -297,7 +279,6 @@ for ista1=1:nsta
                     ind = ind(end)-1;
                 end
                 pzfile = pzfile(ind);
-%                 disp(['Using 's,pzfile.name])
                 pzfile2 = pzfile;
             end
             dt_new = parameters.dt;
@@ -346,31 +327,6 @@ for ista1=1:nsta
         minT1Z = min(S1Zt);
         minT2Z = min(S2Zt);
 
-%         Nstart = 50;
-%         npts= 86000;
-%         if (minT1H1 > minT2H1) || (minT1H1 == minT2H1)
-%             tcutH1 = [minT1H1+Nstart*dt:dt:minT1H1+Nstart*dt+npts*dt];
-%         elseif minT2H1 > minT1H1
-%             tcutH1 = [minT2H1+Nstart*dt:dt:minT2H1+Nstart*dt+npts*dt];
-%         else
-%             error('(H1) Cant tell which data segment starts first!')
-%         end
-%         if (minT1H2 > minT2H2) || (minT1H2 == minT2H2)
-%             tcutH2 = [minT1H2+Nstart*dt:dt:minT1H2+Nstart*dt+npts*dt];
-%         elseif minT2H1 > minT1H1
-%             tcutH2 = [minT2H2+Nstart*dt:dt:minT2H2+Nstart*dt+npts*dt];
-%         else
-%             error('(H2) Cant tell which data segment starts first!')
-%         end
-%         if (minT1Z > minT2Z) || (minT1Z == minT2Z)
-%             tcutZ = [minT1Z+Nstart*dt:dt:minT1Z+Nstart*dt+npts*dt];
-%         elseif minT2H1 > minT1H1
-%             tcutZ = [minT2Z+Nstart*dt:dt:minT2Z+Nstart*dt+npts*dt];
-%         else
-%             error('(Z) Cant tell which data segment starts first!')
-%         end
-
-            %
         if length(S1H1raw) < 30000 || length(S1H2raw) < 30000
             disp(['Sta1 ',sta1,' : ',num2str(length(S1H2raw)),' is too short!'])
             continue
@@ -400,7 +356,6 @@ for ista1=1:nsta
                 [delta,S2az]=distance(lat2,lon2,lat1,lon1);
 
                 dist=deg2km(delta);
-                %dist=delta*6371*pi/180;
 
                 Delta=S1.DELTA;
                 if(abs(Delta-dt) >= 0.01*dt )
@@ -420,9 +375,7 @@ for ista1=1:nsta
             % START WINDOWING
             hour_length = winlength;
 
-            nwin = floor(24/hour_length)*2-1; % hour segments
-            % nwin = floor((24/hour_length)*1.5)+2; % hour segments
-            % nwin = 46; % 46 30 minute long overlapping time segments
+            nwin = floor(24/hour_length)*2-1; %
             win_length = hour_length*60*60*dt; % length of individual windows.
             win_start = 1;
             coh_sumT_day = 0;
@@ -500,25 +453,6 @@ for ista1=1:nsta
             end
 
                 % ROTATE FROM H1-H2 TO R-T
-                % from OBS rotations but with s1phi and s2phi = 0
-                %S1phi = 0;
-                %S2phi = 0;
-%                 Ista = strncmp(sta1,orientation.slist,length(sta1));
-%                 S1phi = orientation.av(Ista); % angle between H1 and N (CW from north)
-%                 S1phi = -S1phi + 360; % convert to H1 CW from north
-%                 Ista = strncmp(sta2,orientation.slist,length(sta2));
-%                 S2phi = orientation.av(Ista); % angle between H1 and N (CW from north)
-%                 S2phi = -S2phi + 360; % convert to H1 CW from north
-
-                %[S1R,S1T] =  rotate_vector(S1H2,S1H1,S1phi+270-S1az); % ?where does 270 come from? => comes from 90 phase shift since H1 and H2 are reversed
-                %[S2R,S2T] =  rotate_vector(S2H2,S2H1,S2phi+270-S1az); % ?S1az should be S2az+180? => S1az ~= S2az+180
-                %%% tested on EQ
-                %%% [BHR, BHT] = rotate_vector(BH1,BH2,CMPAZ+(BAZ+180));
-%                 [S1R,S1T] =  rotate_vector(S1H1,S1H2,S1phi+S1az);
-                %[S1R,S1T] =  rotate_vector(S1H1,S1H2,S1phi-S1az); %should be like this???
-%                 [S2R,S2T] =  rotate_vector(S2H1,S2H2,S2phi+S2az+180);
-                %[S2R,S2T] =  rotate_vector(S2H1,S2H2,S2phi-(S2az+180)); %should be like this???
-
                 Ista = strcmp(sta1,slist);
                 S1phi = orientations(Ista); % angle between H1 and N (CW from north)
                 Ista = strcmp(sta2,slist);
@@ -576,77 +510,9 @@ for ista1=1:nsta
 
 
                 %---------------- Transverse Component --------------
-
-    %             if IsFigure2
-    %                 figure(50)
-    %                 clf
-    %                 subplot(2,1,1)
-    %                 plot(tcutH1,S1T,'-k')
-    %                 %ylim([-0.15e-5 0.15e-5])
-    %                 xlim([0 86400])
-    %                 hold on
-    %                 subplot(2,1,2)
-    %                 plot(tcutH1,S2T,'-k')
-    %                 %ylim([-0.15e-5 0.15e-5])
-    %                 xlim([0 86400])
-    %                 hold on
-    %             end
-
-                % despike
                 S1T = runwin_norm(S1T);
                 S2T = runwin_norm(S2T);
-
-    %             if IsFigure2
-    %                 figure(51)
-    %                 %clf
-    %                 subplot(2,1,1)
-    %                 plot(tcutH1,S1T,'-r')
-    %                 title(['Station 1 : ',sta1])
-    %                 hold on
-    %                 subplot(2,1,2)
-    %                 plot(tcutH1,S2T,'-r')
-    %                 hold on
-    %                 title(['Station 2 : ',sta2])
-    %                 disp(['Distance : ',num2str(dist)])
-    %                 pause
-    %             end
-
-    %             if IsFigure2
-    %                 figure(102)
-    %                 clf
-    %                 subplot(2,1,1)
-    %                 hold on
-    %                 plot(Z1,'-b','linewidth',2);
-    %                 plot(Z1_ip,Z1(Z1_ip),'om');
-    %                 title([sta1,' ',hdayid]);
-    %                 xlim([0 43000]);
-    %                 subplot(2,1,2)
-    %                 hold on
-    %                 plot(Z1,'-b','linewidth',2);
-    %                 plot(Z1_despike,'-g');
-    %                 title([sta1,' ',hdayid]);
-    %                 xlim([0 43000]);
-    %                 hold off
-    %
-    %                 figure(103)
-    %                 clf
-    %                 subplot(2,1,1)
-    %                 hold on
-    %                 plot(Z2,'-b','linewidth',2);
-    %                 plot(Z2_ip,Z2(Z2_ip),'om');
-    %                 title([sta2,' ',hdayid]);
-    %                 xlim([0 43000]);
-    %                 subplot(2,1,2)
-    %                 hold on
-    %                 plot(Z2,'-b','linewidth',2);
-    %                 plot(Z2_despike,'-r');
-    %                 hold off
-    %                 title([sta2,' ',hdayid]);
-    %                 xlim([0 43000]);
-    %                 pause
-    %             end
-
-
+                
                 %fft
                 fftS1T = fft(S1T);
                 fftS2T = fft(S2T);
@@ -839,9 +705,6 @@ for ista1=1:nsta
                 clear coh_sum
                 coh_sum = coh_sumZ;
                 save(sprintf('%s%s/%s_%s_f.mat',ccfZ_fullstack_path,sta1,sta1,sta2),'coh_sum','coh_num','stapairsinfo');
-%                 fpair=fopen([ccfZ_path,sta1,'/stationpair.txt'],'a');
-%                 fprintf(fpair,'%s  %5f   %5f  %5f  %5f  %5f  %5f   %5f   %5f   %5f  \n',[sta1,'_',sta2],lat1,lon1,dep1,lat2,lon2,dep2,dist,S1az,S2az);
-%                 fclose(fpair);
             end
         end
     end % ista2

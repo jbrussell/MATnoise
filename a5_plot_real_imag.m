@@ -1,13 +1,15 @@
 % Plot the power spectral density
 %
-% JBR, 6/20/2016
-clear all;
+% https://github.com/jbrussell
+
+clear;
 setup_parameters;
 
 %======================= PARAMETERS =======================%
 comp = 'ZZ'; %'ZZ'; %'RR'; %'TT';
 period_lims = [2 50];
-pts_smooth = 20;
+windir = 'window3hr';
+pts_smooth = 20; % just for plotting purposes
 issemilogx = 0;
 %==========================================================%
 
@@ -17,7 +19,6 @@ winlength = parameters.winlength;
 figpath = parameters.figpath;
 %fig_winlength_path = [figpath,'window',num2str(winlength),'hr/fullStack/'];
 % custom directory names
-    windir = 'window3hr_Zcorr_tiltcomp'; %'window3hr_0.8kms'; %'window0.2hr'; %'window24hr_specwhite';
     fig_winlength_path = [figpath,windir,'/fullStack/'];
 dt = parameters.dt;
 

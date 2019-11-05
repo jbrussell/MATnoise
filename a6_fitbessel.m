@@ -1,9 +1,9 @@
-% Program to fit the xcorf and get the travel time for each frequency for two station pairs
-% 
-% JBR 5/19/18 : This version fits J0 to the real part and J-1 to the
-% imaginary part. The starting dispersion model is taken from a given
+% Extract phase velocity dispersion between station pairs by fitting J0 bessel function to real(ccf)
+% Uses cross spectral fitting technique of Menke & Jin (2015) BSSA DOI:10.1785/0120140245
 %
-
+% Define own starting phase velocity dispersion c manually or using functions/calc_Rayleigh_disp for a simple layered model (does not work for models with a water column).
+%
+% https://github.com/jbrussell
 clear
 close all;
 
@@ -11,147 +11,44 @@ global tN
 global waxis
 global twloc
 global weight
-
-
 setup_parameters;
 
-% % FUNDAMENTAL MODE RAYLEIGH (NARROW WINDOW)
-% comp = {'ZZ'}; %'RR'; 'ZZ'; 'TT'
-% windir = 'window3hr_Z'; %'window3hr_LH_Zcorr'; %'window3hr_LH_Zcorr'; %'window0.2hr'; %'window24hr_specwhite';
-% xspdir = 'test_1.6win'; %'test_1.6win'; %'test_1.6nowin'; %'test_1.6win';
-% % qfile = 'Nomelt_taper_aniso_constxicrman_etaPREM_constxilays_layer2_5_150s_goodkerns3_h2o4.5km.s0to200.q';
-% qfile = 'Nomelt_taper_aniso_constxicrman_etaPREM_constxilays_layer2_5_150s_goodkerns3_h2o4.5km.s0to250.q';
-% mode = 0; % 0 = fundamental; % of starting phv
-% frange = [1/25 1/14]; %[1/35 1/14]; %[0.1 0.25];
-% % For SNR calculation
-% groupv_max = inf;
-% groupv_min = 1.6;
-% Npers = 12;
-% xlims = [0.02 0.1];
+%======================= PARAMETERS =======================%
+comp = {'ZZ'}; %'RR'; 'ZZ'; 'TT'
+windir = 'window3hr';
+xspdir = 'phv_dir'; % output directory of phase velocities
+frange = [1/5 1/10]; % frequency range over which to fit bessel function
 
-% % FUNDAMENTAL MODE RAYLEIGH (WIDE WINDOW)
-% comp = {'ZZ'}; %'RR'; 'ZZ'; 'TT'
-% windir = 'window3hr_0.8kms'; %'window3hr_LH_Zcorr'; %'window3hr_LH_Zcorr'; %'window0.2hr'; %'window24hr_specwhite';
-% xspdir = 'test_0.8win'; %'test_1.6win'; %'test_1.6nowin'; %'test_1.6win';
-% % qfile = 'Nomelt_taper_aniso_constxicrman_etaPREM_constxilays_layer2_5_150s_goodkerns3.s0to200.q'; % for starting phv
-% qfile = 'Nomelt_taper_aniso_constxicrman_etaPREM_constxilays_layer2_5_150s_goodkerns3_h2o4.5km.s0to200.q';
-% mode = 0; % 0 = fundamental; % of starting phv
-% frange = [1/25 1/14]; %[1/35 1/14]; %[0.1 0.25];
-% % For SNR calculation
-% groupv_max = inf;
-% groupv_min = 0.8;
-% Npers = 12;
-% xlims = [0.02 0.1];
-
-% % FIRST OVERTONE RAYLEIGH
-% comp = {'ZZ'}; %'RR'; 'ZZ'; 'TT'
-% windir = 'window3hr_Zcorr_tiltcomp'; %'window3hr_LH_Zcorr'; %'window3hr_LH_Zcorr'; %'window0.2hr'; %'window24hr_specwhite';
-% xspdir = 'test_1.4win'; %'test_1.6win'; %'test_1.6nowin'; %'test_1.6win';
-% % qfile = 'Nomelt_taper_aniso_constxicrman_etaPREM_constxilays_layer2_5_150s_goodkerns3.s0to200.q'; % for starting phv
-% % qfile = 'Nomelt_taper_aniso_constxicrman_etaPREM_constxilays_layer2_5_150s_goodkerns3_h2o4.5km.s0to200.q';
-% qfile = 'Nomelt_taper_aniso_constxicrman_etaPREM_constxilays_layer2_5_150s_goodkerns3_h2o4.5km.s0to250.q';
-% mode = 1; % 0 = fundamental; % of starting phv
-% frange = [1/10 1/5]; %[0.1 0.25];
-% % For SNR calculation
-% groupv_max = inf;
-% groupv_min = 1.4;
-% Npers = 12;
-% xlims = [1/12 1/3];
-
-% % FUNDAMENTAL MODE LOVE
-% comp = {'TT'}; %'RR'; 'ZZ'; 'TT'
-% windir = 'window3hr'; %'window3hr_LH_Zcorr'; %'window3hr_LH_Zcorr'; %'window0.2hr'; %'window24hr_specwhite';
-% xspdir = 'test_1.4win'; %'test_1.6win'; %'test_1.6nowin'; %'test_1.6win';
-% % qfile = 'Nomelt_taper_aniso_constxicrman_etaPREM_constxilays_layer2_5_150s_goodkerns3.s0to200.q'; % for starting phv
-% % qfile = 'Nomelt_taper_aniso_constxicrman_etaPREM_constxilays_layer2_5_150s_goodkerns3_h2o4.5km.s0to200.q';
-% qfile = 'Nomelt_taper_aniso_constxicrman_etaPREM_constxilays_layer2_5_150s_goodkerns3.t0to333.q';
-% mode = 0; % 0 = fundamental; % of starting phv
-% frange = [1/9 1/3]; %[0.1 0.25];
-% % For SNR calculation
-% groupv_max = inf;
-% groupv_min = 1.4;
-% Npers = 21;
-% xlims = [1/12 1/3];
-% t_vec = 1./flip(linspace(frange(1) , frange(2) ,Npers));
-% % c = [3.7747 % fast starting c
-% %     3.8080
-% %     3.8421
-% %     3.8772
-% %     3.9126
-% %     3.9484
-% %     3.9846
-% %     4.0217
-% %     4.0599
-% %     4.0991
-% %     4.1394
-% %     4.1807
-% %     4.2232
-% %     4.2668
-% %     4.3117
-% %     4.3577
-% %     4.4051
-% %     4.4537
-% %     4.5032
-% %     4.5534
-% %     4.6045]';
-% c = [3.6228 % slow starting c
-%     3.6582
-%     3.6948
-%     3.7327
-%     3.7709
-%     3.8094
-%     3.8482
-%     3.8883
-%     3.9298
-%     3.9727
-%     4.0170
-%     4.0629
-%     4.1103
-%     4.1594
-%     4.2102
-%     4.2627
-%     4.3171
-%     4.3734
-%     4.4307
-%     4.4889
-%     4.5482]';
-
-% FUNDAMENTAL MODE LOVE (mean starting c)
-comp = {'TT'}; %'RR'; 'ZZ'; 'TT'
-windir = 'window3hr'; %'window3hr_LH_Zcorr'; %'window3hr_LH_Zcorr'; %'window0.2hr'; %'window24hr_specwhite';
-xspdir = 'test_1.4win_meanc'; %'test_1.6win'; %'test_1.6nowin'; %'test_1.6win';
-% qfile = 'Nomelt_taper_aniso_constxicrman_etaPREM_constxilays_layer2_5_150s_goodkerns3.s0to200.q'; % for starting phv
-% qfile = 'Nomelt_taper_aniso_constxicrman_etaPREM_constxilays_layer2_5_150s_goodkerns3_h2o4.5km.s0to200.q';
-qfile = 'Nomelt_taper_aniso_constxicrman_etaPREM_constxilays_layer2_5_150s_goodkerns3.t0to333.q';
-mode = 0; % 0 = fundamental; % of starting phv
-frange = [1/9 1/3]; %[0.1 0.25];
-% For SNR calculation
+% Windowing uptions for SNR calculation
 groupv_max = inf;
 groupv_min = 1.4;
-Npers = 21;
+
+Npers = 21; % Number of periods
 xlims = [1/12 1/3];
-t_vec = 1./flip(linspace(frange(1) , frange(2) ,Npers));
-c = [3.6639
-    3.6953
-    3.7284
-    3.7632
-    3.7976
-    3.8316
-    3.8654
-    3.9010
-    3.9387
-    3.9784
-    4.0200
-    4.0636
-    4.1092
-    4.1569
-    4.2067
-    4.2588
-    4.3131
-    4.3698
-    4.4269
-    4.4844
-    4.5422]';
+t_vec = 1./flip(linspace(frange(1) , frange(2) ,Npers)); % periods at which to extract phase velocity
+
+% % Manually input phase velocity
+% c = [3.6639
+%     3.6953
+%     3.7284
+%     3.7632
+%     3.7976
+%     3.8316
+%     3.8654
+%     3.9010
+%     3.9387
+%     3.9784
+%     4.0200
+%     4.0636
+%     4.1092
+%     4.1569
+%     4.2067
+%     4.2588
+%     4.3131
+%     4.3698
+%     4.4269
+%     4.4844
+%     4.5422]';
 
 iswin = 1; % Use the time-domain windowed ccfs?
 npts_smooth = 1; % 1 = no smoothing
@@ -162,6 +59,29 @@ IsFigure = 1;
 isplotinit = 0;
 isfigure2 = 0;
 isfigure_snr = 1;
+
+%% Make the initial phase velocity dispersion model
+
+% calc_Rayleigh_disp
+vec_h = [3 2 4 12]; % Layer thickness
+vec_vs = [1.1 1.2 2.8 3.7 4.6];
+vec_vp = vec_vs.*1.8; vec_pv(1) = 1.5;
+vec_rho = [1.03 1.5 3.02 3.027 3.342];
+vr = mat_disperse(vec_h,vec_rho,vec_vp,vec_vs,1./t_vec);
+c = vr(:,1)';
+c_start = c;
+
+% Manually
+% c = [3.4837    3.6341    3.7458    3.8223    3.8878    3.9451   4.0013    4.0522    4.0951    4.1337    4.1683    4.2098]; % 'test_1.6win' avg
+% 10.0000   11.2063   12.5580   14.0729   15.7704   17.6727   19.8045   22.1935   24.8706   27.8706   31.2325   35.0000
+% c = [3    3.2    3.3    3.4464    3.8400    3.9589    4.0097    4.0363    4.0515    4.0600    4.0644    4.0661];
+
+% From MINEOS .q file (https://github.com/jbrussell/MINEOS_synthetics)
+% if exist('c','var') == 0 % check if phase velocities exist, if not read them in
+%     [~,~,c] = readMINEOS_qfile2(qfile,t_vec,mode);
+% end
+% c_start = c;
+%==========================================================%
 
 twloc=1./t_vec;
 
@@ -191,30 +111,8 @@ end
         data1 = load(filename);
         npts = length(data1.coh_sum_win);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 tN = length(t_vec);
-
 wholesec = npts;
-
-%% Make an initial model
-% From GOC_CC card
-vec_h = [3 2 4 12]; % Layer thickness
-vec_vs = [1.1 1.2 2.8 3.7 4.6];
-vec_vp = vec_vs.*1.8; vec_pv(1) = 1.5;
-vec_rho = [1.03 1.5 3.02 3.027 3.342];
-vr = mat_disperse(vec_h,vec_rho,vec_vp,vec_vs,1./t_vec);
-c = vr(:,1)';
-c_start = c;
-
-% c = [3.4837    3.6341    3.7458    3.8223    3.8878    3.9451   4.0013    4.0522    4.0951    4.1337    4.1683    4.2098]; % 'test_1.6win' avg
-% 10.0000   11.2063   12.5580   14.0729   15.7704   17.6727   19.8045   22.1935   24.8706   27.8706   31.2325   35.0000
-% c = [3    3.2    3.3    3.4464    3.8400    3.9589    4.0097    4.0363    4.0515    4.0600    4.0644    4.0661];
-
-if exist('c','var') == 0 % check if phase velocities exist, if not read them in
-    [~,~,c] = readMINEOS_qfile2(qfile,t_vec,mode);
-end
-c_start = c;
-
 wvec1 = (2*pi)./t_vec;
 wvec1 = wvec1';
 refc = c';
@@ -401,20 +299,6 @@ for ista1=1:nsta
         xcorf1 = data1.coh_sum./data1.coh_num;
         xcorf1_filtered = tukey_filt( xcorf1,flip(1./frange),1,0.25 );
         [snr, signal_ind] = calc_SNR(xcorf1_filtered,groupv_min,groupv_max,r1,isfigure_snr);
-%         snrdata = real(ifft((xcorf1_filtered)));
-%         snrdata = fftshift(snrdata);
-%         groupv_max = 10;
-%         groupv_min = 1.6;
-%         NN= length(snrdata);
-%         lag = [-floor(NN/2):floor(NN/2)];
-%         win_min = r1./groupv_max;
-%         win_max = r1./groupv_min;
-%         if win_min < 15; win_min = 0; end
-%         if win_max < 50; win_max = 50; end
-%         signal_ind = ((lag>-win_max & lag<-win_min) | (lag>win_min & lag<win_max));
-%         signal_amp = sum(snrdata(signal_ind).^2)/length(snrdata(signal_ind));
-%         noise_amp = sum(snrdata(~signal_ind).^2)/length(snrdata(~signal_ind));
-%         snr = signal_amp/noise_amp;
         %%
 
         xspinfo.filename = filename;
@@ -429,13 +313,10 @@ for ista1=1:nsta
                 A = 1;
                 binit = besselj(0,x_init)*A;
                 binit = binit./mean(abs(binit)).*mean([abs(xsp1)]);
-                %plot(wvec1/2/pi,binit,'-k')
                 plot(waxis/2/pi,binit,'-k','linewidth',2); hold on;
             end
             
             f3 = figure(3); clf; hold on; 
-%             set(gcf, 'Color', 'w','position',[259    63   713   642]);
-%             set(gcf,'color','w','Position',[289   218   532   487]);
             set(gcf,'color','w','Position',[289     1   517   704]);
 
             ax1 = subplot(3,1,1);
@@ -458,10 +339,8 @@ for ista1=1:nsta
                 plot(waxis/2/pi,xsp1,'-b','linewidth',1);
             end
             plot(waxis/2/pi,b,'-r','linewidth',2); hold on; 
-%             xlim([frange(1) frange(2)])
             xlim(xlims);
             xlims1 = get(gca,'XLim');
-%             xlabel('Frequency (Hz)','fontsize',16);
             ylabel('J_{0}','fontsize',16);
             ax1 = get(gca);
             dx = 1;
@@ -511,5 +390,3 @@ for ista1=1:nsta
         
     end %end of station j
 end  %end of station i
-%stapairn
-%%soundsc(rand(2000,1),1000,8)

@@ -1,29 +1,16 @@
-% JBR - Plot the cross-spectra in the time domain for the individual
-% station pairs, comparing two components. Uses same structure as
-% plot_ccf_record.m
+% Apply a group velocity window around the surface waves in the time domain. Depending on the range of frquencies used, may need to use multiple windows.
+% Windowed ccfs saved to field 'coh_sum_win'
 %
-% NJA, 04/08/2016
-% JBR, 6/17/2016 - window in time domain;
-% JBR, 2/28/2018 - use less harsh cosine taper for window
-% JBR, 7/8/2017 - This version only defines a minimum group velocity
+% https://github.com/jbrussell
 
 clear; close all;
 setup_parameters;
 IsFigure = 1;
 
-%======================= PARAMETERS =======================%comps = {'TT'}; %{'RR' 'TT' 'ZZ'}; %'ZZ'; %'RR'; %'TT'; % choose 2 components to plot
-
-% % LOVE
-% comps = {'TT'}; %{'RR' 'TT' 'ZZ'}; %'ZZ'; %'RR'; %'TT'; % choose 2 components to plot
-% coperiod = [3 9]; %[2 5]; %[5 25]; %[2 8]; %[2 16]; %[5 25]; %[ 8 30 ]; % Periods to filter between
-% windir = 'window3hr'; %'window3hr_LH_Zcorr'; %'window3hr_LH_whitesm'; %'window3hr_LH_Zcorr';
-% % Mode Branches
-% max_grv = inf; %5.5;
-% min_grv = 1.4; %1.6; %2.2;
-
-comps = {'RR'}; %{'RR' 'TT' 'ZZ'}; %'ZZ'; %'RR'; %'TT'; % choose 2 components to plot
-coperiod = [3 9]; %[2 5]; %[5 25]; %[2 8]; %[2 16]; %[5 25]; %[ 8 30 ]; % Periods to filter between
-windir = 'window3hr'; %'window3hr_LH_Zcorr'; %'window3hr_LH_whitesm'; %'window3hr_LH_Zcorr';
+%======================= PARAMETERS =======================%
+comps = {'ZZ'}; % {'ZZ','RR','TT'}
+coperiod = [5 10]; % Periods to filter between
+windir = 'window3hr'; 
 % Mode Branches
 max_grv = inf; %5.5;
 min_grv = 1.4; %1.6; %2.2;
@@ -32,9 +19,8 @@ min_grv = 1.4; %1.6; %2.2;
 IsVelLines = 1;
 % WATER
 H20grv = 1.4;
-%==========================================================%
-%xlims = [-250 250];
 xlims = [-500 500];
+%==========================================================%
 
 stalist = parameters.stalist;
 nsta = parameters.nsta;
@@ -163,46 +149,6 @@ for icomp = 1:length(comps) % loop over components
         end % ista2
     end % ista1
 end % icomp
-
-%%
-clr = [0 0 0; 1 0 0; 0 0 1]; % colors for plotting [R G B]; 
-% for ista1=1:nsta % loop over all stations
-%     sta1=char(stalist(ista1,:));
-%     if IsFigure
-%         f101 = figure(101); clf; hold on;
-%         for icomp = 1:length(comps) % loop over components
-%             %----------- PLOT CCFs IN DISTANCE-TIME -------------%
-%             for ista2 = 1: nsta % loop over station pairs
-%                 N= length(ccf_ifft);
-%                 time = [-N/2:N/2]; % build lagtime vector for plotting
-%                 amp = 1e1; % amplitude to plot data
-%                 indtime = find(abs(time)<=500); % Time index -500 to 500 seconds
-%                 set(gca,'YDir','reverse');
-%                 for istapair = 1: nstapair % loop over station pairs
-%                     % Normalize using the surface wave amplitude
-%                     tnorm = sta1sta2_dist{ista1}(istapair)/2;
-%                     indtnorm = find(abs(time)<=tnorm);
-%                     ccf_filt_norm = ccf_filt{ista1}{icomp}{istapair}/max(abs(ccf_filt{ista1}{icomp}{istapair}(indtnorm(1):indtnorm(end))));
-%                     
-%                     % Plot the normalized traces
-%                     ccf_waveform = ccf_filt_norm(indtime(1):indtime(end)); % ccf at -500 to 500 seconds
-%                     h1(icomp) = plot(time(indtime(1):indtime(end)),ccf_waveform*amp+sta1sta2_dist{ista1}(istapair),'-','color',clr(icomp,:)); hold on;
-%                     %             text(0,stapairdist(istapair),dumsta2{istapair})
-%                     %             return
-%                     %             pause
-%                 end
-%                 xlim(xlims)
-%                 xlabel('lag time (s)','fontsize',18,'fontweight','bold');
-%                 ylabel('Distance (km)','fontsize',18,'fontweight','bold');
-%                 title(['reference station:',sta1,'  filtered at ',num2str(coperiod(1)), ' - ',num2str(coperiod(2)),'(s)'],'fontsize',18,'fontweight','bold');
-%                 set(gca,'fontsize',15);
-%                 drawnow;
-%             end
-%         end
-%         legend(h1,{comps{1}(1) comps{2}(1) comps{3}(1)},'location','northeast','fontsize',12);
-%     end
-% end
-
 
 %%
 %----------- PLOT ALL CCFs STATION PAIRS IN DISTANCE-TIME -------------%

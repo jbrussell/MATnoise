@@ -1,63 +1,50 @@
-% JBR - 9/16/16
+% Load all phase velocities and calculate azimuthal anisotropy and isotropic velocity assuming a 1-D structure. 
 %
-% Program to load all phv curves calculated by fitbessel2 and plot them
-% together
+% c(w,theta) = c0(w) * [ 1 + A(w)*cos(2*(theta-phi_A(w))) 
+%                          + B(w)*cos(4*(theta-phi_B(w))) ]
+%   Russell et al. (2019) JGR DOI:10.1029/2018JB016598
 %
-
-clear all
-
+% NOTE: For 2-D structure use ./ray_tomo/
+%
+% https://github.com/jbrussell
+clear
 setup_parameters;
-isoutput_aniso = 0; % output anisotropy file?
+isoutput_aniso = 1; % write output anisotropy .mat file?
 
-% comp = {'ZZ'};
-% xspdir = 'test_1.6win'; %'Nomelt3inttaper_iso.s0to333_br1avg'; %'4.0_S1_10pers_avg'; %'Nomelt3inttaper_iso.s0to333_br1avg'; %'4.0_S0_waverage';
-% windir = 'window3hr_Z'; %'window0.2hr'; %'window24hr_specwhite';
-% frange = [1/35 1/10]; %[1/10 1/4]; %[1/30 1/12]; %[0.1 0.25];
-% % frange = [0.033 0.2];
-% snr_tol = 3; % 5
-% r_tol = 150; %200; % 100 km
-% err_tol = 0.7; %0.7; %100;
+%======================= PARAMETERS =======================%
+comp = {'ZZ'};
+xspdir = 'phv_dir';
+windir = 'window3hr';
+frange = [1/10 1/5]; % [Hz]
 
-% % LOVE Slow starting
-% comp = {'TT'};
-% xspdir = 'test_1.4win'; %'Nomelt3inttaper_iso.s0to333_br1avg'; %'4.0_S1_10pers_avg'; %'Nomelt3inttaper_iso.s0to333_br1avg'; %'4.0_S0_waverage';
-% windir = 'window3hr'; %'window0.2hr'; %'window24hr_specwhite';
-% frange = [1/9 1/3]; %[1/10 1/4]; %[1/30 1/12]; %[0.1 0.25];
-% % frange = [0.033 0.2];
-% snr_tol = 3; % 5
-% r_tol = 100; %200; % 100 km
-% err_tol = 0.4; %0.7; %100;
-% ylims_aniso = [-5 5];
-% ylim_p2p = [0 5];
+% Quality control parameters:
+snr_tol = 3; % minimum signal-to-noise
+r_tol = 150; % [km] minimum separation between stations (should make this number frequency dependent!)
+err_tol = 0.7; % maximum misfit of bessel fit between observed and synthetic
+dep_tol = [0 0]; % [sta1 sta2] OBS depth tolerance
 
-% % LOVE Mean starting *
-comp = {'TT'};
-xspdir = 'test_1.4win_meanc'; %'Nomelt3inttaper_iso.s0to333_br1avg'; %'4.0_S1_10pers_avg'; %'Nomelt3inttaper_iso.s0to333_br1avg'; %'4.0_S0_waverage';
-windir = 'window3hr'; %'window0.2hr'; %'window24hr_specwhite';
-frange = [1/9 1/3]; %[1/10 1/4]; %[1/30 1/12]; %[0.1 0.25];
-% frange = [0.033 0.2];
-snr_tol = 2; % 5
-r_tol = 200; %200; % 100 km
-err_tol = 0.7; %0.7; %100;
+% Plotting parameters
 ylims_aniso = [-3 3];
 ylim_p2p = [0 5];
 
-fastdir = 78;
-
-min_err_clr = 0.1;
-max_err_clr = 0.8;
-min_snr_clr = 1;
-max_snr_clr = 10;
+fastdir = 78; % Expected fast direction for plotting purposes
 
 if comp{1}(1) == 'R'
     ylims = [3.2 4.5];
 elseif comp{1}(1) == 'Z'
-    ylims = [3.2 4.5];
+    ylims = [2.5 4.5];
     %ylims = [2.4 4.5];
-    ylims_aniso = [-10 10];
 elseif comp{1}(1) == 'T'
-    ylims = [3.5 4.8];
+    ylims = [3.8 4.8];
 end
+%==========================================================%
+
+%% Load Depths
+STAS = stalist;
+LATS = stalat;
+LONS = stalon;
+DEPTHS = staz;
+
 %% Setup Paths
 
 % input path
@@ -86,11 +73,7 @@ nsta=parameters.nsta; % number of target stations to calculate for
 DIRS = dir([XSP_path,'*_xsp.mat']);
 nxsp = size(DIRS,1);
 
-clr_err = min_err_clr:0.01:max_err_clr;
-clr = winter(length(clr_err));
-clr_snr = min_snr_clr:0.1:max_snr_clr;
-clr2 = winter(length(clr_snr));
-
+%%% --- Loop through XSP files --- %%%
 weight_sum = 0;
 err_sum = 0;
 weight_sum_snr = 0;
@@ -116,48 +99,38 @@ for ixsp=1:nxsp
         S1az = S1az - 360;
     end
     azi = [azi; S1az];
-%if xspinfo.snr >= snr_tol && xspinfo.r >= r_tol
-if xspinfo.snr >= 5 && xspinfo.r >= 100
-    sta1 = xspinfo.sta1;
-    sta2 = xspinfo.sta2;
-    c = xspinfo.r./xspinfo.tw1;
-    c_fit = xspinfo.r./xspinfo.tw;
-    periods = 1./xspinfo.twloc*2*pi;
-    err = xspinfo.sumerr;
-    snr = xspinfo.snr;
-    [~,ierr] = min(abs(err-clr_err));
-    [~,isnr] = min(abs(snr-clr_snr));
-    [~,S1az]=distance(xspinfo.lat1,xspinfo.lon1,xspinfo.lat2,xspinfo.lon2);
-    
-    % Weighted sum error
-    weight_sum = weight_sum + c_fit./err;
-    err_sum = err_sum + 1/err;
-    
-    % Weighted sum snr
-    weight_sum_snr = weight_sum_snr + c_fit.*snr;
-    snr_sum = snr_sum + snr;
+    %if xspinfo.snr >= snr_tol && xspinfo.r >= r_tol
+    if xspinfo.snr >= 5 && xspinfo.r >= 100
+        sta1 = xspinfo.sta1;
+        sta2 = xspinfo.sta2;
+        c = xspinfo.r./xspinfo.tw1;
+        c_fit = xspinfo.r./xspinfo.tw;
+        periods = 1./xspinfo.twloc*2*pi;
+        err = xspinfo.sumerr;
+        snr = xspinfo.snr;
+        [~,ierr] = min(abs(err-clr_err));
+        [~,isnr] = min(abs(snr-clr_snr));
+        [~,S1az]=distance(xspinfo.lat1,xspinfo.lon1,xspinfo.lat2,xspinfo.lon2);
 
-end
+        % Weighted sum error
+        weight_sum = weight_sum + c_fit./err;
+        err_sum = err_sum + 1/err;
+
+        % Weighted sum snr
+        weight_sum_snr = weight_sum_snr + c_fit.*snr;
+        snr_sum = snr_sum + snr;
+
+    end
         
 end  %end of ixsp
 c_weight_avg = weight_sum./err_sum;
-%c_weight_avg = [3.8774    4.0936    4.2459    4.3546    4.4383    4.5021    4.5534]; % T component
 c_weight_avg_snr = weight_sum_snr./snr_sum;
-
-% % Fit Anisotropy
-% phv_std = std(phV);
-% for iper = 1:length(periods)
-%     %varargin{1} = phv_std(iper);
-%     varargin = [];
-%     %[fitstr(iper), isophv(iper), A_2(iper), phi_2(iper)] = fit_azi_anisotropy(azi,phV(:,iper),varargin,comp{1}(1));
-%     [fitstr{iper}, isophv(iper), A_2(iper), phi_2(iper)] = fit_azi_anisotropy(azi,phV(:,iper),comp{1}(1),varargin);
-%     parastd{iper}=confint(fitstr{iper});
-% end
-
 
 phV_QC = [];
 azi_QC = [];
 err_QC = [];
+lats_QC = [];
+lons_QC = [];
 for ixsp=1:nxsp
     filename = [XSP_path,DIRS(ixsp).name];
 
@@ -168,8 +141,11 @@ for ixsp=1:nxsp
 
     % LOAD PHV CURVES
     load(filename);
-    if xspinfo.snr >= snr_tol && xspinfo.r >= r_tol && xspinfo.sumerr <= err_tol
+    if xspinfo.snr >= snr_tol && xspinfo.r >= r_tol && xspinfo.sumerr <= err_tol ...
+            && DEPTHS(strcmp(xspinfo.sta1,STAS)) <= dep_tol(1) && DEPTHS(strcmp(xspinfo.sta2,STAS)) <= dep_tol(2)
         sta1 = xspinfo.sta1;
+        lats_QC = [lats_QC; xspinfo.lat1 xspinfo.lat2];
+        lons_QC = [lons_QC; xspinfo.lon1 xspinfo.lon2];
         sta2 = xspinfo.sta2;
         c = xspinfo.r./xspinfo.tw1;
         c_fit = xspinfo.r./xspinfo.tw;
@@ -205,14 +181,15 @@ for iper = 1:length(periods)
     %varargin = [];
     %[fitstr(iper), isophv(iper), A_2(iper), phi_2(iper)] = fit_azi_anisotropy(azi,phV(:,iper),varargin,comp{1}(1));
     %[fitstr{iper}, isophv(iper), A2_2(iper), A4_2(iper), phi_2(iper)] = fit_azi_anisotropy2theta4theta(azi_QC,phV_QC(:,iper),comp{1}(1),varargin);
-    [fitstr{iper}, isophv(iper), A2_2(iper), A4_2(iper), phi2_2(iper), phi4_2(iper)] = fit_azi_anisotropy2theta4theta_2(azi_QC,phV_QC(:,iper),comp{1}(1),varargin);
+%     [fitstr{iper}, isophv(iper), A2_2(iper), A4_2(iper), phi2_2(iper), phi4_2(iper)] = fit_azi_anisotropy2theta4theta_2(azi_QC,phV_QC(:,iper),comp{1}(1),varargin);
+    [fitstr{iper}, isophv(iper), A2_2(iper), A4_2(iper), phi2_2(iper), phi4_2(iper)] = fit_azi_anisotropy2theta(azi_QC,phV_QC(:,iper),comp{1}(1),varargin);
     parastd{iper}=confint(fitstr{iper});
     
     err(iper) = parastd{iper}(2,1) - fitstr{iper}.a;
     err_2p2p(iper) = parastd{iper}(2,2) - fitstr{iper}.d2;
-    err_4p2p(iper) = parastd{iper}(2,3) - fitstr{iper}.d4;
-    err_phi2(iper) = parastd{iper}(2,4) - fitstr{iper}.e2;
-    err_phi4(iper) = parastd{iper}(2,5) - fitstr{iper}.e4;
+    err_4p2p(iper) = 0;
+    err_phi2(iper) = parastd{iper}(2,3) - fitstr{iper}.e2;
+    err_phi4(iper) = 0;
     
     % WEIGHTED RMS ERROR
     w = err_QC;
@@ -252,8 +229,17 @@ if isoutput_aniso
     save([aniso_path,'/phv_2theta4theta_wRMS_SNRtol',num2str(snr_tol),'_disttol',num2str(r_tol),'_errtol',num2str(err_tol),'.mat'],'aniso');
 end
 
+%% PLOT RAYPATHS
+figure(99); clf;
+cl = lines(5);
+plot(lons_QC',lats_QC','-k','linewidth',2); hold on;
+plot(LONS,LATS,'ok','markersize',15,'MarkerFaceColor',cl(2,:),'linewidth',1);
+set(gca,'linewidth',2,'fontsize',16,'box','on');
+grid on;
+xlabel('Longitude'); ylabel('Latitude');
+
 %%
-Ipers = [1 9 13 16 19 21];
+Ipers = [2 3 5 8 10 12];
 dimpl = [273   272   761   433];
 rowpl = 2;
 colpl = 3;
@@ -263,7 +249,7 @@ FS = 15;
 symb = 'ok';
 mrkclr = [0 0 0];
 clr = lines(10);
-clr_2theta = clr(5,:);
+clr_2theta = clr(2,:);
 clr_4theta = clr(1,:);
 clr_sum = [0.6 0.6 0.6];
 dy_lab = -3.5;
@@ -274,6 +260,7 @@ set(gcf,'position',dimpl);
 f5 = figure(5); clf; hold on; set(gcf, 'Color', 'w');
 % set(gcf,'position',[10         248        1203         457]);
 set(gcf,'position',dimpl);
+
 
 % PLOT
 f3 = figure(3);
@@ -305,7 +292,7 @@ for iper = Ipers %1:length(periods)
     if iper == 1
 %         legend(h1,{'2\theta','4\theta'},'location','northwest');
     end
-    if 0 &&  comp{1}(1) == 'T'% plot azimuth bars?
+    if 0 &&  comp{1}(1) == 'T' % plot azimuth bars?
         % fast
         plot([35 35],[-10 10],'--k');
         plot([125 125],[-10 10],'--k');
@@ -361,12 +348,7 @@ for iper = Ipers
     x = [-180:180];
     % PHV FIT = a*(1+d*cosd(c*(x-e)))
     
-%     h1(2) = plot(x,d4*cosd(4*(x-e_patty))*100,'-','color',[.5 .5 .5],'linewidth',LW); %Patty
-%     h1(1) = plot(x,d4*cosd(4*(x-e4))*100,'-','color',clr_4theta,'linewidth',LW);
-%     h1(3) = plot(x,d2*cosd(2*(x-e2))*100,'-g','linewidth',LW);
     h2(3) = plot(x,d2*cosd(2*(x-e2))*100+d4*cosd(4*(x-e4))*100,'-','color',clr_sum,'linewidth',LW);
-%     h2(1) = plot(x,d4*cosd(4*(x-e4))*100,'-','color',clr_4theta,'linewidth',LW);
-%     h2(2) = plot(x,d2*cosd(2*(x-e2))*100,'-','color',clr_2theta,'linewidth',LW);
     plot(azi_QC,c_perc(:,iper),symb,'MarkerFaceColor',mrkclr,'markersize',mrksize,'linewidth',1); hold on;
     if iper == 1
 %         legend(h2,{'2\theta + 4\theta'},'location','northwest');
@@ -409,7 +391,6 @@ ylabel('Phase Velocity (km/s)','fontsize',15);
 set(gca,'fontsize',12);
 legend(h54,{'PHV_{avg}','PHV_{iso}','PHV_{start}'},'fontsize',12,'location','southeast');
 
-
 %%
 % PLOT Amplitude and Fast direction
 f4 = figure(4); clf;
@@ -418,9 +399,9 @@ set(gcf,'position',[6   220   490   485]);
 for iper = 1:length(periods)
 %     err_p2p(iper) = parastd{iper}(2,2) - fitstr{iper}.d;
     err_2p2p(iper) = parastd{iper}(2,2) - fitstr{iper}.d2;
-    err_4p2p(iper) = parastd{iper}(2,3) - fitstr{iper}.d4;
-    err_phi2(iper) = parastd{iper}(2,4) - fitstr{iper}.e2;
-    err_phi4(iper) = parastd{iper}(2,5) - fitstr{iper}.e4;
+    err_4p2p(iper) = 0;
+    err_phi2(iper) = parastd{iper}(2,3) - fitstr{iper}.e2;
+    err_phi4(iper) = 0;
 end
 % peak-to-peak
 subplot(2,1,1); hold on;
@@ -461,7 +442,9 @@ if comp{1}(1) == 'Z' || comp{1}(1) == 'R'
         [~, I] = min(abs(phi4_vec-fastdir));
         phi4_2(iper) = phi4_vec(I);
     end
-    plot(periods,ones(size(periods))*78,'--k','linewidth',2);
+    plot(periods,ones(size(periods))*fastdir,'--k','linewidth',2);
+    plot(periods,ones(size(periods))*(fastdir+45),'--k','linewidth',2);
+    plot(periods,ones(size(periods))*(fastdir+90),'--k','linewidth',2);
 %     errorbar(periods,phi4_2,err_phi4,'-ob','linewidth',2);
     errorbar(periods,phi2_2,err_phi2,'-o','color',clr_2theta,'linewidth',2);
     ylabel('Fast Direction (%)','fontsize',FS);
@@ -503,7 +486,7 @@ if comp{1}(1) == 'T'
 %     errorbar(periods,phi2_2+90,err_phi2,'-o','color',clr_2theta,'linewidth',2);
     errorbar(periods,phi4_2,err_phi4,'-o','color',clr_4theta,'linewidth',2);
     errorbar(periods,phi2_2,err_phi2,'-o','color',clr_2theta,'linewidth',2);
-    ylabel('Fast Direction (%)','fontsize',FS);
+    ylabel('Fast Direction (\circ)','fontsize',FS);
     ylim([50 200]);
 end
 % xlim([3.5 10.5]);

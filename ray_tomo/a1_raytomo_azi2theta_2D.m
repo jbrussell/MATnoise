@@ -1,69 +1,42 @@
-% Script to do the ray theory tomography based on the ambient noise measurement
-% Written by Ge Jin, jinwar@gmail.com
-% Nov 2012
-%
-% Modified by NJA, April 2016
-%
-% Modified by JBR, 10/3/17
-% Added azimuthally anisotropic terms to the inversion. Now inverts for
-% 2theta and 4theta coefficients (averaged over the entire array) jointly
-% with the 2D isotropic part.
+% Script to do the ray theory tomography based on the ambient noise measurement. Solves for azimuthal anisotropy and isotropic velocity on a 2D grid.
 %
 % phv(theta,freq) = phv_iso(freq) + Ac2(freq)*cos(2*theta) + As2(freq)*sin(2*theta)
 %                                 + Ac4(freq)*cos(4*theta) + As4(freq)*sin(4*theta)
 %
-
+% Written by Ge Jin, jinwar@gmail.com
+% Nov 2012
+% JBR: Modified in 2018 to include azimuthal anisotropy
+% https://github.com/jbrussell
 clear; close all;
 
+%%
+%======================= PARAMETERS =======================%
 comp = {'ZZ'};
-xspdir = 'test_1.6win_avg'; %'Nomelt3inttaper_iso.s0to333_br1avg'; %'4.0_S1_10pers_avg'; %'Nomelt3inttaper_iso.s0to333_br1avg'; %'4.0_S0_waverage';
-
-% comp = {'TT'};
-% xspdir = 'Nomelt3inttaper_iso.t0to500_br0avg'; %'Nomelt3inttaper_iso_waverage'; %'4.0_S0_waverage'; %'Nomelt3inttaper_iso_T1'; %'Nomelt3inttaper_iso_waverage'; %'Nomelt3inttaper_iso'; %'4.2kmsstart';
-
-stafile = 'stations_all'; %'stations_shallow'; %'stations_deep'; %'stations_all'
-
-% aniso_data = 'phv_2theta4theta_wRMS_SNRtol0_disttol200_errtol0.7.mat';
-frange = [1/40 1/15]; %[1/10 1/4]; %[1/30 1/12]; %[0.1 0.25];
-
-average_vel = 3.8; % (km/s) For calculating wavelength for determining r_tol_min
-
-% QC parameters
-snr_tol = 3; %0; % 5
-is_rtolmin_wavelength = 0; wl_fac = 1.0; % determine distance tolerance by wavelength?
-r_tol_min = 90; %90; %150; %200; %200; % 100 km
-r_tol_max = 600;
-% err_tol = 0.5; % FOR AGU17
-err_tol = 0.3; %100; %0.7; %100;
-
-% % 1D
-% snr_tol = 3; %0; % 5
-% r_tol_min = 150; %90; %150; %200; %200; % 100 km
-% r_tol_max = 600;
-% % err_tol = 0.5; % FOR AGU17
-% err_tol = 0.5; %100; %0.7; %100;
-
-% Norm damping for azimuthal anisotropy
-% damp_azi = [1 1 1e10 1e10]; % [2c 2s 4c 4s] % Damping individual parameters
-% aziweight = 1; % global weight
-
-fastdir = 95; % Fast direction for azimuthal anisotropy (only for plotting purposes);
-
-iscompare_aniso = 0; % compare to old anisotropic measurements
-
-windir = 'window3hr_LH_Zcorr_tiltonly'; %'window3hr_LH_Zcorr'; %'window3hr_LH_Zcorr'; %'window0.2hr'; %'window24hr_specwhite';
+xspdir = 'phv_dir'; %'Nomelt3inttaper_iso.s0to333_br1avg'; %'4.0_S1_10pers_avg'; %'Nomelt3inttaper_iso.s0to333_br1avg'; %'4.0_S0_waverage';
+windir = 'window3hr'; 
 
 % Save results?
 isoutput = 1;
+savefile = ['test'];
 
+frange = [1/10 1/5]; % [Hz]
+
+average_vel = 3.8; % [km/s] For calculating wavelength for determining r_tol_min
+
+% QC parameters
+snr_tol = 3; % minimum signal-to-noise
+is_rtolmin_wavelength = 0; wl_fac = 1.0; % determine distance tolerance by wavelength?
+r_tol_min = 90; % [km] minimum station separation
+r_tol_max = 600; % [km] maximum station separation
+err_tol = 0.5; % maximum misfit of bessel fit between observed and synthetic
+
+fastdir = 78; % Fast direction for azimuthal anisotropy (only for plotting purposes);
+iscompare_aniso = 0; % compare to old anisotropic measurements
+
+%==========================================================%
 %%
-
 % Load color scale
 load seiscmap.mat
-
-% Load station info
-[sta.name, sta.lat, sta.lon, sta.dep] = textread(stafile,'%s %f %f %f');
-
 % Load anisotropy data (from old inversion)
 if iscompare_aniso
     load(['./aniso_DATA/',xspdir,'/',aniso_data]);
@@ -76,25 +49,18 @@ lalim = parameters.lalim;
 lolim = parameters.lolim;
 gridsize = parameters.gridsize;
 gridsize_azi = parameters.gridsize_azi;
+station_list = parameters.station_list;
 
-% Set up error parameters
-% errlevel = parameters.errlevel;
-% snrtol = parameters.snrtol;
-% mincoherenum = parameters.mincoherenum;
+% Load station info
+[sta.name, sta.lat, sta.lon, sta.dep] = textread(station_list,'%s %f %f %f');
+
 fiterrtol = parameters.fiterrtol;
-
-% refv = parameters.refv;
-% distrange = parameters.distrange;
-
 maxerrweight = parameters.maxerrweight;
 polyfit_dt_err = parameters.polyfit_dt_err;
 smweight0 = parameters.smweight0;
 smweight0_azi = parameters.smweight0_azi;
 flweight0_azi = parameters.flweight0_azi;
-
-
 dterrtol = parameters.dterrtol;
-
 raydensetol = parameters.raydensetol;
 raydensetol_azi = parameters.raydensetol_azi;
 r = parameters.r;
@@ -110,9 +76,6 @@ ynode_azi=lolim(1):gridsize_azi:lolim(2);
 [xi_azi yi_azi] = ndgrid(xnode_azi,ynode_azi);
 Nx_azi = length(xnode_azi);
 Ny_azi = length(ynode_azi);
-
-% savefile = parameters.savefile;
-savefile = ['test'];
 
 % figure output path
 phv_fig_path = ['./figs/',windir,'/fullStack/raytomo_azi2theta_2D/',num2str(1/frange(2)),'_',num2str(1/frange(1)),'s_',xspdir,'/',stafile,'/'];
@@ -166,7 +129,7 @@ for ixsp = 1:length(xspfiles)
         twloc = temp.twloc;
         xspinfo.isgood = zeros(size(Tperiods));
         xspsum = xspinfo;
-        wavelength = 3.8*Tperiods;
+        wavelength = average_vel*Tperiods;
     else
         xspinfo.isgood = zeros(size(Tperiods));
         xspsum = [xspsum;xspinfo];

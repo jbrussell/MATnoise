@@ -1,20 +1,14 @@
-% Plot the power spectral density
+% Plot the power spectral density to identify frequency content of signal
 %
-% JBR, 6/20/2016
-clear all;
+% https://github.com/jbrussell
+
+clear;
 setup_parameters;
 
 %======================= PARAMETERS =======================%
-% comp = 'ZZ'; %'ZZ'; %'RR'; %'TT';
-% windir = 'window3hr_Z'; %'window3hr_0.8kms'; %'window3hr_LH_Zcorr'; %'window3hr_LH_whitesm'; %'window3hr_1.6_8.0'; %'window0.2hr'; %'window24hr_specwhite'; %'window0.5hr_specwhite';
+comp = 'ZZ'; %'ZZ'; %'RR'; %'TT';
+windir = 'window3hr_Z'; 
 
-% comp = 'TT'; %'ZZ'; %'RR'; %'TT';
-% windir = 'window3hr';
-
-comp = 'RR'; %'ZZ'; %'RR'; %'TT';
-windir = 'window3hr';
-
-%pts_smooth = 10;
 %==========================================================%
 
 stalist = parameters.stalist;
@@ -90,8 +84,8 @@ for ista1=1:nsta % loop over all stations
         NFFT = [];
         [ccf_psd{nstapair},F] = pwelch(X,WINDOW,NOVERLAP,NFFT,Fs,'onesided');
         ccf_psd_log{nstapair} = 10*log10(ccf_psd{nstapair});
-        
         %ccf_psd{nstapair} = (2/tmax)*abs(ccf*dt).^2;
+        %pts_smooth = 10;
         %ccf_psd_log{nstapair} = smooth(10*log10(ccf_psd{nstapair}),pts_smooth);
 %         ccf_psd{nstapair} = (1/N/Fs) * abs(ccf(1:floor(N/2+1))).^2 * 2;
 %         ccf_psd_log{nstapair} = smooth(10*log10(ccf_psd{nstapair}),100);
@@ -136,7 +130,6 @@ for ista1=1:nsta % loop over all stations
         %----------- PLOT STATION PSDs -------------%
         f201 = figure(201); clf; hold on; set(gcf, 'Color', 'w'); box on;
         T = length(ccf);
-        %faxis = [0:1/T:1/dt/2,-1/dt/2+1/T:1/T:-1/T];
         faxis = F;
         ind = find(faxis>=0);
         clr = lines(nstapair);
@@ -146,14 +139,10 @@ for ista1=1:nsta % loop over all stations
             if isempty(ccf_psd_log{istapair})
                 continue
             end
-            %plot(faxis(ind),ccf_psd{istapair}(ind),'-','color',clr(istapair,:)); hold on;
-            %plot(flip(1./faxis(ind)),ccf_psd_log{istapair}(ind),'-','color',[.5 .5 .5]); hold on;
             semilogx((1./faxis(ind)),ccf_psd_log{istapair}(ind),'-','color',[.5 .5 .5]); hold on;
             %pause
         end
-        %h1 = plot(flip(1./faxis(ind)),ccf_psd_log_staMean{ista1}(ind),'-k','linewidth',3);
         h1 = semilogx((1./faxis(ind)),ccf_psd_log_staMean{ista1}(ind),'-k','linewidth',3);
-        %xlim([2 30]);
         xlim([2 100]);
         xlabel('Period (s)','fontsize',18);
         ylabel('Power','fontsize',18);
@@ -166,7 +155,6 @@ for ista1=1:nsta % loop over all stations
             if isempty(ccf_psd_log{istapair})
                 continue
             end
-            %plot(faxis(ind),ccf_psd{istapair}(ind),'-','color',clr(istapair,:)); hold on;
             plot((1./faxis(ind)),ccf_psd_log{istapair}(ind),'-','color',[.5 .5 .5]); hold on;
             %pause
         end
@@ -177,10 +165,7 @@ for ista1=1:nsta % loop over all stations
         title(['reference station:',sta1,' ',comp(1)],'fontsize',18,'fontweight','bold');
         legend(h1,{'mean'},'fontsize',12);
         set(gca,'fontsize',15);
-        
-        %pause;
-        %print(f201,'-dpdf',[figpath,'psd_ccfwin',comp,'_',sta1,'_log_pwelch.pdf']); % Save figure
-%         save2pdf([figpath,'psd_ccfwin',comp,'_',sta1,'_log_pwelch.pdf'],f201,1000);
+
 end % ista1
 
 %----------- CALCULATE MEAN NETWORK PSD -------------%
@@ -197,21 +182,14 @@ for istapair = 1: npairall
         continue
     end
     semilogx((1./faxis(ind)),ccf_psd_log_all{istapair}(ind),'-','color',[.5 .5 .5]); hold on;
-    %plot(flip(1./faxis(ind)),ccf_psd_log_all{istapair}(ind),'-','color',[.5 .5 .5]); hold on;
-    %plot(flip(1./faxis(ind)),ccf_psd_all{istapair}(ind),'-','color',[.5 .5 .5]); hold on;
 end
 h1 = semilogx((1./faxis(ind)),ccf_psd_log_allMean(ind),'-k','linewidth',3);
-%h1 = plot(flip(1./faxis(ind)),ccf_psd_log_allMean(ind),'-k','linewidth',3);
-%h1 = plot(flip(1./faxis(ind)),ccf_psd_allMean(ind),'-k','linewidth',3);
 axis tight;
 xlim([2 100]);
-%xlim([2 30]);
-%ylim([-80 -65]);
 ylim([-140 -80]); 
 xlabel('Period (s)','fontsize',18);
 ylabel('Power','fontsize',18);
 title(['All stations ',comp(1)],'fontsize',18,'fontweight','bold');
-% legend(h1,{'mean'},'fontsize',12);
 set(gca,'fontsize',15,'linewidth',1.5);
 set(gca,'Xtick',[1 2 3 4 5 6 7 8 10 20 30 40 50 70 100]);
 
