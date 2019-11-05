@@ -1,0 +1,350 @@
+% Plot the cross-spectra in the time domain for the individual station pairs
+%
+% NJA, 04/08/2016
+% JBR, 6/17/2016
+clear all;
+setup_parameters;
+IsFigure = 0;
+IsFigure_GAUS = 0; % Plot frequency domain filtered and unfiltered
+
+%======================= PARAMETERS =======================%
+comp = 'ZZ'; %'ZZ'; %'RR'; %'TT';
+coperiod = [14 25]; %[3 10]; %[4 10]; %[5 25]; %[2 8]; %[2 16]; %[5 25]; %[ 8 30 ]; % Periods to filter between
+amp = 8e0*2;
+windir = 'window3hr_Z'; %'window3hr_LH_Zcorr'; %'window3hr_LH_Zcorr_tiltonly'; %'window3hr_LH_whitesm'; %'window3hr_LH_Zcorr'; %'window0.2hr'; %'window24hr_specwhite';
+windir_for_SNR = 'window3hr_Z'; % Data to use for calculating SNR threshold (for plotting purposes)
+trace_space = 0; % km
+snr_thresh = 2.5;
+dep_tol = [0 0]; % [sta1, sta2];
+max_grv = inf; %5.5;
+min_grv = 1.4; %1.6 %0.2; %2.2;
+xlims = [-250 250];
+ylims = [0 450];
+
+% comp = 'ZZ'; %'ZZ'; %'RR'; %'TT';
+% coperiod = [5 10]; %[3 10]; %[4 10]; %[5 25]; %[2 8]; %[2 16]; %[5 25]; %[ 8 30 ]; % Periods to filter between
+% amp = 8e0;
+% windir = 'window3hr'; %'window3hr_LH_Zcorr'; %'window3hr_LH_Zcorr_tiltonly'; %'window3hr_LH_whitesm'; %'window3hr_LH_Zcorr'; %'window0.2hr'; %'window24hr_specwhite';
+% windir_for_SNR = 'window3hr_Zcorr_tiltcomp'; % Data to use for calculating SNR threshold (for plotting purposes)
+% trace_space = 0; % km
+% snr_thresh = 2.5;
+% dep_tol = [0 0]; % [sta1, sta2];
+% max_grv = inf; %5.5;
+% min_grv = 1.4; %1.6 %0.2; %2.2;
+% xlims = [-250 250];
+% ylims = [0 450];
+
+% comp = 'TT'; %'ZZ'; %'RR'; %'TT';
+% coperiod = [3 9]; %[3 10]; %[4 10]; %[5 25]; %[2 8]; %[2 16]; %[5 25]; %[ 8 30 ]; % Periods to filter between
+% amp = 8e0;
+% windir = 'window3hr'; %'window3hr_LH_Zcorr'; %'window3hr_LH_Zcorr_tiltonly'; %'window3hr_LH_whitesm'; %'window3hr_LH_Zcorr'; %'window0.2hr'; %'window24hr_specwhite';
+% windir_for_SNR = 'window3hr'; % Data to use for calculating SNR threshold (for plotting purposes)
+% trace_space = 0; % km
+% snr_thresh = 2.5;
+% dep_tol = [0 0]; % [sta1, sta2];
+% max_grv = inf; %5.5;
+% min_grv = 1.4; %1.6 %0.2; %2.2;
+% xlims = [-250 250];
+% ylims = [0 450];
+
+% comp = 'RR'; %'ZZ'; %'RR'; %'TT';
+% coperiod = [5 10]; %[3 10]; %[4 10]; %[5 25]; %[2 8]; %[2 16]; %[5 25]; %[ 8 30 ]; % Periods to filter between
+% amp = 8e0;
+% windir = 'window3hr'; %'window3hr_LH_Zcorr'; %'window3hr_LH_Zcorr_tiltonly'; %'window3hr_LH_whitesm'; %'window3hr_LH_Zcorr'; %'window0.2hr'; %'window24hr_specwhite';
+% windir_for_SNR = 'window3hr'; % Data to use for calculating SNR threshold (for plotting purposes)
+% trace_space = 0; % km
+% snr_thresh = 2.5;
+% dep_tol = [0 0]; % [sta1, sta2];
+% max_grv = inf; %5.5;
+% min_grv = 1.4; %1.6 %0.2; %2.2;
+% xlims = [-250 250];
+% ylims = [0 450];
+
+%%% --- Parameters to build up gaussian filters --- %%% 
+% (effects the width of the filter in the frequency domain)
+costap_wid = 0.2; % 0 => box filter; 1 => Hann window
+
+isplotwin = 0; %1;
+isploth20 = 0;
+isfigure_snr = 0;
+% Window Velocities
+% max_grv = 10; %5.5;
+% min_grv = 1.6; %2.2;
+
+h20_grv = 1.5;
+%==========================================================%
+
+dt = parameters.dt;
+stalist = parameters.stalist;
+% stalist =  stalist(1:21);
+nsta = parameters.nsta;
+nsta = length(stalist);
+winlength = parameters.winlength;
+figpath = parameters.figpath;
+%fig_winlength_path = [figpath,'window',num2str(winlength),'hr/fullStack/'];
+% custom directory names
+    fig_winlength_path = [figpath,windir,'/fullStack/'];
+
+%------------ PATH INFORMATION -------------%
+ccf_path = parameters.ccfpath;
+%ccf_winlength_path = [ccf_path,'window',num2str(winlength),'hr/'];
+    ccf_winlength_path = [ccf_path,windir,'/'];
+ccf_singlestack_path = [ccf_winlength_path,'single/'];
+ccf_daystack_path = [ccf_winlength_path,'dayStack/'];
+ccf_monthstack_path = [ccf_winlength_path,'monthStack/'];
+ccf_fullstack_path = [ccf_winlength_path,'fullStack/'];
+
+ccf_stack_path = ccf_fullstack_path;
+
+figpath = [fig_winlength_path,num2str(coperiod(1)),'_',num2str(coperiod(2)),'s/'];
+% create figure directory
+if ~exist(fig_winlength_path)
+    mkdir(fig_winlength_path)
+end
+if ~exist(figpath)
+    mkdir(figpath)
+end
+
+%% Load Depths
+%% Load Depths
+STAS = stalist;
+LATS = stalat;
+LONS = stalon;
+DEPTHS = staz;
+
+%%
+ccf_path = [ccf_stack_path,'ccf',comp,'/',];
+ccf_path_SNR = [parameters.ccfpath,windir_for_SNR,'/','fullStack/','ccf',comp,'/',];
+npairall = 0;
+%------------ LOAD DATA AND PLOT IN TIME DOMAIN -------------%
+for ista1=1:nsta % loop over all stations
+    sta1=char(stalist(ista1,:));
+    sta1dir=[ccf_path,sta1]; % dir to have all cross terms about this central station
+    sta1dir_SNR = [ccf_path_SNR,sta1];
+    nstapair = 0;
+    for ista2 = 1: nsta % loop over station pairs
+        sta2 = char(stalist(ista2,:));
+        
+        % if same station, skip
+        if(strcmp(sta1,sta2))
+            continue
+        end
+                
+        filename = sprintf('%s/%s_%s_f.mat',sta1dir,sta1,sta2);
+        filename_SNR = sprintf('%s/%s_%s_f.mat',sta1dir_SNR,sta1,sta2);
+        
+        if ~exist(filename,'file') % check that ccf file exists
+            disp(['not exist ',filename])
+            continue;
+        end
+        nstapair = nstapair + 1;
+        
+        % Want sta1 to be closest to the coast so waves at -lag travel
+        % towards coast and waves at +lag travel away from coast.
+        filename_sta1sta2 = filename;
+        filename_sta2sta1 = [ccf_path,sta2,'/',sta2,'_',sta1,'_f.mat'];
+        test = load(filename_sta1sta2);
+        sta1lon = test.stapairsinfo.lons(1);
+        sta2lon = test.stapairsinfo.lons(2);
+        if sta1lon > sta2lon
+            filename = filename_sta2sta1;
+        else
+            filename = filename_sta1sta2;
+        end
+        
+        %----------- LOAD DATA -------------%
+        data = load(filename);
+        data_SNR = load(filename_SNR);
+        ccf = data.coh_sum./data.coh_num;
+        ccf(isnan(ccf)) = 0;
+        ccf_SNR = data_SNR.coh_sum./data_SNR.coh_num;
+        ccf_SNR(isnan(ccf_SNR)) = 0;
+        if size(ccf,1) == 1
+            ccf = ccf';
+            ccf_SNR = ccf_SNR';
+        end
+        
+        %%
+        %----------- FILTER DATA (FREQUENCY DOMAIN) -------------%
+        f1 = 1/coperiod(2);
+        f2 = 1/coperiod(1);
+%         [b, a] = butter(2,[f1 f2]); % Butterworth Filter
+%         ccf_filt{nstapair} =  filtfilt(b,a,ccf_ifft);
+
+%         [ccf_gaus,faxis] = gaus_filt(ccf,coperiod,dt,min_width,max_width);
+        
+        [ ccf_filtered ] = tukey_filt( ccf,coperiod,dt,costap_wid );
+        [ ccf_filtered_SNR ] = tukey_filt( ccf_SNR,coperiod,dt,costap_wid );
+        
+%         [b, a] = butter(6,[f1 f2]*2*dt); % Butterworth Filter
+%         ccf_ifft = ifft(ccf); % inverse FFT to get time domain
+%         ccf_ifft_filt=  filtfilt(b,a,ccf_ifft);
+%         ccf_filtered = fft(ccf_ifft_filt);
+        %%
+        
+        if IsFigure_GAUS
+            T = length(ccf_filtered);
+            faxis = [0:1/T:1/dt/2,-1/dt/2+1/T:1/T:-1/T];
+            ind = find(faxis>0);
+            figure(1); clf;
+            plot((faxis(ind)),abs(ccf(ind)),'-k','linewidth',4); hold on;
+            plot((faxis(ind)),abs(ccf_filt(ind)),'r');
+            xlabel('Frequency (Hz)');
+            title(['Gaussian filter ',sta1,'-',sta2,' (',num2str(coperiod(1)),'-',num2str(coperiod(2)),' s)']);
+            pause;
+        end
+        ccf = ccf_filtered;
+        %----------- Frequency ==> Time domain -------------%
+        N = length(ccf);
+        ccf_ifft = real(ifft(2*ccf([1:N/2+1]),N)); % inverse FFT to get time domain
+        %rearrange and keep values corresponding to lags: -(len-1):+(len-1)
+        ccf_ifft = [ccf_ifft(end-N+2:end) ; ccf_ifft(1:N)];
+        
+        ccf_filt{nstapair} = ccf_ifft;
+        
+        %----------- NORMALIZE CCF FUNCTION -------------%
+        ccf_filt{nstapair} = ccf_filt{nstapair}/max(abs(ccf_filt{nstapair}));
+        
+        % Distance between sta1 and sta2
+        sta1sta2_dist(nstapair) = deg2km(distance(data.stapairsinfo.lats(1),data.stapairsinfo.lons(1),data.stapairsinfo.lats(2),data.stapairsinfo.lons(2)));
+        stalats(ista1) = data.stapairsinfo.lats(1);
+        stalons(ista1) = data.stapairsinfo.lons(1);
+        
+        
+        % Check if reverse station pair has already been plotted
+        stapairinv = [sta2,'_',sta1];
+        if exist('existpair','var')
+            if find(strncmp(stapairinv,existpair,length(stapairinv)))
+                continue
+            end
+        end
+        
+        % Update some other useful variables
+        dumsta2{nstapair} = sta2;
+        npairall = npairall + 1; % number of total station pairs
+        ccf_all{npairall} = ccf_filt{nstapair} ; % cell containing all ccf
+        sta1sta2_dist_all(npairall) = sta1sta2_dist(nstapair); % vector containing distance between each station pair
+        existpair(npairall) = {[sta1,'_',sta2]};
+        
+        % SNR
+        [snr(npairall), signal_ind] = calc_SNR(ccf,min_grv,max_grv,sta1sta2_dist(nstapair),isfigure_snr);
+        [snr_compare(npairall), ~] = calc_SNR(ccf_filtered_SNR,min_grv,max_grv,sta1sta2_dist(nstapair),isfigure_snr);
+        dep1(npairall) = DEPTHS(strcmp(sta1,STAS));
+        dep2(npairall) = DEPTHS(strcmp(sta2,STAS));
+        
+    end % ista2
+    
+    
+    
+    if IsFigure
+        %----------- PLOT CCFs IN DISTANCE-TIME -------------%
+        f101 = figure(101); clf; hold on;
+        N= length(ccf_ifft);
+        time = [-N/2:N/2]; % build lagtime vector for plotting
+%         amp = 1e1; % amplitude to plot data
+        indtime = find(abs(time)<=500); % Time index -500 to 500 seconds
+        set(gca,'YDir','reverse');
+        for istapair = 1: nstapair % loop over station pairs
+            ccf_waveform = ccf_filt{istapair}(indtime(1):indtime(end)); % ccf at -500 to 500 seconds
+            plot(time(indtime(1):indtime(end)),ccf_waveform*amp+sta1sta2_dist(istapair),'-k'); hold on;
+            %             text(0,stapairdist(istapair),dumsta2{istapair})
+            %             return
+            %             pause
+        end
+        xlim([-500 500])
+        xlabel('lag time (s)','fontsize',18,'fontweight','bold');
+        ylabel('Distance (km)','fontsize',18,'fontweight','bold');
+        title(['reference station:',sta1,'  filtered at ',num2str(coperiod(1)), ' - ',num2str(coperiod(2)),'(s)'],'fontsize',18,'fontweight','bold');
+        set(gca,'fontsize',15);
+        pause;
+%         print(f101,'-dpdf',[figpath,'ccf',comp,'_',sta1,'.pdf']); % Save figure
+    end
+    %----------- PLOT GROUP VELOCITIES (needs to be updated) -------------%
+    % Plot lines of group velocity for hte first overtone and fundamental mode.
+    % x1st = stapairdist/vel_1st;
+    % x0st = stapairdist/vel_0st;
+    % ydum = stapairdist;
+%     figure(101)
+%     hold on
+    % plot(x1st,ydum,'-r','linewidth',1)
+    % plot(x0st,ydum,'-b','linewidth',1)
+    % plot(x1st*-1,ydum,'-r','linewidth',1)
+    % plot(x0st*-1,ydum,'-b','linewidth',1)
+    %     pause
+end % ista1
+
+
+%% %----------- PLOT ALL CCFs STATION PAIRS IN DISTANCE-TIME -------------%
+N= length(ccf_ifft);
+time = [-N/2:N/2];
+% amp = 1e1;
+if isploth20 && comp(1) == 'Z'
+    amp = amp*1.5;
+end
+indtime = find(abs(time)<=xlims(2));
+
+f102 = figure(102);
+set(gcf, 'Color', 'w');
+clf
+hold on;
+set(gca,'YDir','reverse');
+dists = 0;
+itrace = 0;
+for istapair = 1: npairall
+    if min(abs(sta1sta2_dist_all(istapair)-dists)) > trace_space && snr_compare(istapair) > snr_thresh ...
+            && dep1(istapair) <= dep_tol(1) && dep2(istapair) <= dep_tol(2)
+        itrace = itrace+1;
+        dists(itrace) = sta1sta2_dist_all(istapair);
+        ccf_waveform_all = ccf_all{istapair}(indtime(1):indtime(end));
+        plot(time(indtime(1):indtime(end)),ccf_waveform_all*amp+sta1sta2_dist_all(istapair),'-k','linewidth',1); hold on;
+    end
+end
+% xlim([-500 500])
+xlim(xlims)
+ylim(ylims);
+xlabel('lag time (s)','fontsize',18);
+ylabel('Distance (km)','fontsize',18);
+title([comp(1),' : All non-repeated pairs, filtered at ',num2str(coperiod(1)), ' -',num2str(coperiod(2)),'(s)'],'fontsize',18);
+set(gca,'fontsize',15);
+
+% Plot Velocities
+if isplotwin
+    % Branches
+    plot([min(sta1sta2_dist_all) max(sta1sta2_dist_all)]/max_grv,[min(sta1sta2_dist_all) max(sta1sta2_dist_all)],'color',[1 0 0],'linewidth',2);
+    plot([min(sta1sta2_dist_all) max(sta1sta2_dist_all)]/-max_grv,[min(sta1sta2_dist_all) max(sta1sta2_dist_all)],'color',[1 0 0],'linewidth',2);
+    plot([min(sta1sta2_dist_all) max(sta1sta2_dist_all)]/min_grv,[min(sta1sta2_dist_all) max(sta1sta2_dist_all)],'color',[1 0 0],'linewidth',2);
+    plot([min(sta1sta2_dist_all) max(sta1sta2_dist_all)]/-min_grv,[min(sta1sta2_dist_all) max(sta1sta2_dist_all)],'color',[1 0 0],'linewidth',2);    
+end
+
+if isploth20 && comp(1) == 'Z'
+    plot([min(sta1sta2_dist_all) max(sta1sta2_dist_all)]/h20_grv,[min(sta1sta2_dist_all) max(sta1sta2_dist_all)],'--','color',[0.5 0.5 1],'linewidth',2);
+    plot([min(sta1sta2_dist_all) max(sta1sta2_dist_all)]/-h20_grv,[min(sta1sta2_dist_all) max(sta1sta2_dist_all)],'--','color',[0.5 0.5 1],'linewidth',2);
+end
+
+%pause;
+%% Plot SNR Values
+figure(101); clf;
+plot([0 1000],[1 1],'-k','linewidth',3); hold on;
+% plot(sta1sta2_dist_all,snr,'ok','linewidth',1,'MarkerFaceColor',[0.5 0.5 0.5],'markersize',8); hold on;
+scatter(sta1sta2_dist_all,snr,80,mean([dep1' dep2'],2),'filled','MarkerEdgeColor',[0 0 0],'linewidth',1);
+set(gca,'fontsize',16,'linewidth',2,'YScale','log');
+grid on;
+cb = colorbar;
+ylabel(cb,'Average Depth (km)','fontsize',16);
+xlabel('Distance','FontWeight','bold');
+ylabel('SNR','FontWeight','bold');
+xlim([0 500]);
+ylim([1e-1 1e3]);
+
+
+save2pdf([figpath,'SNR_',comp,'_tukeyfilt_',num2str(min_grv),'_',num2str(max_grv),'.pdf'],101,1000);
+%%
+% print(f102,'-dpdf',[figpath,'all_ccf',comp,'_tukeyfilt.pdf']); % Save figure
+if isplotwin
+    figname = [figpath,'all_ccf',comp,'_tukeyfilt_win',num2str(min_grv),'_',num2str(max_grv),'_TEI19.pdf'];
+else
+    figname = [figpath,'all_ccf',comp,'_tukeyfilt_TEI19.pdf'];
+end
+save2pdf(figname,f102,1000);
+% export_fig(figname,'-pdf','-q100','-p0.02','-painters',f102)
+% print(f102,'-dpdf',figname);
