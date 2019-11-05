@@ -1,4 +1,4 @@
-% Calculate ambient noise cross correlation record from multiple stationpairs for Z, R, and T
+% Calculate ambient noise cross correlation record from multiple stationpairs for (Z, R, T) using the methods from Bensen et al. (2007) GJI DOI:10.1111/j.1365-246X.2007.03374.x
 % !! Currently requires data to be downsampled to 1 Hz !!
 %
 % Expects files organized like so:
