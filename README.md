@@ -19,6 +19,6 @@ This package consists of two parts: (1) Calculation of ambient noise cross-spect
   Menke & Jin (2015) BSSA; DOI:10.1785/0120140245
 - **a7** - Try fitting the phase velocities assuming 1D isotropic velocity variations and 1D azimuthal anisotropy. Azimuthal anisotropy includes options for both 2-theta and 4-theta variations.
 
-### 2. Ray tomography for 2D structure (b0-b1)
+### 2. ray_tomo: Ray tomography for 2D structure (b0-b1)
 - **b0** - Plot ray paths between station pairs colored by velocity.
 - **b1** - Use simple travel-time ray tomography to invert for 2D maps of isotropic phase velocity and 1D or 2D azimuthal anisotropy.
