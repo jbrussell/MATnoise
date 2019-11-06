@@ -1,4 +1,5 @@
-% Load all phase velocities and calculate azimuthal anisotropy and isotropic velocity assuming a 1-D structure. 
+% Load all phase velocities and calculate azimuthal anisotropy and isotropic 
+% velocity assuming a 1-D structure. 
 %
 % c(w,theta) = c0(w) * [ 1 + A(w)*cos(2*(theta-phi_A(w))) 
 %                          + B(w)*cos(4*(theta-phi_B(w))) ]

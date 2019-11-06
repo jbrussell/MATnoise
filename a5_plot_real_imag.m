@@ -1,4 +1,5 @@
-% Plot the real and imaginary parts of the cross spectra to evaluate where signal is best and degree of bias from inhomogeneous noise sources.
+% Plot the real and imaginary parts of the cross spectra to evaluate where signal 
+% is best and degree of bias from inhomogeneous noise sources.
 %
 % https://github.com/jbrussell
 

@@ -1,4 +1,5 @@
-% Apply a group velocity window around the surface waves in the time domain. Depending on the range of frquencies used, may need to use multiple windows.
+% Apply a group velocity window around the surface waves in the time domain. 
+% Depending on the range of frquencies used, may need to use multiple windows.
 % Windowed ccfs saved to field 'coh_sum_win'
 %
 % https://github.com/jbrussell

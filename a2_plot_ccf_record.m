@@ -1,4 +1,6 @@
-% Plot the cross-spectra in the time domain for the individual station pairs. Filter is built using a Tukey taper with sharpness controlled by costap_wid. The typical butterworth filter is not precise enough for the higest frequencies
+% Plot the cross-spectra in the time domain for the individual station pairs. 
+% Filter is built using a Tukey taper with sharpness controlled by costap_wid. 
+% The typical butterworth filter is not precise enough for the higest frequencies
 %
 % https://github.com/jbrussell
 

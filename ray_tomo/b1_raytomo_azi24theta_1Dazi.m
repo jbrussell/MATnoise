@@ -1,4 +1,5 @@
-% Script to do the ray theory tomography based on the ambient noise measurement. Solves for azimuthal anisotropy on a 1D grid and isotropic velocity on a 2D grid.
+% Script to do the ray theory tomography based on the ambient noise measurement. 
+% Solves for azimuthal anisotropy on a 1D grid and isotropic velocity on a 2D grid.
 %
 % phv(theta,freq) = phv_iso(freq) + Ac2(freq)*cos(2*theta) + As2(freq)*sin(2*theta)
 %                                 + Ac4(freq)*cos(4*theta) + As4(freq)*sin(4*theta)

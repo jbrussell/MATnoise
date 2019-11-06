@@ -1,8 +1,10 @@
-% Calculate ambient noise cross correlation record from multiple stationpairs for (Z, R, T) using the methods from Bensen et al. (2007) GJI DOI:10.1111/j.1365-246X.2007.03374.x
+% Calculate ambient noise cross correlation record from multiple stationpairs 
+% for (Z, R, T) using the methods from Bensen et al. (2007) GJI 
+% DOI:10.1111/j.1365-246X.2007.03374.x
 % !! Currently requires data to be downsampled to 1 Hz !!
 %
 % Expects files organized like so:
-%       {datadirectory}/{station}/{station}.{yyyy}.{jday}.{hh}.{mm}.{SS}.{COMP}.sac
+% {datadirectory}/{station}/{station}.{yyyy}.{jday}.{hh}.{mm}.{SS}.{COMP}.sac
 %  e.g.: mydata/CC05/CC05.2018.112.00.00.00.BDH.sac
 %
 %   (NOTE: FUNCTIONIZE IN THE FUTURE)

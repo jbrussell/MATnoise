@@ -1,7 +1,11 @@
-% Extract phase velocity dispersion between station pairs by fitting J0 bessel function to real(ccf)
-% Uses cross spectral fitting technique of Menke & Jin (2015) BSSA DOI:10.1785/0120140245
+% Extract phase velocity dispersion between station pairs by fitting J0 bessel 
+% function to real(ccf)
+% Uses cross spectral fitting technique of Menke & Jin (2015) BSSA 
+% DOI:10.1785/0120140245
 %
-% Define own starting phase velocity dispersion c manually or using functions/calc_Rayleigh_disp for a simple layered model (does not work for models with a water column).
+% Define own starting phase velocity dispersion c manually or using 
+% functions/calc_Rayleigh_disp for a simple layered model (does not work for 
+% models with a water column).
 %
 % https://github.com/jbrussell
 clear
