@@ -521,8 +521,8 @@ for ista1=1:nsta
 
                 %Whiten
                 if IsSpecWhiten
-                    fftS1T = spectrumwhiten_smooth(fftS1T,0.001);
-                    fftS2T = spectrumwhiten_smooth(fftS2T,0.001);
+                    fftS1T = spectrumwhiten(fftS1T,0.001);
+                    fftS2T = spectrumwhiten(fftS2T,0.001);
                 end
 
                 % calcaulate daily CCF and stack for transverse
@@ -554,8 +554,8 @@ for ista1=1:nsta
 
                 %Whiten
                 if IsSpecWhiten
-                    fftS1R = spectrumwhiten_smooth(fftS1R,0.001);
-                    fftS2R = spectrumwhiten_smooth(fftS2R,0.001);
+                    fftS1R = spectrumwhiten(fftS1R,0.001);
+                    fftS2R = spectrumwhiten(fftS2R,0.001);
                 end
 
                 % calcaulate daily CCF and stack for radial
@@ -578,8 +578,8 @@ for ista1=1:nsta
 
                 %Whiten
                 if IsSpecWhiten
-                    fftS1Z = spectrumwhiten_smooth(fftS1Z,0.001);
-                    fftS2Z = spectrumwhiten_smooth(fftS2Z,0.001);
+                    fftS1Z = spectrumwhiten(fftS1Z,0.001);
+                    fftS2Z = spectrumwhiten(fftS2Z,0.001);
                 end
 
                 % calcaulate daily CCF and stack for radial
