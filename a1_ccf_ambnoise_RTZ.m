@@ -61,7 +61,7 @@ comp = parameters.comp;
 dist_min = parameters.mindist;
 
 % Build File Structure: cross-correlations
-ccf_path = './ccf/';
+ccf_path = parameters.ccfpath;
 ccf_winlength_path = [ccf_path,'window',num2str(winlength),'hr/'];
 ccf_singlestack_path = [ccf_winlength_path,'single/'];
 ccf_daystack_path = [ccf_winlength_path,'dayStack/'];
