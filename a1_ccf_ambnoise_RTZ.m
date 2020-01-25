@@ -25,8 +25,16 @@ IsOutputSeismograms = 0; % save raw seismograms before cross-correlating
 
 IsRemoveIR = 0; % remove instrument response
 IsDetrend = 1; % detrend the data
-IsSpecWhiten = 1; % Whiten spectrum
+IsSpecWhiten = 0; % Whiten spectrum
+IsOBN = 0; % One-bit normalization
 IsTaper = 1; % Apply cosine taper to data chunks
+IsFTN = 1; % Frequency-time normalization? (If 1, applied instead of whitening and one-bit normalization)
+frange_FTN = [1/60 1/10]; % frequency range over which to construct FTN seismograms
+
+% % Setup parallel pool
+% Nworkers = 4; % number of workers in pool for parallel processing
+delete(gcp('nocreate'));
+% parpool(Nworkers);
 
 % input path
 datadir = parameters.datapath;
@@ -108,7 +116,7 @@ if ~exist(seis_winlength_path)
     mkdir(seis_winlength_path)
 end
 
-
+warning('off','MATLAB:nargchk:deprecated')
 %% ------------------- loop through center station station-------------------
 
 stalist = parameters.stalist;
@@ -116,6 +124,11 @@ nsta=parameters.nsta; % number of target stations to calculate for
 
 % READ OBS ORIENTATIONS
 [slist, orientations] = textread(orientation_path,'%s%f\n');
+
+% Calculate filter coefficients for FTN
+if IsFTN
+    [ b, a ] = get_filter_TFcoeffs( frange_FTN, dt );
+end
 
 for ista1=1:nsta
 
@@ -173,10 +186,10 @@ for ista1=1:nsta
         if(exist([ccfR_path,sta1,'/',sta1,'_',sta2,'_f.mat']))
             display('CCF already exist, skip this pair');
             continue
-        elseif exist([ccfT_path,sta1,'/',sta2,'_',sta1,'_f.mat'])
+        elseif exist([ccfT_path,sta1,'/',sta1,'_',sta2,'_f.mat'])
             display('CCF already exist, skip this pair');
             continue
-        elseif exist([ccfZ_path,sta1,'/',sta2,'_',sta1,'_f.mat'])
+        elseif exist([ccfZ_path,sta1,'/',sta1,'_',sta2,'_f.mat'])
             display('CCF already exist, skip this pair');
             continue
         end
@@ -373,6 +386,17 @@ for ista1=1:nsta
             stapairsinfo.stanames = {sta1,sta2};
             stapairsinfo.lats = [lat1,lat2];
             stapairsinfo.lons = [lon1,lon2];
+            
+%             % Frequency-time normalization
+%             if IsFTN
+%                 [ S1Zraw ] = FTN( S1Zraw, frange_FTN, dt );
+%                 [ S2Zraw ] = FTN( S2Zraw, frange_FTN, dt );
+%                 [ S1H1raw ] = FTN( S1H1raw, frange_FTN, dt );
+%                 [ S2H1raw ] = FTN( S2H1raw, frange_FTN, dt );
+%                 [ S1H2raw ] = FTN( S1H2raw, frange_FTN, dt );
+%                 [ S2H2raw ] = FTN( S2H2raw, frange_FTN, dt );
+%             end
+            
 
             % START WINDOWING
             hour_length = winlength;
@@ -388,8 +412,10 @@ for ista1=1:nsta
             if last_pt < length(S1H1raw)
                 nwin = nwin + 1;
             end
-			for iwin = 1:nwin
-				clear tcut S1R S2R S1T S2T S1Z S2Z fftS1R fftS2R fftS1T fftS2T fftS1Z fftS2Z
+			
+%             tic
+            parfor iwin = 1:nwin
+%				clear tcut S1R S2R S1T S2T S1Z S2Z fftS1R fftS2R fftS1T fftS2T fftS1Z fftS2Z
 
 				% cut in time
                 if hour_length == 24
@@ -512,17 +538,26 @@ for ista1=1:nsta
 
 
                 %---------------- Transverse Component --------------
-                S1T = runwin_norm(S1T);
-                S2T = runwin_norm(S2T);
-                
-                %fft
-                fftS1T = fft(S1T);
-                fftS2T = fft(S2T);
-
-                %Whiten
-                if IsSpecWhiten
-                    fftS1T = spectrumwhiten(fftS1T,0.001);
-                    fftS2T = spectrumwhiten(fftS2T,0.001);
+                if IsFTN
+                    % Frequency-time normalization
+                    [ S1T ] = FTN( S1T, b, a );
+                    [ S2T ] = FTN( S2T, b, a );
+                    fftS1T = fft(S1T);
+                    fftS2T = fft(S2T);
+                else
+                    if IsOBN
+                        % One-bit normalization
+                        S1T = runwin_norm(S1T);
+                        S2T = runwin_norm(S2T);
+                    end
+                    %fft
+                    fftS1T = fft(S1T);
+                    fftS2T = fft(S2T);
+                    %Whiten
+                    if IsSpecWhiten
+                        fftS1T = spectrumwhiten_smooth(fftS1T,0.001);
+                        fftS2T = spectrumwhiten_smooth(fftS2T,0.001);
+                    end
                 end
 
                 % calcaulate daily CCF and stack for transverse
@@ -544,18 +579,26 @@ for ista1=1:nsta
 
 
                 %-------------------- Radial Component --------------
-                % despike
-                S1R = runwin_norm(S1R);
-                S2R = runwin_norm(S2R);
-
-                %fft
-                fftS1R = fft(S1R);
-                fftS2R = fft(S2R);
-
-                %Whiten
-                if IsSpecWhiten
-                    fftS1R = spectrumwhiten(fftS1R,0.001);
-                    fftS2R = spectrumwhiten(fftS2R,0.001);
+                if IsFTN
+                    % Frequency-time normalization
+                    [ S1R ] = FTN( S1R, b, a  );
+                    [ S2R ] = FTN( S2R, b, a  );
+                    fftS1R = fft(S1R);
+                    fftS2R = fft(S2R);
+                else
+                    % One-bit Normalization
+                    if IsOBN
+                        S1R = runwin_norm(S1R);
+                        S2R = runwin_norm(S2R);
+                    end
+                    %fft
+                    fftS1R = fft(S1R);
+                    fftS2R = fft(S2R);
+                    %Whiten
+                    if IsSpecWhiten
+                        fftS1R = spectrumwhiten_smooth(fftS1R,0.001);
+                        fftS2R = spectrumwhiten_smooth(fftS2R,0.001);
+                    end
                 end
 
                 % calcaulate daily CCF and stack for radial
@@ -568,18 +611,24 @@ for ista1=1:nsta
                 coh_sumR_month = coh_sumR_month + coh_trace;
 
                 %-------------------- Vertical Component --------------
-                % despike
-                S1Z = runwin_norm(S1Z);
-                S2Z = runwin_norm(S2Z);
-
-                %fft
-                fftS1Z = fft(S1Z);
-                fftS2Z = fft(S2Z);
-
-                %Whiten
-                if IsSpecWhiten
-                    fftS1Z = spectrumwhiten(fftS1Z,0.001);
-                    fftS2Z = spectrumwhiten(fftS2Z,0.001);
+                if IsFTN
+                    % Frequency-time normalization
+                    [ S1Z ] = FTN( S1Z, b, a  );
+                    [ S2Z ] = FTN( S2Z, b, a  );
+                    fftS1Z = fft(S1Z);
+                    fftS2Z = fft(S2Z);
+                else
+                    % One-bit normalization
+                    S1Z = runwin_norm(S1Z);
+                    S2Z = runwin_norm(S2Z);
+                    %fft
+                    fftS1Z = fft(S1Z);
+                    fftS2Z = fft(S2Z);
+                    %Whiten
+                    if IsSpecWhiten
+                        fftS1Z = spectrumwhiten_smooth(fftS1Z,0.001);
+                        fftS2Z = spectrumwhiten_smooth(fftS2Z,0.001);
+                    end
                 end
 
                 % calcaulate daily CCF and stack for radial
@@ -591,7 +640,7 @@ for ista1=1:nsta
                 coh_sumZ_day = coh_sumZ_day + coh_trace;
                 coh_sumZ_month = coh_sumZ_month + coh_trace;
 
-                coh_num = coh_num + 1;
+                % coh_num = coh_num + 1;
                 coh_num_day = coh_num_day + 1;
                 coh_num_month = coh_num_month + 1;
     %             toc
@@ -617,6 +666,9 @@ for ista1=1:nsta
                     save(sprintf('%s%s/%s_%d_f.mat',seisH2_path,sta1,sta1,coh_num),'S1H2','stapairsinfo');
                 end
             end % end window
+%             toc
+            coh_num = coh_num + coh_num_day;
+            
             if IsOutputDaystack
                 % Save day stack
                 ccfT_daystack_path = [ccf_daystack_path,'ccfTT/'];
@@ -658,7 +710,6 @@ for ista1=1:nsta
                 f101 = figure(101);clf;
 %                 set(gcf,'position',[400 400 600 300]);
                 subplot(3,1,1)
-                dt = 1;
                 T = length(coh_sumR);
                 faxis = [0:1/T:1/dt/2,-1/dt/2+1/T:1/T:-1/T];
                 ind = find(faxis>0);
@@ -669,7 +720,6 @@ for ista1=1:nsta
                 xlabel('Frequency')
 
                 subplot(3,1,2)
-                dt = 1;
                 T = length(coh_sumT);
                 faxis = [0:1/T:1/dt/2,-1/dt/2+1/T:1/T:-1/T];
                 ind = find(faxis>0);
@@ -680,7 +730,6 @@ for ista1=1:nsta
                 xlabel('Frequency')
 
                 subplot(3,1,3)
-                dt = 1;
                 T = length(coh_sumZ);
                 faxis = [0:1/T:1/dt/2,-1/dt/2+1/T:1/T:-1/T];
                 ind = find(faxis>0);
@@ -712,3 +761,5 @@ for ista1=1:nsta
     end % ista2
 
 end % ista1
+
+delete(gcp('nocreate')); % remove parallel pools
