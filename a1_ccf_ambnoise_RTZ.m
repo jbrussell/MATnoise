@@ -7,6 +7,11 @@
 % {datadirectory}/{station}/{station}.{yyyy}.{jday}.{hh}.{mm}.{SS}.{COMP}.sac
 %  e.g.: mydata/CC05/CC05.2018.112.00.00.00.BDH.sac
 %
+% JBR, Jan 2020: Implemented frequency-time normalization after 
+% Shen et al. (2012) BSSA; DOI:10.1785/0120120023. This greatly improves signal
+% extraction compared to typical one-bit noralization and whitening of Bensen et
+% al. (2007) GJI.
+%
 %   (NOTE: FUNCTIONIZE IN THE FUTURE)
 % Patty Lin -- 10/2014
 % Natalie Accardo
