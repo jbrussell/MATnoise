@@ -22,6 +22,7 @@ max_grv = inf; %5.5;
 min_grv = 1.4; %1.6
 xlims = [-250 250];
 ylims = [0 450];
+IsButterworth = 1;
 
 %%% --- Parameters to build up gaussian filters --- %%% 
 % (effects the width of the filter in the frequency domain)
@@ -127,13 +128,14 @@ for ista1=1:nsta % loop over all stations
         f1 = 1/coperiod(2);
         f2 = 1/coperiod(1);
         
-        [ ccf_filtered ] = tukey_filt( ccf,coperiod,dt,costap_wid );
-        [ ccf_filtered_SNR ] = tukey_filt( ccf_SNR,coperiod,dt,costap_wid );
-        
-%         [b, a] = butter(6,[f1 f2]*2*dt); % Butterworth Filter
-%         ccf_ifft = ifft(ccf); % inverse FFT to get time domain
-%         ccf_ifft_filt=  filtfilt(b,a,ccf_ifft);
-%         ccf_filtered = fft(ccf_ifft_filt);
+        if ~IsButterworth
+            [ ccf_filtered ] = tukey_filt( ccf,coperiod,dt,costap_wid );
+            [ ccf_filtered_SNR ] = tukey_filt( ccf_SNR,coperiod,dt,costap_wid );
+        else
+            [b, a] = butter(2,[f1 f2]*2*dt); % Butterworth Filter
+            ccf_filtered = fft(filtfilt(b,a,ifft(ccf)));
+            ccf_filtered_SNR = fft(filtfilt(b,a,ifft(ccf_SNR)));
+        end
         %%
         
         if IsFigure_GAUS
