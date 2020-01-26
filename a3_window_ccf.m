@@ -81,6 +81,9 @@ for icomp = 1:length(comps) % loop over components
             %----------- LOAD DATA -------------%
             data = load(filename);
             ccf = data.coh_sum./data.coh_num;
+            if size(ccf,1)==1
+                ccf = ccf';
+            end
 
             %----------- Frequency ==> Time domain -------------%
             N = length(ccf);
