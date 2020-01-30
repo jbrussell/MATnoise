@@ -3,13 +3,20 @@
 
 This package consists of two parts: (1) Calculation of ambient noise cross-spectra and measuring interstation phase velocities and (2) inverting interstation velocities for 1D or 2D isotropic phase velocity maps and 1D or 2D azimuthal anisotropy.
 
+> :warning: **WARNING**: This code has only been tested with data that are in 24 hour segments and have been downsampled to 1 Hz!
+
 ### 1. Ambient noise & phase velocities (a1-a7)
-- **a1** - Calculate ambient noise cross correlations (vertical, radial, transverse) in the frequency domain following Bensen et al. (2007) GJI; [DOI:10.1111/j.1365-246X.2007.03374.x](https://academic.oup.com/gji/article/169/3/1239/626431). Optional frequency-time normalization (FTN) after Shen et al. (2012) BSSA; [DOI:10.1785/0120120023](https://pubs.geoscienceworld.org/ssa/bssa/article/102/4/1872-1877/325525) rather than typical one-bit normalization and whitening. This code assumes the data are in 24 hour segments and have been downsampled to 1 Hz.
+- **a1** - Calculate ambient noise cross correlations (vertical, radial, transverse) in the frequency domain.
 
-  Assumed directory structure for data: <br/><br/>
-  ````{datadirectory}/{station}/{station}.{yyyy}.{jday}.{hh}.{mm}.{SS}.{COMP}.sac````
+  **Processing options:**
+  - One-bit normalization and spectral whitening after Bensen et al. (2007) GJI; [DOI:10.1111/j.1365-246X.2007.03374.x](https://academic.oup.com/gji/article/169/3/1239/626431). 
+  - Frequency-time normalization (FTN) after Ekström et al. (2009) GRL; [DOI:10.1029/2009GL039131](https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2009GL039131) and Shen et al. (2012) BSSA; [DOI:10.1785/0120120023](https://pubs.geoscienceworld.org/ssa/bssa/article/102/4/1872-1877/325525) rather than typical one-bit normalization and whitening. 
+  - Simple prefiltering of seismograms prior to cross-correlating following Ekström (2011) EPSL [DOI: 10.1016/j.epsl.2013.11.022](https://www.sciencedirect.com/science/article/pii/S0012821X13006560?via%3Dihub)
 
+  Assumed directory structure for data:
+  ````{datadirectory}/{station}/{station}.{yyyy}.{jday}.{hh}.{mm}.{SS}.{COMP}.sac````\
   e.g.: ````mydata/CC05/CC05.2018.112.00.00.00.BDH.sac````
+
 - **a2** - Plot empirical Green's functions in the time domain
 - **a3** - Apply group velocity window around the surface wave arrivals of interest. This as original developed in order to remove the water column arrival from ocean bottom datasets but should also clean up land spectra.
 - **a4** - Plot power spectral density of the cross spectra in order to determine the frequency content of the dominant signal.
