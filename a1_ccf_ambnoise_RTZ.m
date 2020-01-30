@@ -10,9 +10,10 @@
 % JBR, Jan 2020: Implemented frequency-time normalization after 
 % Shen et al. (2012) BSSA; DOI:10.1785/0120120023. This greatly improves signal
 % extraction compared to typical one-bit noralization and whitening of Bensen et
-% al. (2007) GJI.
+% al. (2007) GJI. Faster FiltFiltM() can be replaced with MATLAB's slower 
+% built-in filtfilt().
 %
-%   (NOTE: FUNCTIONIZE IN THE FUTURE)
+% (NOTE: FUNCTIONIZE IN THE FUTURE)
 % Patty Lin -- 10/2014
 % Natalie Accardo
 % Josh Russell
@@ -22,19 +23,32 @@ setup_parameters;
 
 IsFigure1 = 1;
 IsFigure2 = 0;
+
+% OUTPUT SETTINGS
 IsOutputFullstack = 1; % Save full year ccf stacks
 IsOutputMonthstack = 0; % save month ccf stacks
 IsOutputDaystack = 0; % save day ccf stacks
 IsOutputSinglestack = 0; % save single ccf before stacking
 IsOutputSeismograms = 0; % save raw seismograms before cross-correlating
 
+% GENERAL PROCESSING
 IsRemoveIR = 0; % remove instrument response
 IsDetrend = 1; % detrend the data
+IsTaper = 1; % Apply cosine taper to data chunks
+
+%%%%%%%%%%% OPTIONS FOR PREPROCESSING %%%%%%%%%%%%
+% (1) ONE-BIT NORMALIZATION & SPECTRAL WHITENING? (Bensen et al. 2007)
 IsSpecWhiten = 0; % Whiten spectrum
 IsOBN = 0; % One-bit normalization
-IsTaper = 1; % Apply cosine taper to data chunks
+
+% (2) TIME-FREQUENCY NORMALIZATION (Ekstrom et al. 2009; Shen et al. 2011)
 IsFTN = 1; % Frequency-time normalization? (If 1, applied instead of whitening and one-bit normalization)
 frange_FTN = [1/60 1/10]; % frequency range over which to construct FTN seismograms
+
+% (3) BASIC PREFILTER (Ekstrom 2011)
+IsPrefilter = 0 % apply butterworth bandpass filter before cross-correlation?
+frange_prefilt = [1/100 1/10];
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % % Setup parallel pool
 % Nworkers = 4; % number of workers in pool for parallel processing
@@ -51,10 +65,8 @@ dt = parameters.dt;
 winlength = parameters.winlength;
 
 year = ''; %'2012';
-Nstart = 50; % (seconds) offset start of file
-Nstart = Nstart/dt;
-npts= 86000; % (seconds) Length of full dayfiles
-npts = npts/dt;
+Nstart_sec = parameters.Nstart_sec; % (seconds) offset start of file
+Nstart = Nstart_sec/dt; % Number of samples
 comp = parameters.comp;
 
 %dist_min = 20;
@@ -483,6 +495,17 @@ for ista1=1:nsta
                 S2H1 = cos_taper(S2H1);
                 S2H2 = cos_taper(S2H2);
                 S2Z = cos_taper(S2Z);
+            end
+            
+            % Apply prefilter
+            if IsPrefilter
+                [b,a] = butter(2,frange_prefilt*2*dt);
+                S1H1 = FiltFiltM(b,a,S1H1);
+                S1H2 = FiltFiltM(b,a,S1H2);
+                S1Z =  FiltFiltM(b,a,S1Z);
+                S2H1 = FiltFiltM(b,a,S2H1);
+                S2H2 = FiltFiltM(b,a,S2H2);
+                S2Z =  FiltFiltM(b,a,S2Z);
             end
 
                 % ROTATE FROM H1-H2 TO R-T

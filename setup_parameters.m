@@ -35,6 +35,7 @@ parameters.mindist = 20; % min. distance in kilometers
 
 %%% --- Parameters for ccf_ambnoise --- %%%
 parameters.winlength = 3; %hours
+parameters.Nstart_sec = 50; % number of sections to offset start of seismogram
 
 %%% --- Parameters for fitbessel --- %%%
 parameters.npts = parameters.winlength*3600;
