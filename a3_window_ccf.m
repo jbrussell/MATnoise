@@ -27,6 +27,7 @@ stalist = parameters.stalist;
 nsta = parameters.nsta;
 winlength = parameters.winlength;
 figpath = parameters.figpath;
+dt = parameters.dt;
 %fig_winlength_path = [figpath,'window',num2str(winlength),'hr/fullStack/'];
 % custom directory names
     fig_winlength_path = [figpath,windir,'/fullStack/'];
@@ -127,7 +128,7 @@ for icomp = 1:length(comps) % loop over components
             %----------- FILTER DATA -------------%
             f1 = 1/coperiod(2);
             f2 = 1/coperiod(1);
-            [b, a] = butter(2,[f1 f2]); % Butterworth Filter
+            [b, a] = butter(2,[f1 f2]*2*dt); % Butterworth Filter
             ccf_filt{ista1}{icomp}{nstapair} =  filtfilt(b,a,ccf_ifft);
 
             %----------- NORMALIZE CCF FUNCTION -------------%
