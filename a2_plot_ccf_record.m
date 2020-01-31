@@ -22,7 +22,7 @@ max_grv = inf; %5.5;
 min_grv = 1.4; %1.6
 xlims = [-250 250];
 ylims = [0 450];
-IsButterworth = 1;
+IsButterworth = 1; % 1=butterworth; 0=tukey
 
 %%% --- Parameters to build up gaussian filters --- %%% 
 % (effects the width of the filter in the frequency domain)
@@ -124,19 +124,6 @@ for ista1=1:nsta % loop over all stations
         end
         
         %%
-        %----------- FILTER DATA (FREQUENCY DOMAIN) -------------%
-        f1 = 1/coperiod(2);
-        f2 = 1/coperiod(1);
-        
-        if ~IsButterworth
-            [ ccf_filtered ] = tukey_filt( ccf,coperiod,dt,costap_wid );
-            [ ccf_filtered_SNR ] = tukey_filt( ccf_SNR,coperiod,dt,costap_wid );
-        else
-            [b, a] = butter(2,[f1 f2]*2*dt); % Butterworth Filter
-            ccf_filtered = fft(filtfilt(b,a,ifft(ccf)));
-            ccf_filtered_SNR = fft(filtfilt(b,a,ifft(ccf_SNR)));
-        end
-        %%
         
         if IsFigure_GAUS
             T = length(ccf_filtered);
@@ -149,12 +136,38 @@ for ista1=1:nsta % loop over all stations
             title(['Gaussian filter ',sta1,'-',sta2,' (',num2str(coperiod(1)),'-',num2str(coperiod(2)),' s)']);
             pause;
         end
-        ccf = ccf_filtered;
         %----------- Frequency ==> Time domain -------------%
         N = length(ccf);
         ccf_ifft = real(ifft(2*ccf([1:N/2+1]),N)); % inverse FFT to get time domain
+        ccf_SNR_ifft = real(ifft(2*ccf_SNR([1:N/2+1]),N)); % inverse FFT to get time domain
         %rearrange and keep values corresponding to lags: -(len-1):+(len-1)
         ccf_ifft = [ccf_ifft(end-N+2:end) ; ccf_ifft(1:N)];
+        ccf_SNR_ifft = [ccf_SNR_ifft(end-N+2:end) ; ccf_SNR_ifft(1:N)];
+        
+        %----------- FILTER DATA (FREQUENCY DOMAIN) -------------%
+        f1 = 1/coperiod(2);
+        f2 = 1/coperiod(1);
+        
+        if ~IsButterworth
+            [ ccf_filtered ] = tukey_filt( fft(ccf_ifft),coperiod,dt,costap_wid );
+            [ ccf_filtered_SNR ] = tukey_filt( fft(ccf_SNR_ifft),coperiod,dt,costap_wid );
+            ccf_ifft = real(ifft(ccf_filtered));
+        else
+            % Do butterworth filtering after rearranging
+            [b, a] = butter(2,[f1 f2]*2*dt); % Butterworth Filter
+            ccf_ifft = filtfilt(b,a,ccf_ifft);
+            ccf_SNR_ifft = filtfilt(b,a,ccf_SNR_ifft);
+            ccf_filtered_SNR = fft(ccf_SNR_ifft);
+            
+            if 0
+                figure(99); clf;
+                [h,f] = freqz(b,a,length(ccf_ifft),dt);
+                subplot(2,1,1);
+                plot(f,abs(h));
+                subplot(2,1,2);
+                plot(f,angle(h)*180/pi);
+            end
+        end
         
         ccf_filt{nstapair} = ccf_ifft;
         
@@ -237,7 +250,7 @@ for istapair = 1: npairall
             && dep1(istapair) <= dep_tol(1) && dep2(istapair) <= dep_tol(2)
         itrace = itrace+1;
         dists(itrace) = sta1sta2_dist_all(istapair);
-        ccf_waveform_all = ccf_all{istapair}(indtime(1):indtime(end));
+        ccf_waveform_all = ccf_all{istapair}(indtime(1):indtime(end)) / max(abs(ccf_all{istapair}(indtime(1):indtime(end))));
         plot(time(indtime(1):indtime(end)),ccf_waveform_all*amp+sta1sta2_dist_all(istapair),'-k','linewidth',1); hold on;
     end
 end
