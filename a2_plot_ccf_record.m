@@ -157,6 +157,7 @@ for ista1=1:nsta % loop over all stations
             [b, a] = butter(2,[f1 f2]*2*dt); % Butterworth Filter
             ccf_ifft = filtfilt(b,a,ccf_ifft);
             ccf_SNR_ifft = filtfilt(b,a,ccf_SNR_ifft);
+            ccf_filtered = fft(ccf_ifft);
             ccf_filtered_SNR = fft(ccf_SNR_ifft);
             
             if 0
@@ -196,7 +197,7 @@ for ista1=1:nsta % loop over all stations
         existpair(npairall) = {[sta1,'_',sta2]};
         
         % SNR
-        [snr(npairall), signal_ind] = calc_SNR(ccf,min_grv,max_grv,sta1sta2_dist(nstapair),isfigure_snr);
+        [snr(npairall), signal_ind] = calc_SNR(ccf_filtered,min_grv,max_grv,sta1sta2_dist(nstapair),isfigure_snr);
         [snr_compare(npairall), ~] = calc_SNR(ccf_filtered_SNR,min_grv,max_grv,sta1sta2_dist(nstapair),isfigure_snr);
         dep1(npairall) = DEPTHS(strcmp(sta1,STAS));
         dep2(npairall) = DEPTHS(strcmp(sta2,STAS));
