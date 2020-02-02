@@ -137,28 +137,30 @@ for ista1=1:nsta % loop over all stations
             pause;
         end
         %----------- Frequency ==> Time domain -------------%
-        N = length(ccf);
-        ccf_ifft = real(ifft(2*ccf([1:N/2+1]),N)); % inverse FFT to get time domain
-        ccf_SNR_ifft = real(ifft(2*ccf_SNR([1:N/2+1]),N)); % inverse FFT to get time domain
-        %rearrange and keep values corresponding to lags: -(len-1):+(len-1)
-        ccf_ifft = [ccf_ifft(end-N+2:end) ; ccf_ifft(1:N)];
-        ccf_SNR_ifft = [ccf_SNR_ifft(end-N+2:end) ; ccf_SNR_ifft(1:N)];
+        ccf_ifft = real(ifft(ccf,N)); % inverse FFT to get time domain
+        ccf_ifft = fftshift(ccf_ifft); % rearrange values as [-lag lag]
+        ccf_ifft = detrend(ccf_ifft);
+        ccf_ifft = cos_taper(ccf_ifft);
+        ccf_SNR_ifft = real(ifft(ccf_SNR,N)); % inverse FFT to get time domain
+        ccf_SNR_ifft = fftshift(ccf_SNR_ifft); % rearrange values as [-lag lag]
+        ccf_SNR_ifft = detrend(ccf_SNR_ifft);
+        ccf_SNR_ifft = cos_taper(ccf_SNR_ifft);
         
         %----------- FILTER DATA (FREQUENCY DOMAIN) -------------%
         f1 = 1/coperiod(2);
         f2 = 1/coperiod(1);
         
         if ~IsButterworth
-            [ ccf_filtered ] = tukey_filt( fft(ccf_ifft),coperiod,dt,costap_wid );
-            [ ccf_filtered_SNR ] = tukey_filt( fft(ccf_SNR_ifft),coperiod,dt,costap_wid );
+            [ ccf_filtered ] = tukey_filt( fft(fftshift(ccf_ifft)),coperiod,dt,costap_wid );
+            [ ccf_filtered_SNR ] = tukey_filt(fft(fftshift(ccf_SNR_ifft)),coperiod,dt,costap_wid );
             ccf_ifft = real(ifft(ccf_filtered));
         else
             % Do butterworth filtering after rearranging
             [b, a] = butter(2,[f1 f2]*2*dt); % Butterworth Filter
             ccf_ifft = filtfilt(b,a,ccf_ifft);
             ccf_SNR_ifft = filtfilt(b,a,ccf_SNR_ifft);
-            ccf_filtered = fft(ccf_ifft);
-            ccf_filtered_SNR = fft(ccf_SNR_ifft);
+            ccf_filtered = fft(fftshift(ccf_ifft));
+            ccf_filtered_SNR = fft(fftshift(ccf_SNR_ifft));
             
             if 0
                 figure(99); clf;
