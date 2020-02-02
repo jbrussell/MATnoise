@@ -153,7 +153,7 @@ for ista1=1:nsta % loop over all stations
         if ~IsButterworth
             [ ccf_filtered ] = tukey_filt( fft(fftshift(ccf_ifft)),coperiod,dt,costap_wid );
             [ ccf_filtered_SNR ] = tukey_filt(fft(fftshift(ccf_SNR_ifft)),coperiod,dt,costap_wid );
-            ccf_ifft = real(ifft(ccf_filtered));
+            ccf_ifft = fftshift(real(ifft(ccf_filtered)));
         else
             % Do butterworth filtering after rearranging
             [b, a] = butter(2,[f1 f2]*2*dt); % Butterworth Filter
