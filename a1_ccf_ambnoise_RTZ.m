@@ -46,7 +46,7 @@ IsFTN = 1; % Frequency-time normalization? (If 1, applied instead of whitening a
 frange_FTN = [1/60 1/10]; % frequency range over which to construct FTN seismograms
 
 % (3) BASIC PREFILTER (Ekstrom 2011)
-IsPrefilter = 0 % apply butterworth bandpass filter before cross-correlation?
+IsPrefilter = 0; % apply butterworth bandpass filter before cross-correlation?
 frange_prefilt = [1/100 1/10];
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
