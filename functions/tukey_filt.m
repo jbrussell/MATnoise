@@ -13,19 +13,23 @@ Nt = length(data);
 faxis = [0:1/Nt:1/dt/2,-1/dt/2+1/Nt:1/Nt:-1/Nt];
 fmax = 1/coperiod(1);
 fmin = 1/coperiod(2);
-[~ , If] = find((faxis>=fmin & faxis<=fmax) | (faxis<=-fmin & faxis>=-fmax));
-costap_len = length(If);
+[~ , If_pos] = find(faxis>= fmin & faxis<= fmax);
+[~ , If_neg] = find(faxis<=-fmin & faxis>=-fmax);
+costap_lenpos = length(If_pos);
+costap_lenneg = length(If_neg);
+costap_pos = tukeywin(costap_lenpos,costap_wid);
+costap_neg = tukeywin(costap_lenneg,costap_wid);
 costap_full = zeros(size(data));
-costap = tukeywin(costap_len,costap_wid);
-costap_full(If) = costap;
+costap_full(If_pos) = costap_pos;
+costap_full(If_neg) = costap_neg;
 
 % APPLY FILTER
 data_filt = data.*costap_full;
 
 if 0
     figure(99); clf;
-    plot(1./faxis(1:Nt-1),abs(data(1:Nt-1))','-k'); hold on;
-    plot(1./faxis(1:Nt-1),abs(data_filt(1:Nt-1))','-r');
+    plot(faxis(1:Nt-1),abs(data(1:Nt-1))','-k'); hold on;
+    plot(faxis(1:Nt-1),abs(data_filt(1:Nt-1))','-r');
     xlabel('Period');
     pause;
 end

@@ -10,11 +10,21 @@ IsFigure = 1;
 
 %======================= PARAMETERS =======================%
 comps = {'ZZ'}; % {'ZZ','RR','TT'}
-coperiod = [5 10]; % Periods to filter between
-windir = 'window3hr'; 
+coperiod = [15 40]; % Periods to filter between
+% windir = 'window3hr_prefilt_10_60s_sub';
+% windir = 'window3hr_FTN_10_60s_sub';
+
+% windir = 'window3hr_prefilt_10_60s_sub';
+% windir = 'window3hr_FTN_10_60s_Zcorr_tiltonly_sub';
+% windir = 'window3hr_FTN_10_60s_sub';
+% windir = 'window3hr_LH_Zcorr_tiltonly_sub'; 
+% windir = 'window3hr_prefilt_10_60s_OBNwhitesm_sub';
+% windir = 'window3hr_OBNwhitesm_prefilt_10_60s_sub';
+windir = 'window3hr_LH_whitesm_sub'; 
+
 % Mode Branches
 max_grv = inf; %5.5;
-min_grv = 1.4; %1.6; %2.2;
+min_grv = 0.6; %1.6; %2.2;
 
 
 IsVelLines = 1;
@@ -30,6 +40,7 @@ figpath = parameters.figpath;
 %fig_winlength_path = [figpath,'window',num2str(winlength),'hr/fullStack/'];
 % custom directory names
     fig_winlength_path = [figpath,windir,'/fullStack/'];
+dt = parameters.dt;
 
 %------------ PATH INFORMATION -------------%
 % OLD CCF
@@ -81,6 +92,9 @@ for icomp = 1:length(comps) % loop over components
             %----------- LOAD DATA -------------%
             data = load(filename);
             ccf = data.coh_sum./data.coh_num;
+            if size(ccf,1) == 1
+                ccf = ccf';
+            end
 
             %----------- Frequency ==> Time domain -------------%
             N = length(ccf);
@@ -124,7 +138,7 @@ for icomp = 1:length(comps) % loop over components
             %----------- FILTER DATA -------------%
             f1 = 1/coperiod(2);
             f2 = 1/coperiod(1);
-            [b, a] = butter(2,[f1 f2]); % Butterworth Filter
+            [b, a] = butter(2,[f1 f2]*2*dt); % Butterworth Filter
             ccf_filt{ista1}{icomp}{nstapair} =  filtfilt(b,a,ccf_ifft);
 
             %----------- NORMALIZE CCF FUNCTION -------------%
@@ -162,6 +176,7 @@ f102 = figure(102);
 clf
 hold on;
 set(gca,'YDir','reverse');
+clr = [1 0 0; 0 1 0; 0 0 1];
 for icomp = 1:length(comps) % loop over components
     for istapair = 1: npairall
         % Normalize using the surface wave amplitude

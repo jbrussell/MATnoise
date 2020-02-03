@@ -39,6 +39,8 @@ if isfigure_snr
     xlabel('Lag (s)');
     xlim([-2000 2000]);
     set(gca,'linewidth',1.5,'fontsize',16);
+    
+    pause;
 end
 
 end

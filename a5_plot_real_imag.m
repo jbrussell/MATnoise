@@ -8,8 +8,9 @@ setup_parameters;
 
 %======================= PARAMETERS =======================%
 comp = 'ZZ'; %'ZZ'; %'RR'; %'TT';
-period_lims = [2 50];
-windir = 'window3hr';
+period_lims = [9 50];
+% windir = 'window3hr_prefilt_10_60s_sub';
+windir = 'window3hr_FTN_10_60s_sub';
 pts_smooth = 20; % just for plotting purposes
 issemilogx = 0;
 %==========================================================%
@@ -122,7 +123,7 @@ for ista1=1:nsta % loop over all stations
         xlim([1/period_lims(2) 1/period_lims(1)]);
         %xlim([0.04 0.16])
         xlabel('Frequency');
-        ylim([-0.03 0.03]);
+%         ylim([-0.03 0.03]);
         %ylim([-0.01 0.01]);
         set(gca,'linewidth',1.5);
         
@@ -142,7 +143,7 @@ for ista1=1:nsta % loop over all stations
         xlim([1/period_lims(2) 1/period_lims(1)]);
         %xlim([0.04 0.16])
         xlabel('Frequency');
-        ylim([-0.03 0.03]);
+%         ylim([-0.03 0.03]);
         %ylim([-0.01 0.01]);
         set(gca,'linewidth',1.5);
         

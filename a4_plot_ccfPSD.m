@@ -7,7 +7,7 @@ setup_parameters;
 
 %======================= PARAMETERS =======================%
 comp = 'ZZ'; %'ZZ'; %'RR'; %'TT';
-windir = 'window3hr_Z'; 
+windir = 'window3hr'; 
 
 %==========================================================%
 

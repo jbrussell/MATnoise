@@ -11,17 +11,26 @@ IsFigure_GAUS = 0; % Plot frequency domain filtered and unfiltered
 
 %======================= PARAMETERS =======================%
 comp = 'ZZ'; %'ZZ'; %'RR'; %'TT';
-coperiod = [5 10]; % Periods to filter between
+coperiod = [15 40]; % Periods to filter between
 amp = 8e0;
-windir = 'window3hr';
-windir_for_SNR = 'window3hr'; % Data to use for calculating SNR threshold (for plotting purposes)
+windir = 'window3hr_prefilt_10_60s_sub';
+% windir = 'window3hr_FTN_10_60s_Zcorr_tiltonly_sub';
+% windir = 'window3hr_FTN_10_60s_sub';
+% windir = 'window3hr_LH_Zcorr_tiltonly_sub'; 
+% windir = 'window3hr_prefilt_10_60s_OBNwhitesm_sub';
+% windir = 'window3hr_OBNwhitesm_prefilt_10_60s_sub';
+% windir = 'window3hr_LH_whitesm_sub'; 
+% windir_for_SNR = 'window3hr_prefilt_10_60s_OBNwhitesm_sub'; % Data to use for calculating SNR threshold (for plotting purposes)
+windir_for_SNR = 'window3hr_prefilt_10_60s_sub'; % Data to use for calculating SNR threshold (for plotting purposes)
+% windir_for_SNR = 'window3hr_FTN_10_60s_sub';
 trace_space = 0; % km
-snr_thresh = 2.5;
+snr_thresh = 2;
 dep_tol = [0 0]; % [sta1, sta2] OBS Depth tolerance;
 max_grv = inf; %5.5;
-min_grv = 1.4; %1.6
-xlims = [-250 250];
+min_grv = 0.6; %1.6
+xlims = [-500 500];
 ylims = [0 450];
+IsButterworth = 0; % 1=butterworth; 0=tukey
 
 %%% --- Parameters to build up gaussian filters --- %%% 
 % (effects the width of the filter in the frequency domain)
@@ -97,43 +106,33 @@ for ista1=1:nsta % loop over all stations
         end
         nstapair = nstapair + 1;
         
-        % Want sta1 to be closest to the coast so waves at -lag travel
-        % towards coast and waves at +lag travel away from coast.
-        filename_sta1sta2 = filename;
-        filename_sta2sta1 = [ccf_path,sta2,'/',sta2,'_',sta1,'_f.mat'];
-        test = load(filename_sta1sta2);
-        sta1lon = test.stapairsinfo.lons(1);
-        sta2lon = test.stapairsinfo.lons(2);
-        if sta1lon > sta2lon
-            filename = filename_sta2sta1;
-        else
-            filename = filename_sta1sta2;
-        end
+%         % Want sta1 to be closest to the coast so waves at -lag travel
+%         % towards coast and waves at +lag travel away from coast.
+%         filename_sta1sta2 = filename;
+%         filename_sta2sta1 = [ccf_path,sta2,'/',sta2,'_',sta1,'_f.mat'];
+%         test = load(filename_sta1sta2);
+%         sta1lon = test.stapairsinfo.lons(1);
+%         sta2lon = test.stapairsinfo.lons(2);
+%         if sta1lon > sta2lon
+%             filename = filename_sta2sta1;
+%         else
+%             filename = filename_sta1sta2;
+%         end
         
         %----------- LOAD DATA -------------%
         data = load(filename);
         data_SNR = load(filename_SNR);
         ccf = data.coh_sum./data.coh_num;
-        ccf(isnan(ccf)) = 0;
+%         ccf(isnan(ccf)) = 0;
         ccf_SNR = data_SNR.coh_sum./data_SNR.coh_num;
-        ccf_SNR(isnan(ccf_SNR)) = 0;
+%         ccf_SNR(isnan(ccf_SNR)) = 0;
         if size(ccf,1) == 1
             ccf = ccf';
+        end
+        if size(ccf_SNR,1) == 1
             ccf_SNR = ccf_SNR';
         end
         
-        %%
-        %----------- FILTER DATA (FREQUENCY DOMAIN) -------------%
-        f1 = 1/coperiod(2);
-        f2 = 1/coperiod(1);
-        
-        [ ccf_filtered ] = tukey_filt( ccf,coperiod,dt,costap_wid );
-        [ ccf_filtered_SNR ] = tukey_filt( ccf_SNR,coperiod,dt,costap_wid );
-        
-%         [b, a] = butter(6,[f1 f2]*2*dt); % Butterworth Filter
-%         ccf_ifft = ifft(ccf); % inverse FFT to get time domain
-%         ccf_ifft_filt=  filtfilt(b,a,ccf_ifft);
-%         ccf_filtered = fft(ccf_ifft_filt);
         %%
         
         if IsFigure_GAUS
@@ -147,12 +146,54 @@ for ista1=1:nsta % loop over all stations
             title(['Gaussian filter ',sta1,'-',sta2,' (',num2str(coperiod(1)),'-',num2str(coperiod(2)),' s)']);
             pause;
         end
-        ccf = ccf_filtered;
         %----------- Frequency ==> Time domain -------------%
         N = length(ccf);
-        ccf_ifft = real(ifft(2*ccf([1:N/2+1]),N)); % inverse FFT to get time domain
-        %rearrange and keep values corresponding to lags: -(len-1):+(len-1)
-        ccf_ifft = [ccf_ifft(end-N+2:end) ; ccf_ifft(1:N)];
+        
+%         ccf_ifft = real(ifft(2*ccf([1:N/2+1]),N)); % inverse FFT to get time domain
+%         ccf_SNR_ifft = real(ifft(2*ccf_SNR([1:N/2+1]),N)); % inverse FFT to get time domain
+%         %rearrange and keep values corresponding to lags: -(len-1):+(len-1)
+%         ccf_ifft = [ccf_ifft(end-N+2:end) ; ccf_ifft(1:N)];
+%         ccf_SNR_ifft = [ccf_SNR_ifft(end-N+2:end) ; ccf_SNR_ifft(1:N)];
+
+        ccf_ifft = real(ifft(ccf,N)); % inverse FFT to get time domain
+        ccf_ifft = fftshift(ccf_ifft);
+        ccf_ifft = detrend(ccf_ifft);
+        ccf_ifft = cos_taper(ccf_ifft);
+        ccf_SNR_ifft = real(ifft(ccf_SNR,N)); % inverse FFT to get time domain
+        ccf_SNR_ifft = fftshift(ccf_SNR_ifft);
+        ccf_SNR_ifft = detrend(ccf_SNR_ifft);
+        ccf_SNR_ifft = cos_taper(ccf_SNR_ifft);
+        
+%         ccf_ifft = detrend(ccf_ifft);
+%         ccf_ifft = cos_taper(ccf_ifft);
+%         ccf_SNR_ifft = detrend(ccf_SNR_ifft);
+%         ccf_SNR_ifft = cos_taper(ccf_SNR_ifft);
+        
+        %----------- FILTER DATA (FREQUENCY DOMAIN) -------------%
+        f1 = 1/coperiod(2);
+        f2 = 1/coperiod(1);
+        
+        if ~IsButterworth
+            [ ccf_filtered ] = tukey_filt( fft(fftshift(ccf_ifft)),coperiod,dt,costap_wid );
+            [ ccf_filtered_SNR ] = tukey_filt( fft(fftshift(ccf_SNR_ifft)),coperiod,dt,costap_wid );
+            ccf_ifft = fftshift(real(ifft(ccf_filtered)));
+        else
+        % Do butterworth filtering after rearranging
+            [b, a] = butter(2,[f1 f2]*2*dt); % Butterworth Filter
+            ccf_ifft=  filtfilt(b,a,ccf_ifft);
+            ccf_SNR_ifft = filtfilt(b,a,ccf_SNR_ifft);
+            ccf_filtered = fft(fftshift(ccf_ifft));
+            ccf_filtered_SNR = fft(fftshift(ccf_SNR_ifft));
+            
+            if 0
+                figure(99); clf;
+                [h,f] = freqz(b,a,length(ccf_ifft),dt);
+                subplot(2,1,1);
+                plot(f,abs(h));
+                subplot(2,1,2);
+                plot(f,angle(h)*180/pi);
+            end
+        end
         
         ccf_filt{nstapair} = ccf_ifft;
         
@@ -181,7 +222,7 @@ for ista1=1:nsta % loop over all stations
         existpair(npairall) = {[sta1,'_',sta2]};
         
         % SNR
-        [snr(npairall), signal_ind] = calc_SNR(ccf,min_grv,max_grv,sta1sta2_dist(nstapair),isfigure_snr);
+        [snr(npairall), signal_ind] = calc_SNR(ccf_filtered,min_grv,max_grv,sta1sta2_dist(nstapair),isfigure_snr);
         [snr_compare(npairall), ~] = calc_SNR(ccf_filtered_SNR,min_grv,max_grv,sta1sta2_dist(nstapair),isfigure_snr);
         dep1(npairall) = DEPTHS(strcmp(sta1,STAS));
         dep2(npairall) = DEPTHS(strcmp(sta2,STAS));
@@ -235,7 +276,7 @@ for istapair = 1: npairall
             && dep1(istapair) <= dep_tol(1) && dep2(istapair) <= dep_tol(2)
         itrace = itrace+1;
         dists(itrace) = sta1sta2_dist_all(istapair);
-        ccf_waveform_all = ccf_all{istapair}(indtime(1):indtime(end));
+        ccf_waveform_all = ccf_all{istapair}(indtime(1):indtime(end))/max(abs(ccf_all{istapair}(indtime(1):indtime(end))));
         plot(time(indtime(1):indtime(end)),ccf_waveform_all*amp+sta1sta2_dist_all(istapair),'-k','linewidth',1); hold on;
     end
 end
@@ -265,6 +306,7 @@ end
 %% Plot SNR Values
 figure(101); clf;
 plot([0 1000],[1 1],'-k','linewidth',3); hold on;
+set(gcf,'Color','w');
 % plot(sta1sta2_dist_all,snr,'ok','linewidth',1,'MarkerFaceColor',[0.5 0.5 0.5],'markersize',8); hold on;
 scatter(sta1sta2_dist_all,snr,80,mean([dep1' dep2'],2),'filled','MarkerEdgeColor',[0 0 0],'linewidth',1);
 set(gca,'fontsize',16,'linewidth',2,'YScale','log');
