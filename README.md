@@ -33,4 +33,4 @@ This package consists of two parts: (1) Calculation of ambient noise cross-spect
 
 ---
 ##### Acknowledgements:
-These codes have evolved over the years with the help of several people including Ge Jin, Natalie Accardo, Pei-Ying (Patty) Lin, and Josh Russell.
+These codes have evolved over the years with the help of several people including Ge Jin, Natalie Accardo, and Pei-Ying (Patty) Lin.
