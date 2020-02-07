@@ -235,7 +235,8 @@ end % ista1
 
 %% %----------- PLOT ALL CCFs STATION PAIRS IN DISTANCE-TIME -------------%
 N= length(ccf_ifft);
-time = [-N/2:N/2];
+time = [0:N-1]-floor(N/2);
+time = [time(time<0), time(time>=0)];
 % amp = 1e1;
 if isploth20 && comp(1) == 'Z'
     amp = amp*1.5;
