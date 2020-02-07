@@ -137,6 +137,7 @@ for ista1=1:nsta % loop over all stations
             pause;
         end
         %----------- Frequency ==> Time domain -------------%
+        N = length(ccf);
         ccf_ifft = real(ifft(ccf,N)); % inverse FFT to get time domain
         ccf_ifft = fftshift(ccf_ifft); % rearrange values as [-lag lag]
         ccf_ifft = detrend(ccf_ifft);
