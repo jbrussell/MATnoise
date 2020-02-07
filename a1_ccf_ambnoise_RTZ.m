@@ -647,8 +647,10 @@ for ista1=1:nsta
                     fftS2Z = fft(S2Z);
                 else
                     % One-bit normalization
-                    S1Z = runwin_norm(S1Z);
-                    S2Z = runwin_norm(S2Z);
+                    if IsOBN
+                        S1Z = runwin_norm(S1Z);
+                        S2Z = runwin_norm(S2Z);
+                    end
                     %fft
                     fftS1Z = fft(S1Z);
                     fftS2Z = fft(S2Z);
