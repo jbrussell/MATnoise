@@ -37,41 +37,14 @@ clear; close all;
 % fastdir = 78; % Fast direction for azimuthal anisotropy (only for plotting purposes);
 % iscompare_aniso = 0; % compare to old anisotropic measurements
 
-% % RAYLEIGH 1ST OVERTONE
-% comp = {'ZZ'};
-% xspdir = 'ZZ_1S_LRT_smEnv';
-% windir = 'window3hr_Zcorr_tiltcomp';
-% N_wl = 1; %
-% % frange = [1/40 1/3]; % [Hz]
-% frange = [1/25 1/3]; % [Hz]
-% % Ipers = [1, 15, 20, 22, 23, 24, 26, 28, 29]; %[2 3 5 8 10 12];
-% per_ind = [1:2:29];
-% Mp = 4; %5; %2;
-% Np = 4; %5; %3;
-% % Quality control parameters:
-% snr_tol = 3; % minimum signal-to-noise
-% is_rtolmin_wavelength = 1; wl_fac = 1.0; % determine distance tolerance by wavelength?
-% is_raydensity_thresh = 0; % Apply raydensity threshold to wipe out poorly constrained grid cells?
-% r_tol_min = 0; % [km] minimum station separation
-% r_tol_max = 600; % [km] maximum station separation
-% err_tol = inf; % maximum misfit of bessel fit between observed and synthetic
-% azi_bin_deg = 20; % (degrees) size of azimuthal data bin
-% min_dep = 9999; %-3500 for min station depth to use
-% % Norm damping for azimuthal anisotropy
-% damp_azi = [1 1 1 1]; % [2c 2s 4c 4s] % Damping individual parameters
-% aziweight = 1; % global weight
-% fastdir = 78; % Fast direction for azimuthal anisotropy (only for plotting purposes);
-% iscompare_aniso = 0; % compare to old anisotropic measurements
-
-% RAYLEIGH 2ND OVERTONE
-comp = {'ZZ'};
-xspdir = 'ZZ_2S_LRT_smEnv';
-windir = 'window3hr_Zcorr_tiltcomp';
+% LOVE FUND MODE
+comp = {'TT'};
+xspdir = 'TT_0T_LRT_smEnv';
+windir = 'window3hr';
 N_wl = 1; %
-% frange = [1/40 1/3]; % [Hz]
 frange = [1/25 1/3]; % [Hz]
 % Ipers = [1, 15, 20, 22, 23, 24, 26, 28, 29]; %[2 3 5 8 10 12];
-per_ind = [1:10];
+per_ind = [1:2:29];
 Mp = 4; %5; %2;
 Np = 4; %5; %3;
 % Quality control parameters:
@@ -84,36 +57,10 @@ err_tol = inf; % maximum misfit of bessel fit between observed and synthetic
 azi_bin_deg = 20; % (degrees) size of azimuthal data bin
 min_dep = 9999; %-3500 for min station depth to use
 % Norm damping for azimuthal anisotropy
-damp_azi = [1 1 1e10 1e10]; % [2c 2s 4c 4s] % Damping individual parameters
+damp_azi = [1 1 1 1]; % [2c 2s 4c 4s] % Damping individual parameters
 aziweight = 1; % global weight
 fastdir = 78; % Fast direction for azimuthal anisotropy (only for plotting purposes);
 iscompare_aniso = 0; % compare to old anisotropic measurements
-
-
-% % LOVE FUND MODE
-% comp = {'TT'};
-% xspdir = 'TT_0T_LRT_smEnv';
-% windir = 'window3hr';
-% N_wl = 1; %
-% frange = [1/25 1/3]; % [Hz]
-% % Ipers = [1, 15, 20, 22, 23, 24, 26, 28, 29]; %[2 3 5 8 10 12];
-% per_ind = [1:2:29];
-% Mp = 4; %5; %2;
-% Np = 4; %5; %3;
-% % Quality control parameters:
-% snr_tol = 3; % minimum signal-to-noise
-% is_rtolmin_wavelength = 1; wl_fac = 1.0; % determine distance tolerance by wavelength?
-% is_raydensity_thresh = 0; % Apply raydensity threshold to wipe out poorly constrained grid cells?
-% r_tol_min = 0; % [km] minimum station separation
-% r_tol_max = 600; % [km] maximum station separation
-% err_tol = inf; % maximum misfit of bessel fit between observed and synthetic
-% azi_bin_deg = 20; % (degrees) size of azimuthal data bin
-% min_dep = 9999; %-3500 for min station depth to use
-% % Norm damping for azimuthal anisotropy
-% damp_azi = [1 1 1 1]; % [2c 2s 4c 4s] % Damping individual parameters
-% aziweight = 1; % global weight
-% fastdir = 78; % Fast direction for azimuthal anisotropy (only for plotting purposes);
-% iscompare_aniso = 0; % compare to old anisotropic measurements
 
 % Save results?
 isoutput = 0;
@@ -864,10 +811,10 @@ if iscompare_aniso
     h3(2) = errorbar(periods,A4_2*2*100,wRMS_4A*100,'--ob','linewidth',2);
     h3(1) = errorbar(periods,A2_2*2*100,wRMS_2A*100,'--o','color',[0 0.7 0],'linewidth',2);
 end
-h3(2) = plot(periods,A4_rt*2*100,'-ob','linewidth',2);
-h3(1) = plot(periods,A2_rt*2*100,'-o','color',[1 0 0],'linewidth',2); hold on;
-% h3(1) = errorbar(periods,A2_pts*2*100,A2_pts_wRMS*100,'o','color',[1 0 0],'linewidth',2,'markerfacecolor',[1 0 0]);
-% h3(1) = errorbar(periods,A2_bin*2*100,A2_bin_wRMS*100,'d','color',[0 0 0],'linewidth',1.5,'markerfacecolor',[0 0 0]);
+% h3(2) = plot(periods,A4_rt*2*100,'-ob','linewidth',2);
+% h3(1) = plot(periods,A2_rt*2*100,'-o','color',[1 0 0],'linewidth',2); hold on;
+h3(1) = errorbar(periods,A2_pts*2*100,A2_pts_wRMS*100,'o','color',[1 0 0],'linewidth',2,'markerfacecolor',[1 0 0]);
+h3(1) = errorbar(periods,A2_bin*2*100,A2_bin_wRMS*100,'d','color',[0 0 0],'linewidth',1.5,'markerfacecolor',[0 0 0]);
 % xlim(flip(1./frange));
 % xlim([17 35]);
 xlim([1./frange(2)-1 1./frange(1)+1]);
@@ -880,7 +827,7 @@ ylabel('Peak-to-peak amp (%)','fontsize',18);
 % Azimuth
 subplot(2,1,2); hold on;
 ii = 0;
-for iper = 1:length(phi2_rt)
+for iper = per_ind
     ii = ii + 1;
     % OLD AZIMUTHAL PARAMTERS
     if iscompare_aniso
@@ -923,17 +870,17 @@ for iper = 1:length(phi2_rt)
     if comp{1}(1) == 'Z'
         [dif, I] = min(abs(phi2_vec-fastdir));
         phi2_rt(iper) = phi2_vec(I);
-%         if phi2_rt(iper) < fastdir && dif > 10
-%             phi2_rt(iper) = phi2_rt(iper)+180;
-%         end
+        if phi2_rt(iper) < fastdir && dif > 10
+            phi2_rt(iper) = phi2_rt(iper)+180;
+        end
     elseif comp{1}(1) == 'T'
         [dif, I] = min(abs(phi2_vec-fastdir+90));
         phi2_rt(iper) = phi2_vec(I);
-%         if phi2_rt(iper) < fastdir
-%             phi2_rt(iper) = phi2_rt(iper)+180;
-%         end
+        if phi2_rt(iper) < fastdir
+            phi2_rt(iper) = phi2_rt(iper)+180;
+        end
     end
-%     phi2_rt(phi2_rt>160) = phi2_rt(phi2_rt>160)-180;
+    phi2_rt(phi2_rt>160) = phi2_rt(phi2_rt>160)-180;
 
 
     phi4_vec(1) = phi4_rt(iper);
@@ -950,21 +897,20 @@ for iper = 1:length(phi2_rt)
     end
 end
 plot(periods,ones(size(periods))*fastdir,'--k','linewidth',2);
-plot(periods,ones(size(periods))*fastdir+45,'--','color',[0.5 0.5 0.5]*0,'linewidth',2);
-% plot(periods,ones(size(periods))*fastdir-90,'--','color',[0.5 0.5 0.5],'linewidth',2);
-plot(periods,ones(size(periods))*fastdir+90,'--','color',[0.5 0.5 0.5]*0,'linewidth',2);
+plot(periods,ones(size(periods))*fastdir-90,'--','color',[0.5 0.5 0.5],'linewidth',2);
+plot(periods,ones(size(periods))*fastdir+90,'--','color',[0.5 0.5 0.5],'linewidth',2);
 if iscompare_aniso
     errorbar(periods,phi4_2,err_phi4,'--ob','linewidth',2);
     errorbar(periods,phi2_2,err_phi2,'--o','color',[0 0.7 0],'linewidth',2);
 end
-plot(periods,phi4_rt,'-ob','linewidth',2);
-plot(periods,phi2_rt,'-o','color',[1 0 0],'linewidth',2); hold on;
-% errorbar(periods,phi2_pts,phi2_pts_err,'o','color',[1 0 0],'linewidth',2,'markerfacecolor',[1 0 0]);
-% errorbar(periods,phi2_bin,phi2_bin_err,'d','color',[0 0 0],'linewidth',1.5,'markerfacecolor',[0 0 0]);
-% errorbar(periods,phi2_bin-180,phi2_bin_err,'d','color',[0 0 0],'linewidth',1.5,'markerfacecolor',[0 0 0]);
-% errorbar(periods,phi2_bin+180,phi2_bin_err,'d','color',[0 0 0],'linewidth',1.5,'markerfacecolor',[0 0 0]);
+% plot(periods,phi4_rt,'-ob','linewidth',2);
+% plot(periods,phi2_rt,'-o','color',[1 0 0],'linewidth',2); hold on;
+errorbar(periods,phi2_pts,phi2_pts_err,'o','color',[1 0 0],'linewidth',2,'markerfacecolor',[1 0 0]);
+errorbar(periods,phi2_bin,phi2_bin_err,'d','color',[0 0 0],'linewidth',1.5,'markerfacecolor',[0 0 0]);
+errorbar(periods,phi2_bin-180,phi2_bin_err,'d','color',[0 0 0],'linewidth',1.5,'markerfacecolor',[0 0 0]);
+errorbar(periods,phi2_bin+180,phi2_bin_err,'d','color',[0 0 0],'linewidth',1.5,'markerfacecolor',[0 0 0]);
 ylabel('Fast Direction (\circ)','fontsize',18);
-ylim([fastdir-78 fastdir+130]);
+ylim([fastdir-130 fastdir+130]);
 % xlim(flip(1./frange));
 % xlim([17 35]);
 xlim([1./frange(2)-1 1./frange(1)+1]);
