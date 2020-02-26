@@ -166,6 +166,7 @@ f102 = figure(102);
 clf
 hold on;
 set(gca,'YDir','reverse');
+clr = [1,0,0,; 0,1,0; 0,0,1];
 for icomp = 1:length(comps) % loop over components
     for istapair = 1: npairall
         % Normalize using the surface wave amplitude
