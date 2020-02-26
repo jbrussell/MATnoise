@@ -23,7 +23,7 @@ plot(ax,-[win_max win_max],[-1 1]*max(abs(snrdata)),'-b','linewidth',2);
 plot(ax,lag(signal_ind),snrdata(signal_ind),'-k','linewidth',2);
 xlabel(ax,'Lag (s)');
 title(ax,sprintf('SNR %.2f',snr));
-xlim(ax,[-300 300]);
+xlim(ax,[-win_max win_max]*1.5);
 set(ax,'linewidth',1.5,'fontsize',16);
 
 end

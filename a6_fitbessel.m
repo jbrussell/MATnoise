@@ -22,58 +22,36 @@ comp = {'ZZ'}; %'RR'; 'ZZ'; 'TT'
 windir = 'window3hr';
 xspdir = 'phv_dir'; % output directory of phase velocities
 frange = [1/5 1/10]; % frequency range over which to fit bessel function
+N_wl = 1; % Number of wavelengths required
 
-% Windowing uptions for SNR calculation
-groupv_max = inf;
-groupv_min = 1.4;
 
 Npers = 21; % Number of periods
 xlims = [1/12 1/3];
-t_vec = 1./flip(linspace(frange(1) , frange(2) ,Npers)); % periods at which to extract phase velocity
+t_vec_all = 1./flip(linspace(frange(1) , frange(2) ,Npers)); % periods at which to extract phase velocity
 
 % % Manually input phase velocity
-% c = [3.6639
-%     3.6953
-%     3.7284
-%     3.7632
-%     3.7976
-%     3.8316
-%     3.8654
-%     3.9010
-%     3.9387
-%     3.9784
-%     4.0200
-%     4.0636
-%     4.1092
-%     4.1569
-%     4.2067
-%     4.2588
-%     4.3131
-%     4.3698
-%     4.4269
-%     4.4844
-%     4.5422]';
+% c = []';
 
+is_resume = 0; % Resume from last processed file or overwrite
 iswin = 1; % Use the time-domain windowed ccfs?
 npts_smooth = 1; % 1 = no smoothing
 
 isoutput = 1; % Save *.mat file with results?
 nearstadist = 0;
 IsFigure = 1;
-isplotinit = 0;
 isfigure2 = 0;
 isfigure_snr = 1;
 
 %% Make the initial phase velocity dispersion model
 
-% calc_Rayleigh_disp
-vec_h = [3 2 4 12]; % Layer thickness
-vec_vs = [1.1 1.2 2.8 3.7 4.6];
-vec_vp = vec_vs.*1.8; vec_pv(1) = 1.5;
-vec_rho = [1.03 1.5 3.02 3.027 3.342];
-vr = mat_disperse(vec_h,vec_rho,vec_vp,vec_vs,1./t_vec);
-c = vr(:,1)';
-c_start = c;
+% % calc_Rayleigh_disp
+% vec_h = [3 2 4 12]; % Layer thickness
+% vec_vs = [1.1 1.2 2.8 3.7 4.6];
+% vec_vp = vec_vs.*1.8; vec_pv(1) = 1.5;
+% vec_rho = [1.03 1.5 3.02 3.027 3.342];
+% vr = mat_disperse(vec_h,vec_rho,vec_vp,vec_vs,1./t_vec_all);
+% c = vr(:,1)';
+% c_start = c;
 
 % Manually
 % c = [3.4837    3.6341    3.7458    3.8223    3.8878    3.9451   4.0013    4.0522    4.0951    4.1337    4.1683    4.2098]; % 'test_1.6win' avg
@@ -81,20 +59,20 @@ c_start = c;
 % c = [3    3.2    3.3    3.4464    3.8400    3.9589    4.0097    4.0363    4.0515    4.0600    4.0644    4.0661];
 
 % From MINEOS .q file (https://github.com/jbrussell/MINEOS_synthetics)
-% if exist('c','var') == 0 % check if phase velocities exist, if not read them in
-%     [~,~,c] = readMINEOS_qfile2(qfile,t_vec,mode);
-% end
-% c_start = c;
+qfile = ['./qfiles/Nomelt_taper_eta_crust_INVpconstr_xi1.06_GRL19_ORCAiso_INV.s0to200.q'];
+mode = 0;
+if exist('c','var') == 0 % check if phase velocities exist, if not read them in
+    [~,~,c_all] = readMINEOS_qfile2(qfile,t_vec_all,mode);
+end
+c_start = c_all;
+c_all_std = zeros(size(c_all));
 %==========================================================%
-
-twloc=1./t_vec;
 
 % LIMITS
 if comp{1}(1) == 'R'
     ylims = [3.2 4.5];
-elseif comp{1}(1) == 'Z'
-%     ylims = [1.5 5.0];
-    ylims = [2 4.5];
+elseif comp{1}(1) == 'Z' || comp{1}(1) == 'P'
+    ylims = [1.5 4.5];
 elseif comp{1}(1) == 'T'
     ylims = [3.5 4.8];
 end
@@ -114,19 +92,14 @@ end
         end
         data1 = load(filename);
         npts = length(data1.coh_sum_win);
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-tN = length(t_vec);
-wholesec = npts;
-wvec1 = (2*pi)./t_vec;
-wvec1 = wvec1';
-refc = c';
+
 
 % input path
 %ccf_path = ['./ccf/',windir,'/fullStack/ccf',comp{1},'/'];
 ccf_path = [parameters.ccfpath,windir,'/fullStack/ccf',comp{1},'/'];
 
 % output path
-XSP_path = ['./Xsp/',windir,'/fullStack/Xsp',comp{1},'/',num2str(1/frange(2)),'_',num2str(1/frange(1)),'s_',xspdir,'/'];
+XSP_path = ['./Xsp/',windir,'/fullStack/Xsp',comp{1},'/',num2str(1/frange(2)),'_',num2str(1/frange(1)),'s_',num2str(N_wl),'wl_',xspdir,'/'];
 
 if ~exist(XSP_path)
     if ~exist('./Xsp/')
@@ -146,9 +119,9 @@ end
 
 % figure output path
 if iswin
-    XSP_fig_path = ['./figs/',windir,'/fullStack/Xsp/',num2str(1/frange(2)),'_',num2str(1/frange(1)),'s_',xspdir,'/TEI19/'];
+    XSP_fig_path = ['./figs/',windir,'/fullStack/Xsp/',num2str(1/frange(2)),'_',num2str(1/frange(1)),'s_',num2str(N_wl),'wl_',xspdir,'/TEI19/'];
 else
-    XSP_fig_path = ['./figs/',windir,'/fullStack/Xsp/',num2str(1/frange(2)),'_',num2str(1/frange(1)),'s_',xspdir,'/TEI19_nowin/'];
+    XSP_fig_path = ['./figs/',windir,'/fullStack/Xsp/',num2str(1/frange(2)),'_',num2str(1/frange(1)),'s_',num2str(N_wl),'wl_',xspdir,'/TEI19_nowin/'];
 end
 
 if ~exist(XSP_fig_path)
@@ -159,15 +132,6 @@ end
 
 
 warning off; %#ok<WNOFF>
-
-
-
-
-% Get your axis correct
-twloc = twloc*2*pi;
-waxis = (frange(1):1/wholesec:frange(2))*2*pi;
-
-%faxis = [0:wholesec/2 -1]*1/wholesec;
 
 stalist = parameters.stalist;
 nsta=parameters.nsta; % number of target stations to calculate for
@@ -188,7 +152,7 @@ for ista1=1:nsta
         end
         
         % Check to see if we have already done this
-        if 0%exist([XSP_path,sta1,'_',sta2,'_xsp.mat'])
+        if is_resume && exist([XSP_path,sta1,'_',sta2,'_xsp.mat'])
             disp('Already fit this one!')
             continue
         end
@@ -206,10 +170,33 @@ for ista1=1:nsta
         data1 = load(filename);
         delta = distance(data1.stapairsinfo.lats(1),data1.stapairsinfo.lons(1),data1.stapairsinfo.lats(2),data1.stapairsinfo.lons(2));
         r1    = deg2km(delta); % distance
+        groupv_max = data1.max_grv;
+        groupv_min = data1.min_grv;
         
         if r1 < nearstadist
             continue;
         end
+        
+        % Index wavelength criterion
+        I_wl = r1 ./ (t_vec_all .* c_all) > N_wl;
+        if sum(I_wl) <= 1
+            I_wl(1) = 1;
+            I_wl(2) = 1;
+        end
+        c = c_all(I_wl);
+        t_vec = t_vec_all(I_wl);
+        c_std = c_all_std(I_wl);
+        
+        tN = length(t_vec);
+        wholesec = npts;
+        wvec1 = (2*pi)./t_vec;
+        wvec1 = wvec1';
+        
+        % Get your axis correct
+        twloc=1./t_vec;
+        twloc = twloc*2*pi;
+%         waxis = (frange(1):1/wholesec:frange(2))*2*pi;
+        waxis = (1/max(t_vec):1/wholesec:1/min(t_vec))*2*pi;
         
         
         %%% - Get the normalized ccf - %%%
@@ -270,9 +257,19 @@ for ista1=1:nsta
 %         tw2 = lsqnonlin(@(x) besselerr(x,[xsp1]),[tw1],[],[],options);
         
         weight(:) = 1;
-        tw = lsqnonlin(@(x) besselerr(x,[xsp1]),[tw2],[tw2]*0.8,[tw2]*1.2,options);
+        [tw,~,res,~,~,~,J] = lsqnonlin(@(x) besselerr(x,[xsp1]),[tw2],[tw2]*0.8,[tw2]*1.2,options);
+%         tw = lsqnonlin(@(x) besselerr(x,[xsp1]),[tw2],[tw2]*0.8,[tw2]*1.2,options);
 %         tw = lsqnonlin(@(x) besselerr(x,[xsp1]),[tw2],[],[],options);
         
+        % ESTIMATE ERROR BARS ON MODEL! :: JBR - 2/2020
+        % Calculate data variance from residual following Menke QMDA book eq. (4.31)
+        % s_d^2 = E / (N-M)
+        sigma_d2 = res'*res / (length(res)-length(tw));
+        Cov_m = inv(J'*J)*sigma_d2;
+        sigma_m_tw = diag(Cov_m).^(1/2);
+        % Propogate model error to phase velocity
+        % c = r1./tw;  therefore   dc = |r*t^(-2) * dt|
+        sigma_m_c = abs(r1.*tw'.^(-2).*sigma_m_tw);
         
         %%% - Set up the variable structure - %%%
         xspinfo.sta1 = sta1;
@@ -285,23 +282,28 @@ for ista1=1:nsta
         xspinfo.r = r1;
         xspinfo.tw = tw;
         xspinfo.xsp = xsp1;
+        xspinfo.xsp_norm = xsp1./abs(hilbert(xsp1));
         xspinfo.coherenum = data1.coh_num;
         err = besselerr(tw,xsp1);
         err = err(1:length(waxis));
-        xspinfo.sumerr = sum(err.^2)./sum((xsp1./weight(:)).^2);
+        xspinfo.sumerr = sum(err.^2)./sum((xspinfo.xsp_norm./weight(:)).^2);
         xspinfo.err = err./weight(:);
         xspinfo.tw1 = tw1;
         xspinfo.twloc = twloc;
         xspinfo.c = r1./tw;
+        xspinfo.c_std = sigma_m_c;
         xspinfo.per = 1./(twloc/2/pi);
         xspinfo.c_start = c_start;
+        xspinfo.c_std_start = c_all_std;
+        xspinfo.per_start = t_vec_all;
+        xspinfo.isgood_wl = I_wl;
         
         data = r1./tw;
         
 
         %% %%% Calculate SNR %%%
         xcorf1 = data1.coh_sum./data1.coh_num;
-        xcorf1_filtered = tukey_filt( xcorf1,flip(1./frange),1,0.25 );
+        xcorf1_filtered = tukey_filt( xcorf1,[min(t_vec) max(t_vec)],1,0.25 );
         [snr, signal_ind] = calc_SNR(xcorf1_filtered,groupv_min,groupv_max,r1,isfigure_snr);
         %%
 
@@ -357,8 +359,8 @@ for ista1=1:nsta
                 
             hold on
             subplot(3,1,3);
-            plot(twloc/2/pi,r1./tw1,'o-','color',[0.5 0.5 0.5],'linewidth',2);hold on;
-            plot(twloc/2/pi,r1./tw,'o-','color',[1 0 0 ],'linewidth',2);
+            errorbar(twloc/2/pi,r1./tw1,c_std,'o-','color',[0.5 0.5 0.5],'linewidth',2);hold on;
+            errorbar(twloc/2/pi,r1./tw,sigma_m_c*2,'o-','color',[1 0 0 ],'linewidth',2);
 %             errorbar(twloc/2/pi,r1./tw,xspinfo.err,'ro-','linewidth',2);
             title([sta1,'-',sta2],'fontsize',16)
             xlabel('Frequency (Hz)','fontsize',16);
@@ -367,6 +369,17 @@ for ista1=1:nsta
             ylim(ylims);
             xlim(xlims1);
             box off;
+            
+            % Plot normalized bessel functions
+            figure(4); clf;
+            b_dat = smooth(real(data1.coh_sum_win(ind)/data1.coh_num),npts_smooth);
+            plot(faxis(ind),b_dat./abs(hilbert(b_dat)),'k','linewidth',3); hold on;
+%             plot(waxis/2/pi,b./abs(hilbert(b)),'-r','linewidth',2); hold on; 
+            plot(waxis/2/pi,b./SmoothAnalyticEnv(waxis/2/pi,b),'-r','linewidth',2); hold on; 
+            xlim(xlims);
+            xlims1 = get(gca,'XLim');
+            ylabel('J_{0}','fontsize',16);
+            ylim([-2 2]);
             
             if isfigure2
             f12 = figure(12);
