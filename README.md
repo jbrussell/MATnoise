@@ -21,7 +21,7 @@ This package consists of two parts: (1) Calculation of ambient noise cross-spect
 - **a3** - Apply group velocity window around the surface wave arrivals of interest. This as original developed in order to remove the water column arrival from ocean bottom datasets but should also clean up land spectra.
 - **a4** - Plot power spectral density of the cross spectra in order to determine the frequency content of the dominant signal.
 - **a5** - Plot the real and imaginary parts of the cross spectra to evaluate where signal is best and degree of bias from inhomogeneous noise sources.
-- **a6** - Fit J_0 Bessel functions to real part of cross-spectra to extract interstation phase velocity dispersion.
+- **a6** - Fit J_0 Bessel functions to real part of cross-spectra to extract interstation phase velocity dispersion. Can use results from the linear radon transform (see [./mat-LRTdisp](https://github.com/jbrussell/MATnoise/tree/master/mat-LRTdisp)) as the starting dispersion model.
   
   Menke & Jin (2015) BSSA; [DOI:10.1785/0120140245](https://pubs.geoscienceworld.org/ssa/bssa/article/105/3/1619/332118/Waveform-Fitting-of-Cross-Spectra-to-Determine)
 - **a7** - Try fitting the phase velocities assuming 1D isotropic velocity variations and 1D azimuthal anisotropy. Azimuthal anisotropy includes options for both 2-theta and 4-theta variations.
@@ -29,6 +29,7 @@ This package consists of two parts: (1) Calculation of ambient noise cross-spect
 ## 2. ray_tomo: Ray tomography for 2D phase velocity maps (b0-b1)
 - **b0** - Plot ray paths between station pairs colored by velocity.
 - **b1** - Use simple travel-time ray tomography to invert for 2D maps of isotropic phase velocity and 1D or 2D azimuthal anisotropy.
+
 
 
 ---
