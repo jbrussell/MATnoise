@@ -9,8 +9,8 @@ addpath('./tomo_functions');
 parameters.station_list = '../../sta_locs.txt';
 
 % Lat Lon
-parameters.lalim = [-9 -3] ;
-parameters.lolim = [-136 -130];
+parameters.lalim = [32.0 37.0] ;
+parameters.lolim = [-77.0 -71.0];
 parameters.gridsize = 0.25; % degrees?
 parameters.agebins = [165:5:175];
 parameters.bathybins = [-9000 :5000: 1000];
