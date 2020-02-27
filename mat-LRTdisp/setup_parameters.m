@@ -39,7 +39,8 @@ pers = 1./flip(linspace(f_min, f_max ,Npers));
 
 %% SETUP PATHS
 % Path to seismogram data structure
-ndata = ['./data/',ccf,'/',windir,'/noise_',comp,'.mat'];
+datapath = ['./data/',ccf,'/',windir,'/'];
+ndata = [datapath,'noise_',comp,'.mat'];
 
 % Output LRT panel path (a1)
 LRTmatpath = ['./LRT_mats/',ccf,'/',windir,'/',num2str(1/f_max),'_',num2str(1/f_min),'s/'];
