@@ -76,9 +76,6 @@ end
 
 %%
 
-% Load color scale
-load './tomo_functions/seiscmap.mat'
-
 % Load anisotropy data (from old inversion)
 if iscompare_aniso
     load(['./aniso_DATA/',xspdir,'/',aniso_data]);
@@ -537,7 +534,6 @@ for ip=1:length(Tperiods_all)
         avgv = nanmean(raytomo(ip).GV(:));
         caxis([avgv*(1-r) avgv*(1+r)])
         colorbar
-        colormap(seiscmap)
         
 %         pause;
     end
