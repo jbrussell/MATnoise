@@ -5,12 +5,15 @@
 % https://github.com/jbrussell
 
 clear;
+if ~exist('setup_parameters_MATnoise.m')
+    !cp ../setup_parameters.m ./setup_parameters_MATnoise.m
+end
 setup_parameters_MATnoise;
 IsFigure = 0;
 IsFigure_GAUS = 0; % Plot frequency domain filtered and unfiltered
 
 %======================= PARAMETERS =======================%
-comps = {'ZZ','PP'}; %{'ZZ','RR','PP'}; %'PZ'; %'PP'; %'ZZ'; %'RR'; %'TT';
+comps = {'ZZ','PP'};  % {'ZZ','RR','PP'}; 'PZ'; 'PP'; 'ZZ'; 'RR'; 'TT';
 amp = 8e0;
 windir = 'window3hr';
 % windir = 'window3hr_Zcorr_tiltcomp';
