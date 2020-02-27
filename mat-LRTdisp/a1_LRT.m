@@ -8,6 +8,9 @@ setup_parameters;
 
 is_savemat = 1;
 
+is_win = 0; % Use windowed waveforms?
+
+%%
 % Load data
 load(ndata);
 delta=mean(Delta);
@@ -16,8 +19,13 @@ Delta = Delta';
 %% Do Radon Transform
 % Invert to Radon domain using several different methods with varying
 % degrees of sparseness
+if is_win
+    dat = M_win;
+else
+    dat = M;
+end
 tic;
-[ Rfft,f ] = Radon_conjgrad(P_axis,t,M,Delta,maxiter,rthresh,method);
+[ Rfft,f ] = Radon_conjgrad(P_axis,t,dat,Delta,maxiter,rthresh,method);
 toc
 
 [~,I_fmin_plot] = min(abs(f-f_min)); [~,I_fmax_plot] = min(abs(f-f_max));
@@ -106,5 +114,9 @@ if is_savemat
     mat.f_max = f_max;
     mat.v_min = v_min;
     mat.v_max = v_max;
-    save([LRTmatpath,'LRT_',method,'_',comp,'.mat'],'mat');
+    if is_win
+        save([LRTmatpath,'LRT_',method,'_',comp,'_win.mat'],'mat');
+    else
+        save([LRTmatpath,'LRT_',method,'_',comp,'.mat'],'mat');
+    end
 end

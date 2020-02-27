@@ -6,8 +6,17 @@
 clear;
 setup_parameters;
 
+is_globnorm = 0;
+
+is_win = 0; % Use windowed waveforms?
+
+%%
 % Load precalculated LRT
-load([LRTmatpath,'LRT_',method,'_',comp,'.mat']);
+if is_win
+    load([LRTmatpath,'LRT_',method,'_',comp,'_win.mat']);
+else
+    load([LRTmatpath,'LRT_',method,'_',comp,'.mat']);
+end
 
 % Load waveforms
 load(mat.ndata);
@@ -107,4 +116,8 @@ set(gca,'Position',pos);
 if ~exist(figpath)
     mkdir(figpath);
 end
-save2pdf([figpath,'LRT_',method,'_',comp,'.pdf'],3,100);
+if is_win
+    save2pdf([figpath,'LRT_',method,'_',comp,'_win.pdf'],3,100);
+else
+    save2pdf([figpath,'LRT_',method,'_',comp,'.pdf'],3,100);
+end

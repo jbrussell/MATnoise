@@ -6,11 +6,14 @@
 clear;
 setup_parameters;
 
-% Load precalculated LRT
-load([LRTmatpath,'LRT_',method,'_',comp,'.mat']);
-
-% Load dispersion picks
-load([picks_out_path,'LRTpicks_',method,'_',comp,'.mat']);
+% Load precalculated LRT & dispersion picks
+if is_win
+    load([LRTmatpath,'LRT_',method,'_',comp,'_win.mat']);
+    load([picks_out_path,'LRTpicks_',method,'_',comp,'_win.mat']);
+else
+    load([LRTmatpath,'LRT_',method,'_',comp,'.mat']);
+    load([picks_out_path,'LRTpicks_',method,'_',comp,'.mat']);
+end
 
 %%
 % Plot picks  to double check
@@ -48,5 +51,8 @@ cb = colorbar;
 set(cb,'linewidth',1.5);
 set(gca,'Position',pos);
 %%%%
-
-save2pdf([figpath,'LRT_picks_',method,'_',comp,'.pdf'],4,100);
+if is_win
+    save2pdf([figpath,'LRT_picks_',method,'_',comp,'_win.pdf'],4,100);
+else
+    save2pdf([figpath,'LRT_picks_',method,'_',comp,'.pdf'],4,100);
+end

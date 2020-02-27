@@ -15,6 +15,9 @@ windir = 'window3hr';
 % Normalization option for plotting
 is_globnorm = 0; % 1 for normalize radon panel by global max; 0 for column norm
 
+% Group velocity windowing
+is_win = 0; % Use windowed waveforms?
+
 % Define variables for calculating the LRT
 maxiter = 10; % Maximum number of iterations
 rthresh = 1e-6;

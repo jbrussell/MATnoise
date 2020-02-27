@@ -19,9 +19,11 @@ amp = 8e0;
 windir = 'window3hr';
 % windir = 'window3hr_Zcorr_tiltcomp';
 
-
+% Define group velocity window
 max_grv = inf; %5.5;
 min_grv = 0.7; %1.6
+
+% Define time axis limits for cutting waveforms
 xlims = [0 500];
 ylims = [0 450];
 
@@ -150,8 +152,11 @@ for icomp = 1:length(comps)
             time = [time(time<0), time(time>=0)];
             indtime_pos = find(abs(time)<=xlims(2) & time>=0);
             indtime_neg = find(abs(time)<=xlims(2) & time<=0);
-            ccf_ifft_pos = cos_taper(detrend(ccf_ifft(indtime_pos)));
-            ccf_ifft_neg = flip(cos_taper(detrend(ccf_ifft(indtime_neg))));
+
+            ccf_ifft_pos = (detrend(ccf_ifft(indtime_pos)));
+            ccf_ifft_neg = flip((detrend(ccf_ifft(indtime_neg))));            
+%             ccf_ifft_pos = cos_taper(detrend(ccf_ifft(indtime_pos)));
+%             ccf_ifft_neg = flip(cos_taper(detrend(ccf_ifft(indtime_neg))));
 
     %         % flip -lag to positive +lag
     %         M = [M; ccf_ifft_pos; ccf_ifft_neg ];
@@ -177,19 +182,24 @@ end
 [Delta, I_srt] = sort(Delta);
 M = M(I_srt,:);
 
+% Apply group velocity window
+I_keep = t<=Delta./min_grv & t>=Delta./max_grv;
+win_mat = zeros(size(I_keep));
+for itr = 1:length(Delta)
+    I_onesrow = I_keep(itr,:)==1;
+    win_row = I_keep(itr,I_onesrow);
+    win_mat(itr,I_onesrow) = cos_taper(win_row);
+end
+M_win = M.*win_mat;
+
 %% %----------- PLOT ALL CCFs STATION PAIRS IN DISTANCE-TIME -------------%
 f102 = figure(102);
 set(gcf, 'Color', 'w');
 clf
 hold on;
 set(gca,'YDir','reverse');
-dists = 0;
-itrace = 0;
-for istapair = 1: size(M,1)
-    itrace = itrace+1;
-    ccf_waveform_all = M(istapair,:) / max(abs(M(istapair,:)));
-    plot(t,ccf_waveform_all*amp+Delta(istapair),'-k','linewidth',1); hold on;
-end
+plot(t,M./max(abs(M),[],2)*amp+Delta,'-k','linewidth',1);
+plot(t,M_win./max(abs(M),[],2)*amp+Delta,'-r','linewidth',0.5);
 xlim([min(t) max(t)])
 % xlim([0 max(xlims)])
 ylim(ylims);
@@ -212,4 +222,4 @@ end
 if ~exist(datapath)
     mkdir(datapath)
 end
-save(ndata,'M','Delta','t');
+save(ndata,'M','M_win','max_grv','min_grv','Delta','t');

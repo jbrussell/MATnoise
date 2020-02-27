@@ -6,8 +6,15 @@
 clear;
 setup_parameters;
 
+is_win = 0; % Use windowed waveforms?
+
+%%
 % Load precalculated LRT
-load([LRTmatpath,'LRT_',method,'_',comp,'.mat']);
+if is_win
+    load([LRTmatpath,'LRT_',method,'_',comp,'_win.mat']);
+else
+    load([LRTmatpath,'LRT_',method,'_',comp,'.mat']);
+end
 
 % Load waveforms
 load(ndata);
@@ -52,7 +59,11 @@ if ~exist(picks_out_path)
 end
 % Save picks to mat file
 if ~isempty(picks_LRT)
-    save([picks_out_path,'LRTpicks_',method,'_',comp,'.mat'],'picks_LRT');
+    if is_win
+        save([picks_out_path,'LRTpicks_',method,'_',comp,'_win.mat'],'picks_LRT');
+    else
+        save([picks_out_path,'LRTpicks_',method,'_',comp,'.mat'],'picks_LRT');
+    end
 end
 
 %%
