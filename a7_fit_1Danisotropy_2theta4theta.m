@@ -17,16 +17,14 @@ isoutput_aniso = 0; % write output anisotropy .mat file?
 % RAYLEIGH FUND MODE
 comp = {'ZZ'};
 % xspdir = 'ZZ_0S_LRT'; %'test1';
-xspdir = 'ZZ_0S_LRT_smEnv';
-windir = 'window3hr';
+xspdir = 'ZZ_0S_LRT';
+windir = 'window3hr_raw_Zcorr_tiltonly';
 N_wl = 1; %
-% frange = [1/40 1/3]; % [Hz]
-frange = [1/25 1/3]; % [Hz]
-% Ipers = [1, 15, 20, 22, 23, 24, 26, 28, 29]; %[2 3 5 8 10 12];
-Ipers = [1:2:29];
+frange = [1/100 1/10]; % [Hz]
+Ipers = [1:2:25];
 rowpl = 4; %5; %2;
 colpl = 4; %5; %3;
-ylims_aniso = [-3 3];
+ylims_aniso = [-5 5];
 % Quality control parameters:
 snr_tol = 10; % minimum signal-to-noise
 rmin_tol = 0; % [km] minimum separation between stations (should make this number frequency dependent!)
@@ -40,7 +38,7 @@ is_fit4theta = 0; % fit both 2-theta & 4-theta?
 % ylims_aniso = [-5 5];
 ylim_p2p = [0 5];
 
-fastdir = 78; % Expected fast direction for plotting purposes
+% fastdir = 78; % Expected fast direction for plotting purposes
 
 if comp{1}(1) == 'R'
     ylims = [3.2 4.5];
@@ -51,6 +49,11 @@ elseif comp{1}(1) == 'T'
     ylims = [3.8 4.8];
 end
 %==========================================================%
+
+%% Load BSMA to calculate margin parallel and fossil spreading directions
+[BSMA.lon, BSMA.lat] = textread('./ray_tomo/BSMA_bound.txt','%f %f');
+margin_parallel = mean_ang(BSMA.lat,BSMA.lon);
+fastdir = margin_parallel + 90;
 
 %% Load Depths
 STAS = stalist;
@@ -433,8 +436,8 @@ if comp{1}(1) == 'Z' || comp{1}(1) == 'R' || comp{1}(1) == 'P'
         phi4_2(iper) = phi4_vec(I);
     end
     plot(periods,ones(size(periods))*fastdir,'--k','linewidth',2);
-    plot(periods,ones(size(periods))*(fastdir+45),'--k','linewidth',2);
     plot(periods,ones(size(periods))*(fastdir+90),'--k','linewidth',2);
+    plot(periods,ones(size(periods))*(fastdir-90),'--k','linewidth',2);
     if is_fit4theta
         errorbar(periods,phi4_2,err_phi4*2,'-o','color',clr_4theta,'linewidth',2);
     end
@@ -469,8 +472,8 @@ if comp{1}(1) == 'T'
     end
     
     plot(periods,ones(size(periods))*fastdir,'--k','linewidth',2);
-    plot(periods,ones(size(periods))*(fastdir+45),'--k','linewidth',2);
     plot(periods,ones(size(periods))*(fastdir+90),'--k','linewidth',2);
+    plot(periods,ones(size(periods))*(fastdir-90),'--k','linewidth',2);
 %     plot(periods,ones(size(periods))*(78+45),'--k','linewidth',2);
 %     plot(periods,ones(size(periods))*(78+90),'--k','linewidth',2);
 

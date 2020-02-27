@@ -13,42 +13,17 @@ clear; close all;
 %%
 %======================= PARAMETERS =======================%
 
-% % RAYLEIGH FUND MODE
-% comp = {'ZZ'};
-% xspdir = 'ZZ_0S_LRT_smEnv'; 
-% windir = 'window3hr'; 
-% N_wl = 1; %
-% frange = [1/25 1/3]; % [Hz]
-% per_ind = [1, 15, 20, 22, 23, 24, 26, 28, 29];
-% Mp = 3; % rows for plotting
-% Np = 3; % columns for plotting
-% % Quality control parameters:
-% snr_tol = 3; % minimum signal-to-noise
-% is_rtolmin_wavelength = 1; wl_fac = 1.0; % determine distance tolerance by wavelength?
-% is_raydensity_thresh = 0; % Apply raydensity threshold to wipe out poorly constrained grid cells?
-% r_tol_min = 0; % [km] minimum station separation
-% r_tol_max = 600; % [km] maximum station separation
-% err_tol = inf; % maximum misfit of bessel fit between observed and synthetic
-% azi_bin_deg = 20; % (degrees) size of azimuthal data bin
-% min_dep = 9999; %-3500 for min station depth to use
-% % Norm damping for azimuthal anisotropy
-% damp_azi = [1 1 1e10 1e10]; % [2c 2s 4c 4s] % Damping individual parameters
-% aziweight = 1; % global weight
-% fastdir = 78; % Fast direction for azimuthal anisotropy (only for plotting purposes);
-% iscompare_aniso = 0; % compare to old anisotropic measurements
-
-% LOVE FUND MODE
-comp = {'TT'};
-xspdir = 'TT_0T_LRT_smEnv';
-windir = 'window3hr';
+% RAYLEIGH FUND MODE
+comp = {'ZZ'};
+xspdir = 'ZZ_0S_LRT'; 
+windir = 'window3hr_raw_Zcorr_tiltonly'; 
 N_wl = 1; %
-frange = [1/25 1/3]; % [Hz]
-% Ipers = [1, 15, 20, 22, 23, 24, 26, 28, 29]; %[2 3 5 8 10 12];
-per_ind = [1:2:29];
-Mp = 4; %5; %2;
-Np = 4; %5; %3;
+frange = [1/100 1/10]; % [Hz]
+per_ind = [1:3:25];
+Mp = 3; % rows for plotting
+Np = 3; % columns for plotting
 % Quality control parameters:
-snr_tol = 3; % minimum signal-to-noise
+snr_tol = 10; % minimum signal-to-noise
 is_rtolmin_wavelength = 1; wl_fac = 1.0; % determine distance tolerance by wavelength?
 is_raydensity_thresh = 0; % Apply raydensity threshold to wipe out poorly constrained grid cells?
 r_tol_min = 0; % [km] minimum station separation
@@ -57,15 +32,20 @@ err_tol = inf; % maximum misfit of bessel fit between observed and synthetic
 azi_bin_deg = 20; % (degrees) size of azimuthal data bin
 min_dep = 9999; %-3500 for min station depth to use
 % Norm damping for azimuthal anisotropy
-damp_azi = [1 1 1 1]; % [2c 2s 4c 4s] % Damping individual parameters
+damp_azi = [1 1 1e10 1e10]; % [2c 2s 4c 4s] % Damping individual parameters
 aziweight = 1; % global weight
-fastdir = 78; % Fast direction for azimuthal anisotropy (only for plotting purposes);
+% fastdir = 78; % Fast direction for azimuthal anisotropy (only for plotting purposes);
 iscompare_aniso = 0; % compare to old anisotropic measurements
+
 
 % Save results?
 isoutput = 0;
 savefile = ['test'];
 
+%% Load BSMA to calculate margin parallel and fossil spreading directions
+[BSMA.lon, BSMA.lat] = textread('BSMA_bound.txt','%f %f');
+margin_parallel = mean_ang(BSMA.lat,BSMA.lon);
+fastdir = margin_parallel + 90;
 
 %% Figure output
 % figure output path

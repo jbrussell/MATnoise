@@ -11,24 +11,24 @@ IsFigure_GAUS = 0; % Plot frequency domain filtered and unfiltered
 
 %======================= PARAMETERS =======================%
 comp = 'ZZ'; %'ZZ'; %'RR'; %'TT';
-coperiod = [5 10]; % Periods to filter between
+coperiod = [14 40]; % Periods to filter between
 amp = 8e0;
-windir = 'window3hr';
-windir_for_SNR = 'window3hr'; % Data to use for calculating SNR threshold (for plotting purposes)
-trace_space = 0; % km
+windir = 'window3hr_raw_Zcorr_tiltonly';
+windir_for_SNR = 'window3hr_raw_Zcorr_tiltonly'; % Data to use for calculating SNR threshold (for plotting purposes)
+trace_space = 3; % km
 snr_thresh = 2.5;
 dep_tol = [0 0]; % [sta1, sta2] OBS Depth tolerance;
 max_grv = inf; %5.5;
-min_grv = 1.4; %1.6
-xlims = [-250 250];
-ylims = [0 450];
+min_grv = 0.7; %1.6
+xlims = [-500 500];
+ylims = [0 460];
 IsButterworth = 1; % 1=butterworth; 0=tukey
 
 %%% --- Parameters to build up gaussian filters --- %%% 
 % (effects the width of the filter in the frequency domain)
 costap_wid = 0.2; % 0 => box filter; 1 => Hann window
 
-isplotwin = 0; %1;
+isplotwin = 1; %1;
 isploth20 = 0;
 isfigure_snr = 0;
 

@@ -2,9 +2,9 @@
 addpath('./functions/'); addpath('./functions/CG_methods/');
 
 % Input data
-comp = 'PP'; %'ZZ'; 'RR'; 'TT';
-ccf = 'ccf_raw';
-windir = 'window3hr';
+comp = 'ZZ'; %'ZZ'; 'RR'; 'TT';
+ccf = 'ccf';
+windir = 'window3hr_raw_Zcorr_tiltonly';
 % windir = 'window3hr_Zcorr_tiltcomp'; % Tilt & compliance corrected
 
 % comp = 'ZZ';
@@ -23,8 +23,8 @@ maxiter = 10; % Maximum number of iterations
 rthresh = 1e-6;
 method = 'CGG_weight';
 % method = 'CG_IRLS';
-f_min = 1/40;%1/150;
-f_max = 1/3;%1/20;
+f_min = 1/100;%1/150;
+f_max = 1/10;%1/20;
 v_min = 1; %4;
 v_max = 6; %8;
 P_axis = [111/(v_max*1.1) : 0.1 : 111/(v_min*0.9)]; % s/deg
@@ -53,9 +53,9 @@ figpath = ['./figs/',ccf,'/',windir,'/'];
 
 %% LOAD DISPERSION
 if strcmp(comp(1),'T')
-    qfile = './qfiles/Nomelt_taper_eta_crust_INVpconstr_xi1.06_GRL19_ORCAiso_INV.t0to200.q';
+    qfile = '../qfiles/Nomelt_taper_eta_crust_INVpconstr_xi1.06_GRL19_ORCAiso_INV.t0to200.q';
 else
-    qfile = './qfiles/Nomelt_taper_eta_crust_INVpconstr_xi1.06_GRL19_ORCAiso_INV.s0to200.q';
+    qfile = '../qfiles/Nomelt_taper_eta_crust_INVpconstr_xi1.06_GRL19_ORCAiso_INV.s0to200.q';
 end
 
 BRANCHES=2;
