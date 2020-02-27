@@ -9,6 +9,7 @@ if ~exist('setup_parameters_MATnoise.m')
     !cp ../setup_parameters.m ./setup_parameters_MATnoise.m
 end
 setup_parameters_MATnoise;
+setup_parameters;
 IsFigure = 0;
 IsFigure_GAUS = 0; % Plot frequency domain filtered and unfiltered
 
@@ -27,7 +28,6 @@ ylims = [0 450];
 ccfpath = '../ccf/';
 % ccf_path = '/data/irma6/jrussel/YoungPacificORCA/ccf_FTN/';
 
-data_dir = './data/ccf/';
 
 %%% --- Parameters to build up gaussian filters --- %%% 
 % (effects the width of the filter in the frequency domain)
@@ -209,7 +209,7 @@ end
 
 % save2pdf([figpath,'SNR_',comp,'_tukeyfilt_',num2str(min_grv),'_',num2str(max_grv),'.pdf'],101,1000);
 
-if ~exist(data_dir)
-    mkdir(data_dir)
+if ~exist(datapath)
+    mkdir(datapath)
 end
-save([data_dir,'noise_',cell2mat(comps),'.mat'],'M','Delta','t');
+save(ndata,'M','Delta','t');
