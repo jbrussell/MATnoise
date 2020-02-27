@@ -6,6 +6,9 @@
 clear;
 setup_parameters;
 
+is_win = 0;
+
+%%
 % Load precalculated LRT & dispersion picks
 if is_win
     load([LRTmatpath,'LRT_',method,'_',comp,'_win.mat']);
