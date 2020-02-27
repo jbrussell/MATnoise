@@ -13,67 +13,15 @@ clear; close all;
 %%
 %======================= PARAMETERS =======================%
 
-% % RAYLEIGH FUND MODE
-% comp = {'ZZ'};
-% xspdir = 'ZZ_0S_LRT_smEnv'; 
-% windir = 'window3hr'; 
-% N_wl = 1; %
-% frange = [1/25 1/3]; % [Hz]
-% per_ind = [1, 15, 20, 22, 23, 24, 26, 28, 29];
-% Mp = 3; % rows for plotting
-% Np = 3; % columns for plotting
-% % Quality control parameters:
-% snr_tol = 3; % minimum signal-to-noise
-% is_rtolmin_wavelength = 1; wl_fac = 1.0; % determine distance tolerance by wavelength?
-% is_raydensity_thresh = 0; % Apply raydensity threshold to wipe out poorly constrained grid cells?
-% r_tol_min = 0; % [km] minimum station separation
-% r_tol_max = 600; % [km] maximum station separation
-% err_tol = inf; % maximum misfit of bessel fit between observed and synthetic
-% azi_bin_deg = 20; % (degrees) size of azimuthal data bin
-% min_dep = 9999; %-3500 for min station depth to use
-% % Norm damping for azimuthal anisotropy
-% damp_azi = [1 1 1e10 1e10]; % [2c 2s 4c 4s] % Damping individual parameters
-% aziweight = 1; % global weight
-% fastdir = 78; % Fast direction for azimuthal anisotropy (only for plotting purposes);
-% iscompare_aniso = 0; % compare to old anisotropic measurements
-
-% % RAYLEIGH 1ST OVERTONE
-% comp = {'ZZ'};
-% xspdir = 'ZZ_1S_LRT_smEnv';
-% windir = 'window3hr_Zcorr_tiltcomp';
-% N_wl = 1; %
-% % frange = [1/40 1/3]; % [Hz]
-% frange = [1/25 1/3]; % [Hz]
-% % Ipers = [1, 15, 20, 22, 23, 24, 26, 28, 29]; %[2 3 5 8 10 12];
-% per_ind = [1:2:29];
-% Mp = 4; %5; %2;
-% Np = 4; %5; %3;
-% % Quality control parameters:
-% snr_tol = 3; % minimum signal-to-noise
-% is_rtolmin_wavelength = 1; wl_fac = 1.0; % determine distance tolerance by wavelength?
-% is_raydensity_thresh = 0; % Apply raydensity threshold to wipe out poorly constrained grid cells?
-% r_tol_min = 0; % [km] minimum station separation
-% r_tol_max = 600; % [km] maximum station separation
-% err_tol = inf; % maximum misfit of bessel fit between observed and synthetic
-% azi_bin_deg = 20; % (degrees) size of azimuthal data bin
-% min_dep = 9999; %-3500 for min station depth to use
-% % Norm damping for azimuthal anisotropy
-% damp_azi = [1 1 1 1]; % [2c 2s 4c 4s] % Damping individual parameters
-% aziweight = 1; % global weight
-% fastdir = 78; % Fast direction for azimuthal anisotropy (only for plotting purposes);
-% iscompare_aniso = 0; % compare to old anisotropic measurements
-
-% RAYLEIGH 2ND OVERTONE
+% RAYLEIGH FUND MODE
 comp = {'ZZ'};
-xspdir = 'ZZ_2S_LRT_smEnv';
-windir = 'window3hr_Zcorr_tiltcomp';
+xspdir = 'ZZ_0S_LRT_smEnv'; 
+windir = 'window3hr'; 
 N_wl = 1; %
-% frange = [1/40 1/3]; % [Hz]
 frange = [1/25 1/3]; % [Hz]
-% Ipers = [1, 15, 20, 22, 23, 24, 26, 28, 29]; %[2 3 5 8 10 12];
-per_ind = [1:10];
-Mp = 4; %5; %2;
-Np = 4; %5; %3;
+per_ind = [1, 15, 20, 22, 23, 24, 26, 28, 29];
+Mp = 3; % rows for plotting
+Np = 3; % columns for plotting
 % Quality control parameters:
 snr_tol = 3; % minimum signal-to-noise
 is_rtolmin_wavelength = 1; wl_fac = 1.0; % determine distance tolerance by wavelength?
@@ -90,31 +38,6 @@ fastdir = 78; % Fast direction for azimuthal anisotropy (only for plotting purpo
 iscompare_aniso = 0; % compare to old anisotropic measurements
 
 
-% % LOVE FUND MODE
-% comp = {'TT'};
-% xspdir = 'TT_0T_LRT_smEnv';
-% windir = 'window3hr';
-% N_wl = 1; %
-% frange = [1/25 1/3]; % [Hz]
-% % Ipers = [1, 15, 20, 22, 23, 24, 26, 28, 29]; %[2 3 5 8 10 12];
-% per_ind = [1:2:29];
-% Mp = 4; %5; %2;
-% Np = 4; %5; %3;
-% % Quality control parameters:
-% snr_tol = 3; % minimum signal-to-noise
-% is_rtolmin_wavelength = 1; wl_fac = 1.0; % determine distance tolerance by wavelength?
-% is_raydensity_thresh = 0; % Apply raydensity threshold to wipe out poorly constrained grid cells?
-% r_tol_min = 0; % [km] minimum station separation
-% r_tol_max = 600; % [km] maximum station separation
-% err_tol = inf; % maximum misfit of bessel fit between observed and synthetic
-% azi_bin_deg = 20; % (degrees) size of azimuthal data bin
-% min_dep = 9999; %-3500 for min station depth to use
-% % Norm damping for azimuthal anisotropy
-% damp_azi = [1 1 1 1]; % [2c 2s 4c 4s] % Damping individual parameters
-% aziweight = 1; % global weight
-% fastdir = 78; % Fast direction for azimuthal anisotropy (only for plotting purposes);
-% iscompare_aniso = 0; % compare to old anisotropic measurements
-
 % Save results?
 isoutput = 0;
 savefile = ['test'];
@@ -129,8 +52,6 @@ end
 
 %%
 
-% Load color scale
-load './tomo_functions/seiscmap.mat'
 
 % Load anisotropy data (from old inversion)
 if iscompare_aniso
@@ -222,22 +143,20 @@ for ixsp = 1:length(xspfiles)
     xspinfo = temp.xspinfo;
     
     if ixsp ==1
-        Tperiods_all = xspinfo.per_start;
-        Tperiods = (2*pi)./temp.twloc;
+        Tperiods = xspinfo.per_start;
         waxis = temp.waxis;
         twloc = temp.twloc;
-        xspinfo.isgood = zeros(size(Tperiods_all));
+        xspinfo.isgood = zeros(size(Tperiods));
         xspinfo.waxis = waxis;
         xspsum = xspinfo;
-        wavelength = xspinfo.c.*Tperiods;
+        wavelength = xspinfo.c .* xspinfo.per;
     else
-        Tperiods = (2*pi)./temp.twloc;
         waxis = temp.waxis;
         twloc = temp.twloc;
-        xspinfo.isgood = zeros(size(Tperiods_all));
+        xspinfo.isgood = zeros(size(Tperiods));
         xspinfo.waxis = waxis;
         xspsum = [xspsum;xspinfo];
-        wavelength = xspinfo.c.*Tperiods;
+        wavelength = xspinfo.c .* xspinfo.per;
     end
     clear temp
     dep1 = sta.dep(strcmp(xspsum(ixsp).sta1,sta.name));
@@ -249,7 +168,7 @@ for ixsp = 1:length(xspfiles)
 %             && xspsum(ixsp).snr > snrtol && xspsum(ixsp).coherenum > mincoherenum
 %         xspsum(ixsp).isgood = 1;
 %     end
-    for ip = 1:length(Tperiods)
+    for ip = 1:length(xspinfo.per)
         if ~is_rtolmin_wavelength && xspinfo.snr >= snr_tol && xspinfo.r >= r_tol_min && xspinfo.r <= r_tol_max && xspinfo.sumerr <= err_tol
             xspsum(ixsp).isgood(ip) = 1;
         elseif  is_rtolmin_wavelength && xspinfo.snr >= snr_tol && xspinfo.r >= wavelength(ip)*wl_fac && xspinfo.r <= r_tol_max && xspinfo.sumerr <= err_tol
@@ -273,9 +192,9 @@ end % end of loop ixsp'
 % end
 
 % Loop through periods
-for ip=1:length(Tperiods_all)
+for ip=1:length(Tperiods)
     disp(' ');
-    disp(['Inversing Period: ',num2str(Tperiods_all(ip))]);
+    disp(['Inversing Period: ',num2str(Tperiods(ip))]);
     clear rays dt fiterr mat phaseg err raydense dist azi mat_azi phv
     raynum = 0;
 
@@ -590,7 +509,6 @@ for ip=1:length(Tperiods_all)
         avgv = nanmean(raytomo(ip).GV(:));
         caxis([avgv*(1-r) avgv*(1+r)])
         colorbar
-        colormap(seiscmap)
         
 %         pause;
     end
