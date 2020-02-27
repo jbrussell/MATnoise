@@ -10,11 +10,11 @@ IsFigure = 1;
 
 %======================= PARAMETERS =======================%
 comps = {'ZZ'}; % {'ZZ','RR','TT'}
-coperiod = [12 40]; % Periods to filter between
-windir = 'window3hr_raw_Zcorr_tiltonly'; 
+coperiod = [5 10]; % Periods to filter between
+windir = 'window3hr'; 
 % Mode Branches
 max_grv = inf; %5.5;
-min_grv = 0.7; %1.6; %2.2;
+min_grv = 1.4; %1.6; %2.2;
 
 
 IsVelLines = 1;

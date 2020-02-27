@@ -21,17 +21,17 @@ setup_parameters;
 
 % RAYLEIGH FUND MODE
 comp = {'ZZ'}; %'RR'; 'ZZ'; 'TT'
-windir = 'window3hr_raw_Zcorr_tiltonly';
+windir = 'window3hr';
 xspdir = 'ZZ_0S_LRT'; % output directory of phase velocities
 N_wl = 1; % Number of wavelengths required
-Ninterp = 25; % [] or Number of points to interpolate to;
+Ninterp = 40; % [] or Number of points to interpolate to;
 % Use picks from Linear Radon Transform? (./mat-LRTdisp/)
 is_LRT_picks = 1; % Use picks from Radon Transform to determine starting dispersion model and frequencies
 LRT_method = 'CGG_weight';
 mode_br = 0; % desired mode branch [0=fund.]
-xlims = [1/100 1/9];
-frange_LRT = [1/100 1/10]; % Frequency range of LRT panel for reading in picks
-frange_fit = [1/100 1/10]; % Frequency range to fit over! Can be more restrictive than where picks were made
+xlims = [1/70 1/5];
+frange_LRT = [1/40 1/3]; % Frequency range of LRT panel for reading in picks
+frange_fit = [1/25 1/3]; % Frequency range to fit over! Can be more restrictive than where picks were made
 
 if ~is_LRT_picks
     frange_fit = [1/40 1/10]; % frequency range over which to fit bessel function
