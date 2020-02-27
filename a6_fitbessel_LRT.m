@@ -19,24 +19,10 @@ setup_parameters;
 
 %======================= PARAMETERS =======================%
 
-% % RAYLEIGH FUND MODE
-% comp = {'ZZ'}; %'RR'; 'ZZ'; 'TT'
-% windir = 'window3hr';
-% xspdir = 'ZZ_0S_LRT_smEnv'; % output directory of phase velocities
-% N_wl = 1; % Number of wavelengths required
-% Ninterp = 40; % [] or Number of points to interpolate to;
-% % Use picks from Linear Radon Transform? (./mat-LRTdisp/)
-% is_LRT_picks = 1; % Use picks from Radon Transform to determine starting dispersion model and frequencies
-% LRT_method = 'CGG_weight';
-% mode_br = 0; % desired mode branch [0=fund.]
-% xlims = [1/70 1/5];
-% frange_LRT = [1/40 1/3]; % Frequency range of LRT panel for reading in picks
-% frange_fit = [1/25 1/3]; % Frequency range to fit over! Can be more restrictive than where picks were made
-
-% RAYLEIGH FUND MODE (PRESSURE)
-comp = {'PP'}; %'RR'; 'ZZ'; 'TT'
+% RAYLEIGH FUND MODE
+comp = {'ZZ'}; %'RR'; 'ZZ'; 'TT'
 windir = 'window3hr';
-xspdir = 'PP_0S_LRT_smEnv'; % output directory of phase velocities
+xspdir = 'ZZ_0S_LRT'; % output directory of phase velocities
 N_wl = 1; % Number of wavelengths required
 Ninterp = 40; % [] or Number of points to interpolate to;
 % Use picks from Linear Radon Transform? (./mat-LRTdisp/)
@@ -46,49 +32,6 @@ mode_br = 0; % desired mode branch [0=fund.]
 xlims = [1/70 1/5];
 frange_LRT = [1/40 1/3]; % Frequency range of LRT panel for reading in picks
 frange_fit = [1/25 1/3]; % Frequency range to fit over! Can be more restrictive than where picks were made
-
-% % RAYLEIGH 1ST OVERTONE
-% comp = {'ZZ'}; %'RR'; 'ZZ'; 'TT'
-% windir = 'window3hr_Zcorr_tiltcomp';
-% xspdir = 'ZZ_1S_LRT_smEnv'; % output directory of phase velocities
-% mode_br = 1; % desired mode branch [0=fund.]
-% N_wl = 1; % Number of wavelengths required
-% Ninterp = 30; % [] or Number of points to interpolate to;
-% % Use picks from Linear Radon Transform? (./mat-LRTdisp/)
-% is_LRT_picks = 1; % Use picks from Radon Transform to determine starting dispersion model and frequencies
-% LRT_method = 'CGG_weight';
-% xlims = [1/70 1/3];
-% frange_LRT = [1/40 1/3]; % Frequency range of LRT panel for reading in picks
-% frange_fit = [1/25 1/3]; % Frequency range to fit over! Can be more restrictive than where picks were made
-
-% % RAYLEIGH 2ND OVERTONE
-% comp = {'ZZ'}; %'RR'; 'ZZ'; 'TT'
-% windir = 'window3hr_Zcorr_tiltcomp';
-% xspdir = 'ZZ_2S_LRT_smEnv'; % output directory of phase velocities
-% mode_br = 2; % desired mode branch [0=fund.]
-% N_wl = 1; % Number of wavelengths required
-% Ninterp = 10; % [] or Number of points to interpolate to;
-% % Use picks from Linear Radon Transform? (./mat-LRTdisp/)
-% is_LRT_picks = 1; % Use picks from Radon Transform to determine starting dispersion model and frequencies
-% LRT_method = 'CGG_weight';
-% xlims = [1/70 1/3];
-% frange_LRT = [1/40 1/3]; % Frequency range of LRT panel for reading in picks
-% frange_fit = [1/25 1/3]; % Frequency range to fit over! Can be more restrictive than where picks were made
-
-% % LOVE FUND MODE
-% comp = {'TT'}; %'RR'; 'ZZ'; 'TT'
-% windir = 'window3hr';
-% xspdir = 'TT_0T_LRT_smEnv'; % output directory of phase velocities
-% mode_br = 0; % desired mode branch [0=fund.]
-% N_wl = 1; % Number of wavelengths required
-% Ninterp = 30; % [] or Number of points to interpolate to;
-% % Use picks from Linear Radon Transform? (./mat-LRTdisp/)
-% is_LRT_picks = 1; % Use picks from Radon Transform to determine starting dispersion model and frequencies
-% LRT_method = 'CGG_weight';
-% xlims = [1/70 1/3];
-% frange_LRT = [1/40 1/3]; % Frequency range of LRT panel for reading in picks
-% frange_fit = [1/10 1/3]; % Frequency range to fit over! Can be more restrictive than where picks were made
-
 
 if ~is_LRT_picks
     frange_fit = [1/40 1/10]; % frequency range over which to fit bessel function
