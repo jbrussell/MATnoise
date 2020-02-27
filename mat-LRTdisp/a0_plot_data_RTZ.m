@@ -23,18 +23,18 @@ snr_thresh = 2;
 dep_tol = [0 0]; % [sta1, sta2] OBS Depth tolerance;
 max_grv = inf; %5.5;
 min_grv = 0.7; %1.6
-xlims = [-500 500];
-ylims = [0 450];
+xlims = [0 500];
+ylims = [0 470];
 IsButterworth = 1;
 
-ccf_path = '/data/irma6/jrussel/YoungPacificORCA/ccf_raw/';
+ccfpath = '../ccf/';
 % ccf_path = '/data/irma6/jrussel/YoungPacificORCA/ccf_FTN/';
 
 %%% --- Parameters to build up gaussian filters --- %%% 
 % (effects the width of the filter in the frequency domain)
 costap_wid = 0.2; % 0 => box filter; 1 => Hann window
 
-isplotwin = 1; %1;
+isplotwin = 0; %1;
 isploth20 = 0;
 isfigure_snr = 0;
 
@@ -54,7 +54,7 @@ figpath = parameters.figpath;
 %------------ PATH INFORMATION -------------%
 % ccf_path = parameters.ccfpath;
 %ccf_winlength_path = [ccf_path,'window',num2str(winlength),'hr/'];
-    ccf_winlength_path = [ccf_path,windir,'/'];
+    ccf_winlength_path = [ccfpath,windir,'/'];
 ccf_singlestack_path = [ccf_winlength_path,'single/'];
 ccf_daystack_path = [ccf_winlength_path,'dayStack/'];
 ccf_monthstack_path = [ccf_winlength_path,'monthStack/'];
@@ -79,7 +79,7 @@ DEPTHS = staz;
 
 %%
 ccf_path = [ccf_stack_path,'ccf',comp,'/',];
-ccf_path_SNR = [parameters.ccfpath,windir_for_SNR,'/','fullStack/','ccf',comp,'/',];
+ccf_path_SNR = [ccfpath,windir_for_SNR,'/','fullStack/','ccf',comp,'/',];
 npairall = 0;
 %------------ LOAD DATA AND PLOT IN TIME DOMAIN -------------%
 for ista1=1:nsta % loop over all stations
@@ -269,7 +269,7 @@ for istapair = 1: npairall
         
         % Plot negative
         ccf_waveform_all = ccf_all{istapair}(indtime_neg(1):indtime_neg(end)) / max(abs(ccf_all{istapair}(indtime_neg(1):indtime_neg(end))));
-        plot(abs(time(indtime_neg(1):indtime_neg(end))),ccf_waveform_all*amp+sta1sta2_dist_all(istapair),'-r','linewidth',1); hold on;
+        plot(abs(time(indtime_neg(1):indtime_neg(end))),ccf_waveform_all*amp+sta1sta2_dist_all(istapair),'-k','linewidth',1); hold on;
     
     end
 end
