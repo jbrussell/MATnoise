@@ -129,8 +129,6 @@ end
 
 %%
 
-% Load color scale
-load './tomo_functions/seiscmap.mat'
 
 % Load anisotropy data (from old inversion)
 if iscompare_aniso
@@ -222,22 +220,20 @@ for ixsp = 1:length(xspfiles)
     xspinfo = temp.xspinfo;
     
     if ixsp ==1
-        Tperiods_all = xspinfo.per_start;
-        Tperiods = (2*pi)./temp.twloc;
+        Tperiods = xspinfo.per_start;
         waxis = temp.waxis;
         twloc = temp.twloc;
-        xspinfo.isgood = zeros(size(Tperiods_all));
+        xspinfo.isgood = zeros(size(Tperiods));
         xspinfo.waxis = waxis;
         xspsum = xspinfo;
-        wavelength = xspinfo.c.*Tperiods;
+        wavelength = xspinfo.c .* xspinfo.per;
     else
-        Tperiods = (2*pi)./temp.twloc;
         waxis = temp.waxis;
         twloc = temp.twloc;
-        xspinfo.isgood = zeros(size(Tperiods_all));
+        xspinfo.isgood = zeros(size(Tperiods));
         xspinfo.waxis = waxis;
         xspsum = [xspsum;xspinfo];
-        wavelength = xspinfo.c.*Tperiods;
+        wavelength = xspinfo.c .* xspinfo.per;
     end
     clear temp
     dep1 = sta.dep(strcmp(xspsum(ixsp).sta1,sta.name));
@@ -249,7 +245,7 @@ for ixsp = 1:length(xspfiles)
 %             && xspsum(ixsp).snr > snrtol && xspsum(ixsp).coherenum > mincoherenum
 %         xspsum(ixsp).isgood = 1;
 %     end
-    for ip = 1:length(Tperiods)
+    for ip = 1:length(xspinfo.per)
         if ~is_rtolmin_wavelength && xspinfo.snr >= snr_tol && xspinfo.r >= r_tol_min && xspinfo.r <= r_tol_max && xspinfo.sumerr <= err_tol
             xspsum(ixsp).isgood(ip) = 1;
         elseif  is_rtolmin_wavelength && xspinfo.snr >= snr_tol && xspinfo.r >= wavelength(ip)*wl_fac && xspinfo.r <= r_tol_max && xspinfo.sumerr <= err_tol
@@ -273,9 +269,9 @@ end % end of loop ixsp'
 % end
 
 % Loop through periods
-for ip=1:length(Tperiods_all)
+for ip=1:length(Tperiods)
     disp(' ');
-    disp(['Inversing Period: ',num2str(Tperiods_all(ip))]);
+    disp(['Inversing Period: ',num2str(Tperiods(ip))]);
     clear rays dt fiterr mat phaseg err raydense dist azi mat_azi phv
     raynum = 0;
 
@@ -590,7 +586,6 @@ for ip=1:length(Tperiods_all)
         avgv = nanmean(raytomo(ip).GV(:));
         caxis([avgv*(1-r) avgv*(1+r)])
         colorbar
-        colormap(seiscmap)
         
 %         pause;
     end
