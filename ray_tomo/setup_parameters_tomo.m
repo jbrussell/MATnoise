@@ -6,7 +6,7 @@ addpath('../functions');
 addpath('./tomo_functions');
 % parameters.qpath = './MINEOS_qfile/';
 
-parameters.station_list = '../stalist_good12.txt';
+parameters.station_list = '../../sta_locs.txt';
 
 % Lat Lon
 parameters.lalim = [-9 -3] ;
