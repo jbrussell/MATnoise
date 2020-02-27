@@ -13,7 +13,7 @@ IsFigure = 0;
 IsFigure_GAUS = 0; % Plot frequency domain filtered and unfiltered
 
 %======================= PARAMETERS =======================%
-comps = {'ZZ','PP'};  % {'ZZ','RR','PP'}; 'PZ'; 'PP'; 'ZZ'; 'RR'; 'TT';
+comps = {'ZZ'};  % {'ZZ','RR','PP'}; 'PZ'; 'PP'; 'ZZ'; 'RR'; 'TT';
 amp = 8e0;
 windir = 'window3hr';
 % windir = 'window3hr_Zcorr_tiltcomp';
@@ -21,13 +21,13 @@ windir = 'window3hr';
 
 max_grv = inf; %5.5;
 min_grv = 0.7; %1.6
-xlims = [-500 500];
+xlims = [0 500];
 ylims = [0 450];
 
-ccf_path = '../ccf/ccf_raw/';
+ccfpath = '../ccf/';
 % ccf_path = '/data/irma6/jrussel/YoungPacificORCA/ccf_FTN/';
 
-data_dir = './data/ccf_raw/';
+data_dir = './data/ccf/';
 
 %%% --- Parameters to build up gaussian filters --- %%% 
 % (effects the width of the filter in the frequency domain)
@@ -53,7 +53,7 @@ figpath = parameters.figpath;
 %------------ PATH INFORMATION -------------%
 % ccf_path = parameters.ccfpath;
 %ccf_winlength_path = [ccf_path,'window',num2str(winlength),'hr/'];
-    ccf_winlength_path = [ccf_path,windir,'/'];
+    ccf_winlength_path = [ccfpath,windir,'/'];
 ccf_singlestack_path = [ccf_winlength_path,'single/'];
 ccf_daystack_path = [ccf_winlength_path,'dayStack/'];
 ccf_monthstack_path = [ccf_winlength_path,'monthStack/'];
@@ -196,6 +196,15 @@ ylim(ylims);
 xlabel('lag time (s)','fontsize',18);
 ylabel('Distance (km)','fontsize',18);
 set(gca,'fontsize',15);
+
+% Plot Velocities
+if isplotwin
+    % Branches
+    plot([min(Delta) max(Delta)]/max_grv,[min(Delta) max(Delta)],'color',[1 0 0],'linewidth',2);
+    plot([min(Delta) max(Delta)]/-max_grv,[min(Delta) max(Delta)],'color',[1 0 0],'linewidth',2);
+    plot([min(Delta) max(Delta)]/min_grv,[min(Delta) max(Delta)],'color',[1 0 0],'linewidth',2);
+    plot([min(Delta) max(Delta)]/-min_grv,[min(Delta) max(Delta)],'color',[1 0 0],'linewidth',2);    
+end
 
 
 % save2pdf([figpath,'SNR_',comp,'_tukeyfilt_',num2str(min_grv),'_',num2str(max_grv),'.pdf'],101,1000);
