@@ -16,7 +16,6 @@ xmin = min(xnode);
 ymin = min(ynode);
 xmax = max(xnode);
 ymax = max(ynode);
-dr = deg2km(mean(diff(xnode)))/10;
 
 Dx = xmax - xmin;
 Dy = ymax - ymin;
@@ -25,6 +24,7 @@ G=spalloc(nray,Nm,nray*Nx); % for each ray, maximum number of pixels to be sampl
 bins=[1:Nm];
 
 for i = 1:nray
+    dr = deg2km(mean(diff(xnode)))/10;
     lat1 = ray(i,1);
     lon1 = ray(i,2);
     lat2 = ray(i,3);
@@ -46,6 +46,7 @@ for i = 1:nray
 	% closest to
 
 	[lat_way,lon_way] = gcwaypts(lat1,lon1,lat2,lon2,Nr);
+    dr = gc_raydr_km(lat_way,lon_way);
 	% mid point location of segment
 	xv = 0.5*(lat_way(1:Nr)+lat_way(2:Nr+1));
 	yv = 0.5*(lon_way(1:Nr)+lon_way(2:Nr+1));
@@ -59,15 +60,24 @@ for i = 1:nray
     ixv = 1+floor( (Nx-1)*(xv-xmin)/Dx );
     iyv = 1+floor( (Ny-1)*(yv-ymin)/Dy );
     qv = (ixv-1)*Ny + iyv;
+    % sum binned dr values
+    qv = sort(qv);    
+    drq = zeros(size(unique(qv)'));
+    ii = 0;
+    for iq = unique(qv)'
+        ii = ii+1;
+        drq(ii) = sum(dr(qv==iq));
+    end
     % now count of the ray segments in each pixel of the
     % image, and use the count to increment the appropriate
     % element of G.  The use of the hist() function to do
     % the counting is a bit weird, but it seems to work
     count=hist(qv,bins); 
     icount = find( count~=0 );
-    G(i,icount) = G(i,icount) + count(icount)*dr;
+%     G(i,icount) = G(i,icount) + count(icount)*dr;
+    G(i,icount) = G(i,icount) + drq;
     
-    if 0        
+    if 0      
         % PLOT RAYS AND RAY DENSITY
         figure(39);
         if i == 1
@@ -95,4 +105,16 @@ end
 
 
 return
+
+%%
+    function [dr_ray] = gc_raydr_km(lat_way,lon_way)
+        % Calculate dr vector in units of km for lat-lon waypoints using great circle
+        % approximations along each segment. (If assume straight rays, can
+        % accumulate errors of ~20% !)
+        % JBR 5/8/2020
+        %
+        dr_ray = deg2km(distance(lat_way(1:end-1),lon_way(1:end-1),...
+                                 lat_way(2:end),lon_way(2:end)));
+    end
+
 end
