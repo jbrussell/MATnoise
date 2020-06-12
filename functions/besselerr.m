@@ -55,7 +55,7 @@ dx(find(dx>0)) = 0;
 % % ORIGINAL
 % err = [F1z(:); sm(:)*0.2; dx(:)*10];
 % % ADD FLATNESS
-err = [F1z(:); sm(:)*0.2*100; fl(:)*0.2*100; dx(:)*10*1];
+err = [F1z(:); sm(:)*0.2*100*5; fl(:)*0.2*100; dx(:)*10*2];
 
 % err = err./mean(abs(err))*1;
 

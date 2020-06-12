@@ -23,10 +23,10 @@ per_ind = [1:3:25];
 Mp = 3; % rows for plotting
 Np = 3; % columns for plotting
 % Quality control parameters:
-snr_tol = 10; % minimum signal-to-noise
+snr_tol = 20; % minimum signal-to-noise
 is_rtolmin_wavelength = 1; wl_fac = 1.0; % determine distance tolerance by wavelength?
 is_raydensity_thresh = 0; % Apply raydensity threshold to wipe out poorly constrained grid cells?
-r_tol_min = 0; % [km] minimum station separation
+r_tol_min = 150; % [km] minimum station separation
 r_tol_max = 600; % [km] maximum station separation
 err_tol = inf; % maximum misfit of bessel fit between observed and synthetic
 azi_bin_deg = 20; % (degrees) size of azimuthal data bin
@@ -153,13 +153,16 @@ for ixsp = 1:length(xspfiles)
         xspinfo.isgood = zeros(size(Tperiods));
         xspinfo.waxis = waxis;
         xspsum = xspinfo;
-        wavelength = xspinfo.c .* xspinfo.per;
     else
         waxis = temp.waxis;
         twloc = temp.twloc;
         xspinfo.isgood = zeros(size(Tperiods));
         xspinfo.waxis = waxis;
         xspsum = [xspsum;xspinfo];
+    end
+    if isfield(xspinfo,'isgood_zc')
+        wavelength = xspinfo.c .* xspinfo.per_start;
+    else
         wavelength = xspinfo.c .* xspinfo.per;
     end
     clear temp
@@ -267,6 +270,10 @@ for ip=1:length(Tperiods)
         % JBR - Build azimuthal part of data kernel
         mat_azi(raynum,:) = dist(raynum) * [cosd(2*azi(raynum)), sind(2*azi(raynum)), cosd(4*azi(raynum)), sind(4*azi(raynum)) ];
    
+    end
+    if raynum == 0
+        disp(['No data for period: ',num2str(Tperiods(ip)),'s']);
+        continue
     end
     if size(dt,1) ~=raynum
         dt = dt';
@@ -787,7 +794,7 @@ if iscompare_aniso
     h3(1) = errorbar(periods,A2_2*2*100,wRMS_2A*100,'--o','color',[0 0.7 0],'linewidth',2);
 end
 % h3(2) = plot(periods,A4_rt*2*100,'-ob','linewidth',2);
-% h3(1) = plot(periods,A2_rt*2*100,'-o','color',[1 0 0],'linewidth',2); hold on;
+h3(1) = plot(periods,A2_rt*2*100,'-o','color',[0 0 1],'linewidth',2); hold on;
 h3(1) = errorbar(periods,A2_pts*2*100,A2_pts_wRMS*100,'o','color',[1 0 0],'linewidth',2,'markerfacecolor',[1 0 0]);
 h3(1) = errorbar(periods,A2_bin*2*100,A2_bin_wRMS*100,'d','color',[0 0 0],'linewidth',1.5,'markerfacecolor',[0 0 0]);
 % xlim(flip(1./frange));
@@ -879,13 +886,15 @@ if iscompare_aniso
     errorbar(periods,phi2_2,err_phi2,'--o','color',[0 0.7 0],'linewidth',2);
 end
 % plot(periods,phi4_rt,'-ob','linewidth',2);
-% plot(periods,phi2_rt,'-o','color',[1 0 0],'linewidth',2); hold on;
+plot(periods,phi2_rt,'-o','color',[0 0 1],'linewidth',2); hold on;
 errorbar(periods,phi2_pts,phi2_pts_err,'o','color',[1 0 0],'linewidth',2,'markerfacecolor',[1 0 0]);
+errorbar(periods,phi2_pts-180,phi2_pts_err,'o','color',[1 0 0],'linewidth',2,'markerfacecolor',[1 0 0]);
+errorbar(periods,phi2_pts+180,phi2_pts_err,'o','color',[1 0 0],'linewidth',2,'markerfacecolor',[1 0 0]);
 errorbar(periods,phi2_bin,phi2_bin_err,'d','color',[0 0 0],'linewidth',1.5,'markerfacecolor',[0 0 0]);
 errorbar(periods,phi2_bin-180,phi2_bin_err,'d','color',[0 0 0],'linewidth',1.5,'markerfacecolor',[0 0 0]);
 errorbar(periods,phi2_bin+180,phi2_bin_err,'d','color',[0 0 0],'linewidth',1.5,'markerfacecolor',[0 0 0]);
 ylabel('Fast Direction (\circ)','fontsize',18);
-ylim([fastdir-130 fastdir+130]);
+ylim([fastdir-150 fastdir-150+180]);
 % xlim(flip(1./frange));
 % xlim([17 35]);
 xlim([1./frange(2)-1 1./frange(1)+1]);

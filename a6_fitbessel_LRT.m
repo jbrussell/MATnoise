@@ -51,7 +51,7 @@ is_resume = 0; % Resume from last processed file or overwrite
 iswin = 1; % Use the time-domain windowed ccfs?
 npts_smooth = 1; % 1 = no smoothing
 
-isoutput = 1; % Save *.mat file with results?
+isoutput = 0; % Save *.mat file with results?
 nearstadist = 0;
 IsFigure = 1;
 isfigure2 = 0;

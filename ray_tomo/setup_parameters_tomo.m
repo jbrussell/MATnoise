@@ -14,13 +14,13 @@ parameters.lolim = [-77.0 -71.0];
 parameters.gridsize = 0.25; % degrees?
 parameters.agebins = [165:5:175];
 parameters.bathybins = [-9000 :5000: 1000];
-parameters.gridsize_azi = 0.25; %3; %1.5; % gridsize for 2D azimuthal anisotropy (degrees)
+parameters.gridsize_azi = 0.5; %3; %1.5; % gridsize for 2D azimuthal anisotropy (degrees)
 parameters.r = 0.03; %0.01; % controls color bar [avgv(1-r) avgv(1+r)]
 
 % Smoothing parameters
 parameters.smweight0 = 100; % isotropic second derivative smoothing
 parameters.smweight0_azi = 1e3; %1000; % anisotropic second derivative smoothing
-parameters.flweight0_azi = 1000; %1000; % anisotropic first derivative flatness
+parameters.flweight0_azi = 1; %1000; % anisotropic first derivative flatness
 
 % parameters for the tomography (QC)
 parameters.raydensetol=deg2km(parameters.gridsize)*0.25; %deg2km(parameters.gridsize); %deg2km(parameters.gridsize)*2;
