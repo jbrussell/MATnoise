@@ -43,7 +43,7 @@ isoutput = 0;
 savefile = ['test'];
 
 %% Load BSMA to calculate margin parallel and fossil spreading directions
-[BSMA.lon, BSMA.lat] = textread('BSMA_bound.txt','%f %f');
+[BSMA.lon, BSMA.lat] = textread('./ENAM_data/BSMA_bound.txt','%f %f');
 margin_parallel = mean_ang(BSMA.lat,BSMA.lon);
 fastdir = margin_parallel + 90;
 
