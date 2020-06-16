@@ -18,7 +18,7 @@ This package consists of two parts: (1) Calculation of ambient noise cross-spect
   e.g.: ````mydata/CC05/CC05.2018.112.00.00.00.BDH.sac````
 
 - **a2** - Plot empirical Green's functions in the time domain
-- **a3** - Apply group velocity window around the surface wave arrivals of interest. This as original developed in order to remove the water column arrival from ocean bottom datasets but should also clean up land spectra.
+- **a3** - Apply group velocity window around the surface wave arrivals of interest. This was originally developed in order to remove the water column arrival from ocean bottom datasets but should also clean up land spectra.
 - **a4** - Plot power spectral density of the cross spectra in order to determine the frequency content of the dominant signal.
 - **a5** - Plot the real and imaginary parts of the cross spectra to evaluate where signal is best and degree of bias from inhomogeneous noise sources.
 - **a6** - Fit J_0 Bessel functions to real part of cross-spectra to extract interstation phase velocity dispersion. Can use results from the linear radon transform (see [./mat-LRTdisp](https://github.com/jbrussell/MATnoise/tree/master/mat-LRTdisp)) as the starting dispersion model.
