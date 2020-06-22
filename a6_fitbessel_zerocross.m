@@ -478,7 +478,9 @@ for ista1=1:nsta
             end
             psfile = [XSP_fig_path,'Xsp_',comp{1}(1),'_',sta1,'_',sta2,'_J0J1.pdf'];
             %print('-dpsc2',psfile);
-            save2pdf(psfile,f3,1000);
+            save2pdf(psfile,f3,250);
+            psfile2 = [XSP_fig_path,'Xsp_',comp{1}(1),'_',sta1,'_',sta2,'_zerocross.pdf'];
+            save2pdf(psfile2,59,250);
 
             
 %             pause;
