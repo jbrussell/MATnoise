@@ -7,6 +7,8 @@ global tN
 global waxis
 global twloc
 
+issmooth = 1;
+Nptsmooth = 5;
 interpmethod = 'linear';
 tw1 = interp1(twloc,tw(1:tN),waxis,interpmethod);
 x1 = waxis.*tw1;
@@ -53,22 +55,32 @@ c_k = mean(r./tw0_int_mat(:,I_avg), 2);
 c_ref = mean(r./tw(I_avg));
 [~,Ik] = min(abs(c_k-c_ref));
 tw0_int = tw0_int_mat(Ik,:);
+if issmooth==1
+    Inan = isnan(tw0_int);
+    tw0_int = smooth(tw0_int,Nptsmooth)';
+    tw0_int(Inan) = nan;
+end
 
 if 1
     figure(59)
     clf
-    subplot(2,1,1)
+    subplot(2,1,1); box on;
     hold on
     plot(waxis/2/pi,xsp,'b','linewidth',2);
     plot(w0/2/pi,xsp(I0),'xr','linewidth',2);
+    set(gca,'linewidth',1.5,'fontsize',16);
+%     xlabel('Frequency (Hz)');
+    ylabel('Real(\rho)');
     
-    subplot(2,1,2);
+    subplot(2,1,2); box on;
     hold on;
     plot(twloc/2/pi,r./tw,'-o','color',[0 0 0],'linewidth',2);
 %     plot(w0/2/pi,r./tw0,'-or');
     plot(twloc/2/pi,r./tw0_int_mat,'-o','color',[0.7 0.7 0.7]);
     plot(twloc/2/pi,r./tw0_int,'-or','linewidth',2);
     ylim([1.5 4.2]);
+    set(gca,'linewidth',1.5,'fontsize',16);
+    xlabel('Frequency (Hz)');
 end
 end
 
