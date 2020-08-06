@@ -414,6 +414,8 @@ for ista1=1:nsta
             stapairsinfo.stanames = {sta1,sta2};
             stapairsinfo.lats = [lat1,lat2];
             stapairsinfo.lons = [lon1,lon2];
+            stapairsinfo.dt = dt;
+            stapairsinfo.r = dist;
             
 %             % Frequency-time normalization
 %             if IsFTN
