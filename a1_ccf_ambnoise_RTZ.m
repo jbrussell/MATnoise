@@ -753,7 +753,7 @@ for ista1=1:nsta
 %                 set(gcf,'position',[400 400 600 300]);
                 subplot(3,1,1)
                 T = length(coh_sumR);
-                faxis=(-T/2:T/2-1)/dt/T;
+                faxis = [0:(T-mod(T-1,2))/2 , -(T-mod(T,2))/2:-1]/dt/T;
                 ind = find(faxis>0);
                 plot(faxis(ind),smooth(real(coh_sumR(ind)/coh_num),100));
                 title(sprintf('%s %s coherency R ,station distance: %f km',sta1,sta2,dist));
@@ -763,7 +763,7 @@ for ista1=1:nsta
 
                 subplot(3,1,2)
                 T = length(coh_sumT);
-                faxis=(-T/2:T/2-1)/dt/T;
+                faxis = [0:(T-mod(T-1,2))/2 , -(T-mod(T,2))/2:-1]/dt/T;
                 ind = find(faxis>0);
                 plot(faxis(ind),smooth(real(coh_sumT(ind)/coh_num),100));
                 title(sprintf('%s %s coherency T ,station distance: %f km',sta1,sta2,dist));
@@ -773,7 +773,7 @@ for ista1=1:nsta
 
                 subplot(3,1,3)
                 T = length(coh_sumZ);
-                faxis=(-T/2:T/2-1)/dt/T;
+                faxis = [0:(T-mod(T-1,2))/2 , -(T-mod(T,2))/2:-1]/dt/T;
                 ind = find(faxis>0);
                 plot(faxis(ind),smooth(real(coh_sumZ(ind)/coh_num),100));
                 title(sprintf('%s %s coherency Z ,station distance: %f km',sta1,sta2,dist));

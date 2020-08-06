@@ -510,7 +510,7 @@ for ista1=1:nsta
 
                 subplot(3,1,3)
                 T = length(coh_sumZ);
-                faxis=(-T/2:T/2-1)/dt/T;
+                faxis = [0:(T-mod(T-1,2))/2 , -(T-mod(T,2))/2:-1]/dt/T;
                 ind = find(faxis>0);
                 plot(faxis(ind),smooth(real(coh_sumZ(ind)/coh_num),100));
                 title(sprintf('%s %s coherency %s ,station distance: %f km',sta1,sta2,strNAMEcomp(1),dist));
