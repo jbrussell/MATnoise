@@ -10,7 +10,7 @@ function [ data_filt ] = tukey_filt( data,coperiod,dt,costap_wid )
 
 % BUILD TUKEYWIN FILTER
 Nt = length(data);
-faxis = [0:1/Nt:1/dt/2,-1/dt/2+1/Nt:1/Nt:-1/Nt];
+faxis = [0:(Nt-mod(Nt-1,2))/2 , -(Nt-mod(Nt,2))/2:-1]/dt/Nt;
 fmax = 1/coperiod(1);
 fmin = 1/coperiod(2);
 [~ , If_pos] = find(faxis>= fmin & faxis<= fmax);
