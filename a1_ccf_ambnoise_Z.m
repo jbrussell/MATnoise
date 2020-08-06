@@ -21,6 +21,8 @@
 clear;
 setup_parameters;
 
+strSACcomp = 'Z';
+strNAMEcomp = 'ZZ';
 IsFigure1 = 1;
 IsFigure2 = 0;
 
@@ -42,7 +44,7 @@ IsSpecWhiten = 0; % Whiten spectrum
 IsOBN = 0; % One-bit normalization
 
 % (2) TIME-FREQUENCY NORMALIZATION (Ekstrom et al. 2009; Shen et al. 2011)
-IsFTN = 1; % Frequency-time normalization? (If 1, applied instead of whitening and one-bit normalization)
+IsFTN = 0; % Frequency-time normalization? (If 1, applied instead of whitening and one-bit normalization)
 frange_FTN = [1/60 1/10]; % frequency range over which to construct FTN seismograms
 
 % (3) BASIC PREFILTER (Ekstrom 2011)
@@ -101,7 +103,7 @@ end
 
 PATHS = {ccf_singlestack_path; ccf_daystack_path; ccf_monthstack_path; ccf_fullstack_path};
 for ipath = 1:length(PATHS)
-    ccfZ_path = [PATHS{ipath},'ccfZZ/'];
+    ccfZ_path = [PATHS{ipath},'ccf',strNAMEcomp,'/'];
     if ~exist(ccfZ_path)
         mkdir(ccfZ_path);
     end
@@ -144,17 +146,17 @@ for ista1=1:nsta
     sta1=char(stalist(ista1,:));
     % Build station directories
     for ipath = 1:length(PATHS)
-        ccfZ_path = [PATHS{ipath},'ccfZZ/'];
+        ccfZ_path = [PATHS{ipath},'ccf',strNAMEcomp,'/'];
         if ~exist([ccfZ_path,sta1])
             mkdir([ccfZ_path,sta1]);
         end
     end
-    seisZ_path = [seis_winlength_path,'Z/'];
+    seisZ_path = [seis_winlength_path,strNAMEcomp(1),'/'];
     if ~exist([seisZ_path,sta1])
         mkdir([seisZ_path,sta1]);
     end
 
-    list1 = dir([datadir,sta1,'/*Z.sac']);
+    list1 = dir([datadir,sta1,'/*',strSACcomp,'.sac']);
 
     for ista2=1:nsta
         clear lat1 lat2 lon1 lon2 dist az baz vec_tz2 Z2raw vec_tz Z1raw
@@ -207,15 +209,25 @@ for ista1=1:nsta
 
             disp(['Looking at ',hdayid,' ',sta2]);
 
-            data1cZ= dir([datadir,sta1,'/',year,'/',sta1,'.',hdayid,'.*Z.sac']);
-            data2cZ= dir([datadir,sta2,'/',year,'/',sta2,'.',hdayid,'.*Z.sac']);
+            data1cZ= dir([datadir,sta1,'/',year,'/',sta1,'.',hdayid,'.*',strSACcomp,'.sac']);
+            data2cZ= dir([datadir,sta2,'/',year,'/',sta2,'.',hdayid,'.*',strSACcomp,'.sac']);
 
             data1cZ =  [datadir,sta1,'/',year,'/',data1cZ.name];
             data2cZ =  [datadir,sta2,'/',year,'/',data2cZ.name];
 
             %------------------- TEST IF DATA EXIST------------------------
-            [S1Zt,S1Zraw]=readsac(data1cZ);
-            [S2Zt,S2Zraw]=readsac(data2cZ);
+            [S1Zt,S1Zraw,S1,S1Ztstart] = load_sac(data1cZ);
+            [S2Zt,S2Zraw,S2,S2Ztstart] = load_sac(data2cZ);
+            
+            % Make sure all times are relative to same reference point
+            starttime = S1Ztstart;
+            S1Zt = S1Zt + seconds(S1Ztstart-starttime);
+            S2Zt = S2Zt + seconds(S2Ztstart-starttime);
+            
+            % Ensure that files have same start time to within 1 sample
+            if abs(seconds(S1Ztstart-S2Ztstart)) > S1.DELTA
+                error('Station files do not have same start time');
+            end
 
             %------------------- Remove instrument response ------------------------
         if IsRemoveIR
@@ -302,9 +314,6 @@ for ista1=1:nsta
 
             if(~exist('lat2','var'));
 
-                S1 = readsac(data1cZ);
-                S2 = readsac(data2cZ);
-
                 lat1=S1.STLA;
                 lon1=S1.STLO;
                 dep1=S1.STEL; % depth is negative for OBS and positive for land stations
@@ -327,7 +336,7 @@ for ista1=1:nsta
                 end
 
                 if(dist < dist_min)
-                    display('distance shorter than 80 km, skip');
+                    display(['distance shorter than ',num2str(dist_min),' km, skip']);
                     break
                 end
             end % if lat variabls
@@ -351,11 +360,11 @@ for ista1=1:nsta
             hour_length = winlength;
 
             nwin = floor(24/hour_length)*2-1; %
-            win_length = hour_length*60*60*dt; % length of individual windows.
+            win_length = hour_length*60*60/dt; % length of individual windows.
             win_start = 1;
             coh_sumZ_day = 0;
             coh_num_day = 0;
-            last_pt = win_length*.5*(nwin-1)+1+Nstart*dt+win_length;
+            last_pt = win_length*.5*(nwin-1)+1+Nstart+win_length;
             if last_pt < length(S1Zraw)
                 nwin = nwin + 1;
             end
@@ -366,20 +375,20 @@ for ista1=1:nsta
 
 				% cut in time
                 if hour_length == 24
-                    pts_begin = Nstart*dt;
-                    pts_end = length(S1Zraw)-Nstart*dt;
+                    pts_begin = Nstart;
+                    pts_end = length(S1Zraw)-Nstart;
                 else
-                    pts_begin = win_length*.5*(iwin-1)+1+Nstart*dt;
+                    pts_begin = win_length*.5*(iwin-1)+1+Nstart;
                     pts_end = pts_begin+win_length;
                 end
 
                 if pts_begin > length(S1Zraw) || pts_begin > length(S2Zraw) || pts_end > length(S1Zraw) || pts_end > length(S2Zraw)
-					disp('(Z) Points greater than the data... fixing window');
-					pts_begin = length(S1Zraw)-win_length-Nstart*dt;
+					% disp('(Z) Points greater than the data... fixing window');
+					pts_begin = length(S1Zraw)-win_length-Nstart;
                     pts_end = pts_begin+win_length;
                     %continue
                 end
-                tcut = [pts_begin:dt:pts_end];
+                tcut = [pts_begin:pts_end] * dt;
 
                 % cut in tim Z for STA1
                 S1Z=interp1(S1Zt,S1Zraw,tcut);
@@ -417,7 +426,7 @@ for ista1=1:nsta
                     plot(tcut,S1Z,'-k')
                     %ylim([-0.15e-5 0.15e-5])
                     xlim([tcut(1) tcut(end)])
-                    title('Z');
+                    title(strNAMEcomp(1));
                     hold on
 
                     pause;
@@ -462,11 +471,11 @@ for ista1=1:nsta
     %             toc
 
                 if IsOutputSinglestack % save individual xcor
-                    ccfZ_singlestack_path = [ccf_singlestack_path,'ccfZZ/'];
+                    ccfZ_singlestack_path = [ccf_singlestack_path,'ccf',strNAMEcomp,'/'];
                     save(sprintf('%s%s/%s_%s_%d_f.mat',ccfZ_singlestack_path,sta1,sta1,sta2,coh_num),'coh_trace_Z','stapairsinfo');
                 end
                 if IsOutputSeismograms % save seismograms before xcor
-                    seisZ_path = [seis_winlength_path,'Z/'];
+                    seisZ_path = [seis_winlength_path,strNAMEcomp(1),'/'];
                     save(sprintf('%s%s/%s_%d_f.mat',seisZ_path,sta1,sta1,coh_num),'S1Z','stapairsinfo');
                 end
             end % end window
@@ -475,16 +484,17 @@ for ista1=1:nsta
             
             if IsOutputDaystack
                 % Save day stack
-                ccfZ_daystack_path = [ccf_daystack_path,'ccfZZ/'];
+                daystr = datestr(starttime,'YYYYmmddHHMMSS');
+                ccfZ_daystack_path = [ccf_daystack_path,'ccf',strNAMEcomp,'/'];
                 clear coh_sum
                 coh_sum = coh_sumZ_day;
-                save(sprintf('%s%s/%s_%s_day%d_f.mat',ccfZ_daystack_path,sta1,sta1,sta2,ihday),'coh_sum','coh_num_day','stapairsinfo');
+                save(sprintf('%s%s/%s_%s_%s_f.mat',ccfZ_daystack_path,sta1,sta1,sta2,daystr),'coh_sum','coh_num_day','stapairsinfo','starttime');
             end
             if IsOutputMonthstack
                 % Save 30 day (month) stack
                 if month_counter == 30
                     imonth = imonth + 1;
-                    ccfZ_monthstack_path = [ccf_monthstack_path,'ccfZZ/'];
+                    ccfZ_monthstack_path = [ccf_monthstack_path,'ccf',strNAMEcomp,'/'];
                     clear coh_sum
                     coh_sum = coh_sumZ_month;
                     save(sprintf('%s%s/%s_%s_month%d_f.mat',ccfZ_monthstack_path,sta1,sta1,sta2,imonth),'coh_sum','coh_num_month','stapairsinfo');
@@ -503,7 +513,7 @@ for ista1=1:nsta
                 faxis = [0:1/T:1/dt/2,-1/dt/2+1/T:1/T:-1/T];
                 ind = find(faxis>0);
                 plot(faxis(ind),smooth(real(coh_sumZ(ind)/coh_num),100));
-                title(sprintf('%s %s coherency Z ,station distance: %f km',sta1,sta2,dist));
+                title(sprintf('%s %s coherency %s ,station distance: %f km',sta1,sta2,strNAMEcomp(1),dist));
                 xlim([0.01 0.5])
                 %xlim([0.04 0.16])
                 xlabel('Frequency')
@@ -513,7 +523,7 @@ for ista1=1:nsta
                 %pause;
             end
             if IsOutputFullstack
-                ccfZ_fullstack_path = [ccf_fullstack_path,'ccfZZ/'];
+                ccfZ_fullstack_path = [ccf_fullstack_path,'ccf',strNAMEcomp,'/'];
                 clear coh_sum
                 coh_sum = coh_sumZ;
                 save(sprintf('%s%s/%s_%s_f.mat',ccfZ_fullstack_path,sta1,sta1,sta2),'coh_sum','coh_num','stapairsinfo');

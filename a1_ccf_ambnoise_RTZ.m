@@ -42,7 +42,7 @@ IsSpecWhiten = 0; % Whiten spectrum
 IsOBN = 0; % One-bit normalization
 
 % (2) TIME-FREQUENCY NORMALIZATION (Ekstrom et al. 2009; Shen et al. 2011)
-IsFTN = 1; % Frequency-time normalization? (If 1, applied instead of whitening and one-bit normalization)
+IsFTN = 0; % Frequency-time normalization? (If 1, applied instead of whitening and one-bit normalization)
 frange_FTN = [1/60 1/10]; % frequency range over which to construct FTN seismograms
 
 % (3) BASIC PREFILTER (Ekstrom 2011)
@@ -270,12 +270,26 @@ for ista1=1:nsta
             data2cZ =  [datadir,sta2,'/',year,'/',data2cZ.name];
 
             %------------------- TEST IF DATA EXIST------------------------
-            [S1H1t,S1H1raw]=readsac(data1cH1);
-            [S1H2t,S1H2raw]=readsac(data1cH2);
-            [S1Zt,S1Zraw]=readsac(data1cZ);
-            [S2H1t,S2H1raw]=readsac(data2cH1);
-            [S2H2t,S2H2raw]=readsac(data2cH2);
-            [S2Zt,S2Zraw]=readsac(data2cZ);
+            [S1H1t,S1H1raw,~,S1H1tstart] = load_sac(data1cH1);
+            [S1H2t,S1H2raw,~,S1H2tstart] = load_sac(data1cH2);
+            [S1Zt,S1Zraw,S1,S1Ztstart] = load_sac(data1cZ);
+            [S2H1t,S2H1raw,~,S2H1tstart] = load_sac(data2cH1);
+            [S2H2t,S2H2raw,~,S2H2tstart] = load_sac(data2cH2);
+            [S2Zt,S2Zraw,S2,S2Ztstart] = load_sac(data2cZ);
+            
+            % Make sure all times are relative to same reference point
+            starttime = S1Ztstart;
+            S1H1t = S1H1t + seconds(S1H1tstart-starttime);
+            S1H2t = S1H2t + seconds(S1H2tstart-starttime);
+            S1Zt = S1Zt + seconds(S1Ztstart-starttime);
+            S2H1t = S2H1t + seconds(S2H1tstart-starttime);
+            S2H2t = S2H2t + seconds(S2H2tstart-starttime);
+            S2Zt = S2Zt + seconds(S2Ztstart-starttime);
+            
+            % Ensure that files have same start time to within 1 sample
+            if abs(seconds(S1H1tstart-S2H1tstart))>S1.DELTA || abs(seconds(S1H2tstart-S2H2tstart))>S1.DELTA || abs(seconds(S1Ztstart-S2Ztstart))>S1.DELTA
+                error('Station files do not have same start time');
+            end
 
             %------------------- Remove instrument response ------------------------
         if IsRemoveIR
@@ -370,9 +384,6 @@ for ista1=1:nsta
 
             if(~exist('lat2','var'));
 
-                S1 = readsac(data1cH1);
-                S2 = readsac(data2cH1);
-
                 lat1=S1.STLA;
                 lon1=S1.STLO;
                 dep1=S1.STEL; % depth is negative for OBS and positive for land stations
@@ -395,7 +406,7 @@ for ista1=1:nsta
                 end
 
                 if(dist < dist_min)
-                    display('distance shorter than 80 km, skip');
+                    display(['distance shorter than ',num2str(dist_min),' km, skip']);
                     break
                 end
             end % if lat variabls
@@ -419,13 +430,13 @@ for ista1=1:nsta
             hour_length = winlength;
 
             nwin = floor(24/hour_length)*2-1; %
-            win_length = hour_length*60*60*dt; % length of individual windows.
+            win_length = hour_length*60*60/dt; % length of individual windows.
             win_start = 1;
             coh_sumT_day = 0;
             coh_sumR_day = 0;
             coh_sumZ_day = 0;
             coh_num_day = 0;
-            last_pt = win_length*.5*(nwin-1)+1+Nstart*dt+win_length;
+            last_pt = win_length*.5*(nwin-1)+1+Nstart+win_length;
             if last_pt < length(S1H1raw)
                 nwin = nwin + 1;
             end
@@ -436,30 +447,30 @@ for ista1=1:nsta
 
 				% cut in time
                 if hour_length == 24
-                    pts_begin = Nstart*dt;
-                    pts_end = length(S1H1raw)-Nstart*dt;
+                    pts_begin = Nstart;
+                    pts_end = length(S1H1raw)-Nstart;
                 else
-                    pts_begin = win_length*.5*(iwin-1)+1+Nstart*dt;
+                    pts_begin = win_length*.5*(iwin-1)+1+Nstart;
                     pts_end = pts_begin+win_length;
                 end
 
                 if pts_begin > length(S1H1raw) || pts_begin > length(S2H1raw) || pts_end > length(S1H1raw) || pts_end > length(S2H1raw)
 					disp('(H1) Points greater than the data... fixing window');
-                    pts_begin = length(S1H1raw)-win_length-Nstart*dt;
+                    pts_begin = length(S1H1raw)-win_length-Nstart;
                     pts_end = pts_begin+win_length;
 					%continue
                 elseif pts_begin > length(S1H2raw) || pts_begin > length(S2H2raw) || pts_end > length(S1H2raw) || pts_end > length(S2H2raw)
 					disp('(H2) Points greater than the data... fixing window');
-					pts_begin = length(S1H2raw)-win_length-Nstart*dt;
+					pts_begin = length(S1H2raw)-win_length-Nstart;
                     pts_end = pts_begin+win_length;
                     %continue
                 elseif pts_begin > length(S1Zraw) || pts_begin > length(S2Zraw) || pts_end > length(S1Zraw) || pts_end > length(S2Zraw)
 					disp('(Z) Points greater than the data... fixing window');
-					pts_begin = length(S1Zraw)-win_length-Nstart*dt;
+					pts_begin = length(S1Zraw)-win_length-Nstart;
                     pts_end = pts_begin+win_length;
                     %continue
                 end
-                tcut = [pts_begin:dt:pts_end];
+                tcut = [pts_begin:pts_end] * dt;
 
                 % cut in tim H1 H2 for STA1
                 S1H1=interp1(S1H1t,S1H1raw,tcut);
@@ -701,18 +712,19 @@ for ista1=1:nsta
             
             if IsOutputDaystack
                 % Save day stack
+                daystr = datestr(starttime,'YYYYmmddHHMMSS');
                 ccfT_daystack_path = [ccf_daystack_path,'ccfTT/'];
                 ccfR_daystack_path = [ccf_daystack_path,'ccfRR/'];
                 ccfZ_daystack_path = [ccf_daystack_path,'ccfZZ/'];
                 clear coh_sum
                 coh_sum = coh_sumT_day;
-                save(sprintf('%s%s/%s_%s_day%d_f.mat',ccfT_daystack_path,sta1,sta1,sta2,ihday),'coh_sum','coh_num_day','stapairsinfo');
+                save(sprintf('%s%s/%s_%s_%s_f.mat',ccfT_daystack_path,sta1,sta1,sta2,daystr),'coh_sum','coh_num_day','stapairsinfo','starttime');
                 clear coh_sum
                 coh_sum = coh_sumR_day;
-                save(sprintf('%s%s/%s_%s_day%d_f.mat',ccfR_daystack_path,sta1,sta1,sta2,ihday),'coh_sum','coh_num_day','stapairsinfo');
+                save(sprintf('%s%s/%s_%s_%s_f.mat',ccfR_daystack_path,sta1,sta1,sta2,daystr),'coh_sum','coh_num_day','stapairsinfo','starttime');
                 clear coh_sum
                 coh_sum = coh_sumZ_day;
-                save(sprintf('%s%s/%s_%s_day%d_f.mat',ccfZ_daystack_path,sta1,sta1,sta2,ihday),'coh_sum','coh_num_day','stapairsinfo');
+                save(sprintf('%s%s/%s_%s_%s_f.mat',ccfZ_daystack_path,sta1,sta1,sta2,daystr),'coh_sum','coh_num_day','stapairsinfo','starttime');
             end
             if IsOutputMonthstack
                 % Save 30 day (month) stack
