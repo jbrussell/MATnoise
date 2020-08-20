@@ -2,11 +2,16 @@ function err = besselerr(tw,xsp,varargin)
 % Error function for fitting two nearby station pair's frequency domain xspectrum
 %
 % Modified on 2/2020 by JBR
-% Normalize the bessel function by its analytic envelope to avoid fiting
-% amplitude variations. This was a problem particularly at the endpoints
-% where signal dies out. The caveat is that low SNR parts of
+% Normalize the bessel function by its analytic envelope when is_normbessel=1 to 
+% avoid fitting amplitude variations. This was a problem particularly at the 
+% endpoints where signal dies out. The caveat is that low SNR parts of
 % the cross-spectrum will now be amplified, so want to make sure you're only
 % fitting where there's really signal!
+% 
+% jbrussell 8/20/2020
+% is_normbessel=1 SHOULD BE USED WITH CAUTION. I have found that it tends to
+% produce rougher dispersion curves if there is any hint of noise in the Bessel.
+% Probably best to set is_normbessel=0.
 %
 
 global tN
@@ -17,14 +22,15 @@ global weight
 Isfigure=0;
 interpmethod = 'linear';
 
-
+damp = [1; 1; 1; 1];
+is_normbessel = 0; % no bessel normalization by default
 if nargin>2 % if option is provided
-     Isfigure = varargin{1};
+     damp = varargin{1};
+     if length(varargin)==2
+        is_normbessel = varargin{2};
+     end
 end
 
-% size(twloc)
-% size(tw(1:tN))
-% size(waxis)
 tw1 = interp1(twloc,tw(1:tN),waxis,interpmethod);
 
 x1 = waxis.*tw1;
@@ -32,11 +38,15 @@ x1 = waxis.*tw1;
 % First part of error: fit the Bessel Function
 %F1 = normalise(xsp);
 F1 = xsp;
-F1 = F1./abs(hilbert(F1));
+if is_normbessel
+    F1 = F1./abs(hilbert(F1));
+end
 be = besselj(0,x1);
 be = be./mean(abs(be)).*mean([abs(F1)]);
-% be = be./abs(hilbert(be));
-be = be./SmoothAnalyticEnv(waxis/2/pi,be);
+if is_normbessel
+%     be = be./abs(hilbert(be));
+    be = be./SmoothAnalyticEnv(waxis/2/pi,be);
+end
 F1z =  be(:) - F1(:); 
 F1z = F1z.*weight(:);
 
@@ -55,7 +65,7 @@ dx(find(dx>0)) = 0;
 % % ORIGINAL
 % err = [F1z(:); sm(:)*0.2; dx(:)*10];
 % % ADD FLATNESS
-err = [F1z(:); sm(:)*0.2*100; fl(:)*0.2*100; dx(:)*10*1];
+err = [F1z(:)*damp(1); sm(:)*0.2*100*damp(2); fl(:)*0.2*100*damp(3); dx(:)*10*1*damp(4)];
 
 % err = err./mean(abs(err))*1;
 

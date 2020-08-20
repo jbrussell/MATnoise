@@ -32,6 +32,8 @@ mode_br = 0; % desired mode branch [0=fund.]
 xlims = [1/70 1/5];
 frange_LRT = [1/40 1/3]; % Frequency range of LRT panel for reading in picks
 frange_fit = [1/25 1/3]; % Frequency range to fit over! Can be more restrictive than where picks were made
+damp = [1; 1; 1; 1]; % [fit 2nd 1st increase]
+is_normbessel = 0; % normalize bessel function by analytic envelope?
 
 if ~is_LRT_picks
     frange_fit = [1/40 1/10]; % frequency range over which to fit bessel function
@@ -47,9 +49,9 @@ end
 % % Manually input phase velocity
 % c = []';
 
-is_resume = 0; % Resume from last processed file or overwrite
+is_resume = 0; % Resume from last processed file (1) or overwrite (0)
 iswin = 1; % Use the time-domain windowed ccfs?
-npts_smooth = 1; % 1 = no smoothing
+npts_smooth = 1; % Smoothing of bessel function: 1 = no smoothing
 
 isoutput = 1; % Save *.mat file with results?
 nearstadist = 0;
@@ -302,11 +304,11 @@ for ista1=1:nsta
         %%% - Invert for the bessel function 2x - %%%
         options = optimoptions(@lsqnonlin,'TolFun',1e-12,'MaxIter',1500,'MaxFunEvals',1500);
         weight  = 1./waxis;
-        tw2 = lsqnonlin(@(x) besselerr(x,[xsp1]),[tw1],[tw1]*0.8,[tw1]*1.2,options);
+        tw2 = lsqnonlin(@(x) besselerr(x,[xsp1],damp,is_normbessel),[tw1],[tw1]*0.8,[tw1]*1.2,options);
 %         tw2 = lsqnonlin(@(x) besselerr(x,[xsp1]),[tw1],[],[],options);
         
         weight(:) = 1;
-        [tw,~,res,~,~,~,J] = lsqnonlin(@(x) besselerr(x,[xsp1]),[tw2],[tw2]*0.8,[tw2]*1.2,options);
+        [tw,~,res,~,~,~,J] = lsqnonlin(@(x) besselerr(x,[xsp1],damp,is_normbessel),[tw2],[tw2]*0.8,[tw2]*1.2,options);
 %         tw = lsqnonlin(@(x) besselerr(x,[xsp1]),[tw2],[tw2]*0.8,[tw2]*1.2,options);
 %         tw = lsqnonlin(@(x) besselerr(x,[xsp1]),[tw2],[],[],options);
         
@@ -333,11 +335,14 @@ for ista1=1:nsta
         xspinfo.xsp = xsp1;
         xspinfo.xsp_norm = xsp1./abs(hilbert(xsp1));
         xspinfo.coherenum = data1.coh_num;
-        err = besselerr(tw,xsp1);
+        err = besselerr(tw,xsp1,damp,is_normbessel);
         err = err(1:length(waxis));
         
-%         xspinfo.sumerr = sum(err.^2)./sum((xsp1./weight(:)).^2);
-        xspinfo.sumerr = sum(err.^2)./sum((xspinfo.xsp_norm./weight(:)).^2);
+        if is_normbessel
+            xspinfo.sumerr = sum(err.^2)./sum((xspinfo.xsp_norm./weight(:)).^2);
+        else
+            xspinfo.sumerr = sum(err.^2)./sum((xsp1./weight(:)).^2);
+        end
         xspinfo.err = err./weight(:);
         xspinfo.tw1 = tw1;
         xspinfo.twloc = twloc;
@@ -422,15 +427,16 @@ for ista1=1:nsta
             box off;
             
             % Plot normalized bessel functions
-            figure(4); clf;
-            b_dat = smooth(real(data1.coh_sum_win(ind)/data1.coh_num),npts_smooth);
-            plot(faxis(ind),b_dat./abs(hilbert(b_dat)),'k','linewidth',3); hold on;
-%             plot(waxis/2/pi,b./abs(hilbert(b)),'-r','linewidth',2); hold on; 
-            plot(waxis/2/pi,b./SmoothAnalyticEnv(waxis/2/pi,b),'-r','linewidth',2); hold on; 
-            xlim(xlims);
-            xlims1 = get(gca,'XLim');
-            ylabel('J_{0}','fontsize',16);
-            ylim([-2 2]);
+            if is_normbessel
+                figure(4); clf;
+                b_dat = smooth(real(data1.coh_sum_win(ind)/data1.coh_num),npts_smooth);
+                plot(faxis(ind),b_dat./abs(hilbert(b_dat)),'k','linewidth',3); hold on;
+                plot(waxis/2/pi,b./SmoothAnalyticEnv(waxis/2/pi,b),'-r','linewidth',2); hold on;
+                xlim(xlims);
+                xlims1 = get(gca,'XLim');
+                ylabel('J_{0}','fontsize',16);
+                ylim([-2 2]);
+            end
             
             if isfigure2
             f12 = figure(12);
@@ -444,7 +450,10 @@ for ista1=1:nsta
             end
             psfile = [XSP_fig_path,'Xsp_',comp{1}(1),'_',sta1,'_',sta2,'_J0J1.pdf'];
             %print('-dpsc2',psfile);
-            save2pdf(psfile,f3,1000);
+            drawnow
+            if isoutput
+                save2pdf(psfile,f3,250);
+            end
 
             
 %             pause;
