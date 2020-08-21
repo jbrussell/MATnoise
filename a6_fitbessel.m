@@ -171,8 +171,7 @@ for ista1=1:nsta
         
         
         data1 = load(filename);
-        delta = distance(data1.stapairsinfo.lats(1),data1.stapairsinfo.lons(1),data1.stapairsinfo.lats(2),data1.stapairsinfo.lons(2));
-        r1    = deg2km(delta); % distance
+        r1 = distance(data1.stapairsinfo.lats(1),data1.stapairsinfo.lons(1),data1.stapairsinfo.lats(2),data1.stapairsinfo.lons(2),referenceEllipsoid('GRS80'))/1000;
         groupv_max = data1.max_grv;
         groupv_min = data1.min_grv;
         

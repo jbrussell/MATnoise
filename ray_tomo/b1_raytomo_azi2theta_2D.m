@@ -184,7 +184,8 @@ for ip=1:length(Tperiods)
         rays(raynum,3) = xspsum(ixsp).lat2;
         rays(raynum,4) = xspsum(ixsp).lon2;
         
-        dist(raynum) = deg2km(distance(rays(raynum,1),rays(raynum,2),rays(raynum,3),rays(raynum,4)));
+        % dist(raynum) = deg2km(distance(rays(raynum,1),rays(raynum,2),rays(raynum,3),rays(raynum,4)));
+        dist(raynum) = distance(rays(raynum,1),rays(raynum,2),rays(raynum,3),rays(raynum,4),referenceEllipsoid('GRS80'))/1000;
         dt(raynum) = xspsum(ixsp).tw(ip);
         phv(raynum) = dist(raynum)./dt(raynum);
         
