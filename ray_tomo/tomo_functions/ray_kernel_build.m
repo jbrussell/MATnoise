@@ -30,8 +30,8 @@ for i = 1:nray
     lat2 = ray(i,3);
     lon2 = ray(i,4);
     %r = distance(lat1,lon1,lat2,lon2)*d2r;
-    [r azi] = distance(lat1,lon1,lat2,lon2);
-	r = deg2km(r);
+    [r, azi] = distance(lat1,lon1,lat2,lon2,referenceEllipsoid('GRS80'));
+	r = r/1000;
 
 	% set segment length, 1km
     if r<dr
@@ -113,8 +113,8 @@ return
         % accumulate errors of ~20% !)
         % JBR 5/8/2020
         %
-        dr_ray = deg2km(distance(lat_way(1:end-1),lon_way(1:end-1),...
-                                 lat_way(2:end),lon_way(2:end)));
+        dr_ray = distance(lat_way(1:end-1),lon_way(1:end-1),...
+                                 lat_way(2:end),lon_way(2:end),referenceEllipsoid('GRS80'))/1000;
     end
 
 end

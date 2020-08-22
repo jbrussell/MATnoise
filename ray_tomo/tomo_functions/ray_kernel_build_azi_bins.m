@@ -73,8 +73,8 @@ for i = 1:nray
     lat2 = ray(i,3);
     lon2 = ray(i,4);
     %r = distance(lat1,lon1,lat2,lon2)*d2r;
-    [r azi] = distance(lat1,lon1,lat2,lon2);
-	r = deg2km(r);
+    [r, azi] = distance(lat1,lon1,lat2,lon2,referenceEllipsoid('GRS80'));
+    r = r/1000;
 
 	% set segment length, 1km
 %     if r<dr
