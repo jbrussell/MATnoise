@@ -26,10 +26,10 @@ N_wl = 1; % Number of wavelengths required
 
 
 Npers = 21; % Number of periods
-xlims = [1/12 1/3];
+xlims = [1/12 1/3]; % limits for plotting
 t_vec_all = 1./flip(linspace(frange(1) , frange(2) ,Npers)); % periods at which to extract phase velocity
 
-damp = [1; 1; 1; 1]; % [fit 2nd 1st increase]
+damp = [1; 1; 1]; % [fit, smoothness, slope]
 is_normbessel = 0; % normalize bessel function by analytic envelope?
 
 % % Manually input phase velocity

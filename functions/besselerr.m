@@ -13,6 +13,10 @@ function err = besselerr(tw,xsp,varargin)
 % produce rougher dispersion curves if there is any hint of noise in the Bessel.
 % Probably best to set is_normbessel=0.
 %
+% jbrussell 8/28/2020
+% Removed flatness constraint (1st derivative). After some testing, found that
+% it actually produces rougher dispersion curves. Still not sure why that is.
+%
 
 global tN
 global waxis
@@ -22,7 +26,8 @@ global weight
 Isfigure=0;
 interpmethod = 'linear';
 
-damp = [1; 1; 1; 1];
+% damp = [1; 1; 1; 1]; % deprecated flatness constraint
+damp = [1; 1; 1];
 is_normbessel = 0; % no bessel normalization by default
 if nargin>2 % if option is provided
      damp = varargin{1};
@@ -54,9 +59,9 @@ F1z = F1z.*weight(:);
 sm = del2(tw1);
 sm = sm./mean(abs(sm)).*mean(abs(F1z));
 
-% dispersion curve flatness
-fl = diff(tw1);
-fl = ( fl./mean(abs(fl)).*mean(abs(F1z)) );
+% % dispersion curve flatness (deprecated... for some reason produces rougher dispersion curves)
+% fl = diff(tw1);
+% fl = ( fl./mean(abs(fl)).*mean(abs(F1z)) );
 
 % Third part of error: x1 has to be always increasing
 dx = diff(tw1);
@@ -65,7 +70,8 @@ dx(find(dx>0)) = 0;
 % % ORIGINAL
 % err = [F1z(:); sm(:)*0.2; dx(:)*10];
 % % ADD FLATNESS
-err = [F1z(:)*damp(1); sm(:)*0.2*100*damp(2); fl(:)*0.2*100*damp(3); dx(:)*10*1*damp(4)];
+% err = [F1z(:)*damp(1); sm(:)*0.2*100*damp(2); fl(:)*0.2*100*damp(3); dx(:)*10*1*damp(4)];
+err = [F1z(:)*damp(1); sm(:)*0.2*100*damp(2); dx(:)*10*1*damp(3)];
 
 % err = err./mean(abs(err))*1;
 

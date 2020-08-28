@@ -29,10 +29,10 @@ Ninterp = 25; % [] or Number of points to interpolate to;
 is_LRT_picks = 1; % Use picks from Radon Transform to determine starting dispersion model and frequencies
 LRT_method = 'CGG_weight';
 mode_br = 0; % desired mode branch [0=fund.]
-xlims = [1/100 1/9];
+xlims = [1/100 1/9]; % limits for plotting
 frange_LRT = [1/100 1/10]; % Frequency range of LRT panel for reading in picks
 frange_fit = [1/40 1/10]; % Frequency range to fit over! Can be more restrictive than where picks were made
-damp = [1; 1; 1; 1]; % [fit 2nd 1st increase]
+damp = [1; 1; 1]; % [fit, smoothness, slope]
 is_normbessel = 0; % normalize bessel function by analytic envelope?
 
 if ~is_LRT_picks
@@ -41,13 +41,6 @@ if ~is_LRT_picks
     Npers = 18; % Number of periods
     t_vec_all = 1./flip(linspace(frange_fit(1) , frange_fit(2) ,Npers)); % periods at which to extract phase velocity
 end
-
-% Windowing uptions for SNR calculation
-% groupv_max = inf;
-% groupv_min = 0.6;
-
-% % Manually input phase velocity
-% c = []';
 
 is_resume = 0; % Resume from last processed file or overwrite
 iswin = 1; % Use the time-domain windowed ccfs?
