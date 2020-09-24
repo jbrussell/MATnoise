@@ -229,10 +229,11 @@ for ista1=1:nsta
             file1cH2 = strrep(file1cZ,[comp,'Z'],[comp,'2']);
 
             % Check that day file exists for station 2
-            file2cZ = dir([datadir,sta2,'/',sta2,file1cZ(5:end)]);
-            file2cH1 = dir([datadir,sta2,'/',sta2,file1cH1(5:end)]);
-            file2cH2 = dir([datadir,sta2,'/',sta2,file1cH2(5:end)]);
-            hdayid = file1cZ(6:22);
+            file2cZ = dir([datadir,sta2,'/',strrep(file1cZ,sta1,sta2)]);
+            file2cH1 = dir([datadir,sta2,'/',strrep(file1cH1,sta1,sta2)]);
+            file2cH2 = dir([datadir,sta2,'/',strrep(file1cH2,sta1,sta2)]);
+            str = strsplit(file1cZ,'.');
+            hdayid = [str{2},'.',str{3},'.',str{4},'.',str{5},'.',str{6}];
             if isempty(file2cZ) || isempty(file2cH1) || isempty(file2cH2)
                 disp(['No data for ',sta2,' on day ',hdayid,'... skipping'])
                 continue
