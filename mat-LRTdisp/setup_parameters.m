@@ -1,5 +1,5 @@
 % SETUP PARAMETERS FOR RADON TRANSFORM
-addpath('./functions/'); addpath('./functions/CG_methods/');
+addpath('./functions/'); addpath('./functions/CG_methods/'); addpath('../functions/');
 
 % Input data
 comp = 'PP'; %'ZZ'; 'RR'; 'TT';

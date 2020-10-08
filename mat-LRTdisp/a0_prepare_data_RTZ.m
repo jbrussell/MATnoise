@@ -19,9 +19,10 @@ amp = 8e0;
 windir = 'window3hr';
 % windir = 'window3hr_Zcorr_tiltcomp';
 
-% Define group velocity window
+% Define group velocity window for calculating signal-to-noise ratio
 max_grv = inf; %5.5;
 min_grv = 0.7; %1.6
+snr_thresh = 5; % Signal-to-noise tolerance
 
 % Define time axis limits for cutting waveforms
 xlims = [0 500];
@@ -117,19 +118,6 @@ for icomp = 1:length(comps)
             end
             nstapair = nstapair + 1;
 
-    %         % Want sta1 to be closest to the coast so waves at -lag travel
-    %         % towards coast and waves at +lag travel away from coast.
-    %         filename_sta1sta2 = filename;
-    %         filename_sta2sta1 = [ccf_path,sta2,'/',sta2,'_',sta1,'_f.mat'];
-    %         test = load(filename_sta1sta2);
-    %         sta1lon = test.stapairsinfo.lons(1);
-    %         sta2lon = test.stapairsinfo.lons(2);
-    %         if sta1lon > sta2lon
-    %             filename = filename_sta2sta1;
-    %         else
-    %             filename = filename_sta1sta2;
-    %         end
-
             %----------- LOAD DATA -------------%
             data = load(filename);
             ccf = data.coh_sum./data.coh_num;
@@ -137,10 +125,16 @@ for icomp = 1:length(comps)
             if size(ccf,1) == 1
                 ccf = ccf';
             end
+            
+            % Calculate SNR
+            r = distance(data.stapairsinfo.lats(1),data.stapairsinfo.lons(1),data.stapairsinfo.lats(2),data.stapairsinfo.lons(2),referenceEllipsoid('GRS80'))/1000;
+            [snr, signal_ind] = calc_SNR(ccf,min_grv,max_grv,r,isfigure_snr);
+            if snr < snr_thresh
+                continue
+            end
 
             %%
             %----------- Frequency ==> Time domain -------------%
-            r = deg2km(distance(data.stapairsinfo.lats(1),data.stapairsinfo.lons(1),data.stapairsinfo.lats(2),data.stapairsinfo.lons(2)));
             N = length(ccf);
             ccf_ifft = real(ifft(ccf,N)); % inverse FFT to get time domain
             ccf_ifft = fftshift(ccf_ifft); % rearrange values as [-lag lag]
