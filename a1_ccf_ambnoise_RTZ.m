@@ -299,7 +299,7 @@ for ista1=1:nsta
             pzfile2 = dir([PZpath,'/RESP.*.',sta2,'.*.*H1']);
 
             % Read RESP file for station 1
-            [z,p,c,units] = read_sac_RESP([PZpath,pzfile1.name],units_RemoveIR)
+            [z,p,c,units] = read_sac_RESP([PZpath,pzfile1.name],units_RemoveIR);
 
             dt1 = abs(S1H1t(1)-S1H1t(2));
             dt2 = abs(S2H1t(1)-S2H1t(2));
@@ -310,7 +310,7 @@ for ista1=1:nsta
             S1Zraw = rm_resp(S1Zraw,z,p,c,dt1);
 
             % Read RESP file for station 2
-            [z,p,c,units] = read_sac_RESP([PZpath,pzfile2.name],units_RemoveIR)
+            [z,p,c,units] = read_sac_RESP([PZpath,pzfile2.name],units_RemoveIR);
 
             % Remove instrument response for station 2 H1 & H2
             S2H1raw = rm_resp(S2H1raw,z,p,c,dt2);
