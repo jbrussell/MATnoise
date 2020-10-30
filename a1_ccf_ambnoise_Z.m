@@ -35,6 +35,7 @@ IsOutputSeismograms = 0; % save raw seismograms before cross-correlating
 
 % GENERAL PROCESSING
 IsRemoveIR = 0; % remove instrument response
+units_RemoveIR = 'M'; % 'M' displacement | 'M/S' velocity
 IsDetrend = 1; % detrend the data
 IsTaper = 1; % Apply cosine taper to data chunks
 
@@ -233,56 +234,23 @@ for ista1=1:nsta
 
             %------------------- Remove instrument response ------------------------
         if IsRemoveIR
-            pzfile1 = dir([PZpath,'SAC_PZs_*',sta1,'_*Z_*']); % PZ for H1 and H2 are identical
-            pzfile2 = dir([PZpath,'SAC_PZs_*',sta2,'_*Z_*']);
+            pzfile1 = dir([PZpath,'/RESP.*.',sta1,'.*.*Z']); % PZ for H1 and H2 are identical
+            pzfile2 = dir([PZpath,'/RESP.*.',sta2,'.*.*Z']);
 
-            % do lazy checks to make sure only one PZ file is found for each station
-            if length(pzfile1) ~= 1
-                pzfile = pzfile1;
+            % Read RESP file for station 1
+            [z,p,c,units] = read_sac_RESP([PZpath,pzfile1.name],units_RemoveIR);
 
-                % Figure out which response to read
-                for ii = 1:length(pzfile)
-                    pzdate(ii) = doy2date(str2num(pzfile(ii).name(19:21)),str2num(pzfile(ii).name(14:17)));
-                end
-                otime = datenum(hdayid,'yyyymmddHHMMSS');
-                ind = find(abs(otime-pzdate) == min(abs(otime-pzdate)));
-                if ind > length(pzfile) & ind > 1
-                    ind = ind(end)-1;
-                end
-                pzfile = pzfile(ind);
-                pzfile1 = pzfile;
+            dt1 = abs(S1Zt(1)-S1Zt(2));
+            dt2 = abs(S2Zt(1)-S2Zt(2));
 
-            elseif length(pzfile2) ~= 1
-                pzfile = pzfile2;
+            % Remove instrument response for station 1 Z
+            S1Zraw = rm_resp(S1Zraw,z,p,c,dt1);
 
-                % Figure out which response to read
-                for ii = 1:length(pzfile)
-                    pzdate(ii) = doy2date(str2num(pzfile(ii).name(19:21)),str2num(pzfile(ii).name(14:17)));
-                end
-                otime = datenum(hdayid,'yyyymmddHHMMSS');
-                ind = find(abs(otime-pzdate) == min(abs(otime-pzdate)));
-                if ind > length(pzfile) & ind > 1
-                    ind = ind(end)-1;
-                end
-                pzfile = pzfile(ind);
-                pzfile2 = pzfile;
-            end
-            dt_new = parameters.dt;
+            % Read RESP file for station 2
+            [z,p,c,units] = read_sac_RESP([PZpath,pzfile2.name],units_RemoveIR);
 
-        % Read sacpz file for station 1
-        [p,z,c] = read_SACPZ([PZpath,pzfile1.name]);
-
-        dt1 = abs(S1Zt(1)-S1Zt(2));
-        dt2 = abs(S2Zt(1)-S2Zt(2));
-
-        % Remove instrument response for station 1 Z
-        S1Zraw = rm_SACPZ(S1Zraw,z,p,c,dt1);
-
-        % Read sacpz file for station 2
-        [p,z,c] = read_SACPZ([PZpath,pzfile2.name]);
-
-        % Remove instrument response for station 2 Z
-        S2Zraw = rm_SACPZ(S2Zraw,z,p,c,dt2);
+            % Remove instrument response for station 2 Z
+            S2Zraw = rm_resp(S2Zraw,z,p,c,dt2);
         end
 
 

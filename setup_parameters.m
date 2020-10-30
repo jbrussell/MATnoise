@@ -12,7 +12,7 @@ parameters.workingdir = [parameters.workingdir,'/'];
 
 parameters.datapath = ['/data/irma6/jrussel/YoungPacificORCA/SAC_1Hz/']; %'../nomelt_data_5sta/';
 
-parameters.PZpath = '../INSTRUMENT/';
+parameters.PZpath = '../INSTRUMENT/'; % path to RESP files containing poles and zeros
 parameters.ccfpath = './ccf/';
 parameters.figpath = [parameters.workingdir,'figs/'];
 parameters.seis_path = [parameters.workingdir,'seismograms/'];
