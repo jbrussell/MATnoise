@@ -190,7 +190,8 @@ for ista1=1:nsta
             file1cZ = list1(ifil).name;
 
             % Check that day file exists for station 2
-            file2cZ = dir([datadir,sta2,'/',strrep(file1cZ,sta1,sta2)]);
+            Nchar = length(sta1);
+            file2cZ = dir([datadir,sta2,'/',sta2,file1cZ(Nchar+1:end)]);
             str = strsplit(file1cZ,'.');
             hdayid = [str{2},'.',str{3},'.',str{4},'.',str{5},'.',str{6}];
             
