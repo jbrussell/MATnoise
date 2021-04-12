@@ -7,8 +7,7 @@ addpath('./functions/');
 addpath('./functions/calc_Rayleigh_disp/');
 
 %%% --- Paths to important files --- %%%
-parameters.workingdir = pwd;
-parameters.workingdir = [parameters.workingdir,'/'];
+parameters.workingdir = [pwd,'/'];
 
 parameters.datapath = ['/data/irma6/jrussel/YoungPacificORCA/SAC_1Hz/']; %'../nomelt_data_5sta/';
 
