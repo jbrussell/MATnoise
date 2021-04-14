@@ -211,9 +211,8 @@ if isplotwin
 end
 
 
-% save2pdf([figpath,'SNR_',comp,'_tukeyfilt_',num2str(min_grv),'_',num2str(max_grv),'.pdf'],101,1000);
-
+odata = [datapath,'noise_',comps{:},'.mat'];
 if ~exist(datapath)
     mkdir(datapath)
 end
-save(ndata,'M','M_win','max_grv','min_grv','Delta','t');
+save(odata,'M','M_win','max_grv','min_grv','Delta','t');
