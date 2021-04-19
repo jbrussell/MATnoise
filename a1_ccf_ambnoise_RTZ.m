@@ -228,6 +228,14 @@ for ista1=1:nsta
             file1cZ = list1(ifil).name;
             file1cH1 = strrep(file1cZ,[comp,'Z'],[comp,'1']);
             file1cH2 = strrep(file1cZ,[comp,'Z'],[comp,'2']);
+            % Check for availability of all 3 channels
+            test1Z = dir([datadir,sta1,'/',file1cZ]);
+            test1H1 = dir([datadir,sta1,'/',file1cH1]);
+            test1H2 = dir([datadir,sta1,'/',file1cH2]);
+            if isempty(test1Z) || isempty(test1H1) || isempty(test1H2)
+                disp(['Missing data for ',sta1,' on day ... skipping'])
+                continue
+            end
 
             % Check that day file exists for station 2
             Nchar = length(sta1);
