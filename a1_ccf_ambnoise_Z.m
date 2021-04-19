@@ -492,7 +492,7 @@ for ista1=1:nsta
                 xlabel('Frequency')
                 drawnow
 
-                print(f101,'-dpsc',[fig_winlength_path,sta1,'_',sta2,'.ps']);
+                print(f101,'-dpsc',[fig_winlength_path,sta1,'_',sta2,'_',strNAMEcomp,'.ps']);
                 %pause;
             end
             if IsOutputFullstack
