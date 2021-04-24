@@ -30,7 +30,7 @@ N_zc = length(I0);
 
 % Get zeros of bessel function
 N0 = length(I0);
-k = 10;
+k = 100;
 Zn = besselzero(0, N0+k, 1);
 
 % Calculate dispersion from zero crossings
