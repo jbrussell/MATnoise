@@ -21,6 +21,7 @@ parameters.r = 0.03; %0.01; % controls color bar [avgv(1-r) avgv(1+r)]
 parameters.smweight0 = 100; % isotropic second derivative smoothing
 parameters.smweight0_azi = 1e3; %1000; % anisotropic second derivative smoothing
 parameters.flweight0_azi = 1000; %1000; % anisotropic first derivative flatness
+parameters.damp0_azi = 0; % anisotropic norm damping
 
 % parameters for the tomography (QC)
 parameters.raydensetol=deg2km(parameters.gridsize)*0.25; %deg2km(parameters.gridsize); %deg2km(parameters.gridsize)*2;

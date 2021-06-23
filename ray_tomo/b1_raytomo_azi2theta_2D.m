@@ -61,6 +61,7 @@ polyfit_dt_err = parameters.polyfit_dt_err;
 smweight0 = parameters.smweight0;
 smweight0_azi = parameters.smweight0_azi;
 flweight0_azi = parameters.flweight0_azi;
+damp0_azi = parameters.damp0_azi;
 dterrtol = parameters.dterrtol;
 raydensetol = parameters.raydensetol;
 raydensetol_azi = parameters.raydensetol_azi;
@@ -111,6 +112,14 @@ J_azic = sparse(Nx_azi*Ny_azi*2,Nx*Ny+Nx_azi*Ny_azi*2);
 J_azic(1:end,Nx*Ny+[1:Nx_azi*Ny_azi]) = J_azi;
 J_azis = sparse(Nx_azi*Ny_azi*2,Nx*Ny+Nx_azi*Ny_azi*2);
 J_azis(1:end,Nx*Ny+Nx_azi*Ny_azi+[1:Nx_azi*Ny_azi]) = J_azi;
+
+%% Anisotropy norm damping
+Nxyazi = Nx_azi*Ny_azi*2;
+Nxy = Nx*Ny;
+Areg_azi = zeros(Nxyazi,Nxy+Nxyazi);
+azipart = eye(Nxyazi,Nxyazi); %.* diag(damp_azi);
+Areg_azi(1:Nxyazi,Nxy+1:Nxy+Nxyazi) = azipart;
+F_azi_damp = Areg_azi;
 
 %%
 % Initialize the xsp structure
@@ -269,6 +278,10 @@ for ip=1:length(Tperiods)
     NA=norm(W*mat,1);
     smweight = smweight0*NA/NR;
     
+    NR=norm(F_azi_damp,1);
+    NA=norm(W*mat,1);
+    damp_azi = damp0_azi*NA/NR;
+    
     NR=norm(F_azic,1);
     NA=norm(W*mat,1);
     smweight_azi = smweight0_azi*NA/NR;
@@ -278,18 +291,8 @@ for ip=1:length(Tperiods)
     flweight_azi = flweight0_azi*NA/NR;
     
     disp('start inverse');
-%     A=[W*mat; smweight*F; aziweight*F_azi_damp; aziweight*F_azi_smooth];
-%     rhs=[W*dt; zeros(size(F,1),1); zeros(size(F_azi_damp,1),1); zeros(size(F_azi_smooth,1),1)];
-%     A=[W*mat;smweight*F;aziweight*F_azi_damp];
-%     rhs=[W*dt;zeros(size(F,1),1);zeros(size(F_azi_damp,1),1)];
-% %     A=[W*mat; smweight*F; aziweight*F_azi_smooth];
-% %     rhs=[W*dt; zeros(size(F,1),1); zeros(size(F_azi_smooth,1),1)];
-%     A=[W*mat; smweight*F; aziweight*F_azi_damp];
-%     rhs=[W*dt; zeros(size(F,1),1); zeros(size(F_azi_damp,1),1)];
-%     A=[W*mat; smweight*F; smweight_azi*F_azic; smweight_azi*F_azis];
-%     rhs=[W*dt; zeros(size(F,1),1); zeros(size(F_azic,1),1); zeros(size(F_azis,1),1)];
-    A=[W*mat; smweight*F; smweight_azi*F_azic; smweight_azi*F_azis; flweight_azi*J_azic; flweight_azi*J_azis];
-    rhs=[W*dt; zeros(size(F,1),1); zeros(size(F_azic,1),1); zeros(size(F_azis,1),1); zeros(size(J_azic,1),1); zeros(size(J_azis,1),1)];
+    A=[W*mat; smweight*F; damp_azi*F_azi_damp; smweight_azi*F_azic; smweight_azi*F_azis; flweight_azi*J_azic; flweight_azi*J_azis];
+    rhs=[W*dt; zeros(size(F,1),1); zeros(size(F_azi_damp,1),1); zeros(size(F_azic,1),1); zeros(size(F_azis,1),1); zeros(size(J_azic,1),1); zeros(size(J_azis,1),1)];
 
     phaseg=(A'*A)\(A'*rhs);
     %        toc
@@ -326,6 +329,10 @@ for ip=1:length(Tperiods)
         NA=norm(W*mat,1);
         smweight = smweight0*NA/NR;
         
+        NR=norm(F_azi_damp,1);
+        NA=norm(W*mat,1);
+        damp_azi = damp0_azi*NA/NR;
+        
         NR=norm(F_azic,1);
         NA=norm(W*mat,1);
         smweight_azi = smweight0_azi*NA/NR;
@@ -335,22 +342,8 @@ for ip=1:length(Tperiods)
         flweight_azi = flweight0_azi*NA/NR;
         
         % Invert
-%         A=[W*mat;smweight*F];
-%         rhs=[W*dt;zeros(size(F,1),1)];        
-%         A=[W*mat;smweight*F;aziweight*F_azi];
-%         rhs=[W*dt;zeros(size(F,1),1);zeros(size(F_azi,1),1)];
-%         A=[W*mat; smweight*F; aziweight*F_azi_damp; aziweight*F_azi_smooth];
-%         rhs=[W*dt; zeros(size(F,1),1); zeros(size(F_azi_damp,1),1); zeros(size(F_azi_smooth,1),1)];
-%         A=[W*mat;smweight*F;aziweight*F_azi_damp];
-%         rhs=[W*dt;zeros(size(F,1),1);zeros(size(F_azi_damp,1),1)];
-% %         A=[W*mat; smweight*F; aziweight*F_azi_smooth];
-% %         rhs=[W*dt; zeros(size(F,1),1); zeros(size(F_azi_smooth,1),1)];
-%         A=[W*mat; smweight*F; aziweight*F_azi_damp];
-%         rhs=[W*dt; zeros(size(F,1),1); zeros(size(F_azi_damp,1),1)];
-%         A=[W*mat; smweight*F; smweight_azi*F_azic; smweight_azi*F_azis];
-%         rhs=[W*dt; zeros(size(F,1),1); zeros(size(F_azic,1),1); zeros(size(F_azis,1),1)];
-        A=[W*mat; smweight*F; smweight_azi*F_azic; smweight_azi*F_azis; flweight_azi*J_azic; flweight_azi*J_azis];
-        rhs=[W*dt; zeros(size(F,1),1); zeros(size(F_azic,1),1); zeros(size(F_azis,1),1); zeros(size(J_azic,1),1); zeros(size(J_azis,1),1)];
+        A=[W*mat; smweight*F; damp_azi*F_azi_damp; smweight_azi*F_azic; smweight_azi*F_azis; flweight_azi*J_azic; flweight_azi*J_azis];
+        rhs=[W*dt; zeros(size(F,1),1); zeros(size(F_azi_damp,1),1); zeros(size(F_azic,1),1); zeros(size(F_azis,1),1); zeros(size(J_azic,1),1); zeros(size(J_azis,1),1)];
 
         phaseg=(A'*A)\(A'*rhs);
 
