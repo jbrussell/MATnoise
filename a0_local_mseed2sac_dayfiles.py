@@ -48,8 +48,6 @@ chs = ["CH0", "CH1", "CH2", "CH3"] # channel names
 # %% codecell
 # Load station file
 inventory = pd.read_csv(path2sta, delimiter='\s+', index_col=False, names=['station', 'stla', 'stlo', 'stel'])
-inventory = inventory.set_index('station')
-# inventory = inventory.loc[station].reset_index()
 
 # %% codecell
 # Loop over stations
