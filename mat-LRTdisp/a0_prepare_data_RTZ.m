@@ -16,7 +16,7 @@ IsFigure_GAUS = 0; % Plot frequency domain filtered and unfiltered
 %======================= PARAMETERS =======================%
 comps = {'ZZ'};  % {'ZZ','RR','PP'}; 'PZ'; 'PP'; 'ZZ'; 'RR'; 'TT';
 amp = 8e0;
-windir = 'window3hr';
+% windir = 'window3hr';
 % windir = 'window3hr_Zcorr_tiltcomp';
 
 % Define group velocity window for calculating signal-to-noise ratio
