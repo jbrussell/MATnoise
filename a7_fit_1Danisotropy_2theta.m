@@ -23,6 +23,7 @@ snr_tol = 3; % minimum signal-to-noise
 r_tol = 150; % [km] minimum separation between stations (should make this number frequency dependent!)
 err_tol = 0.7; % maximum misfit of bessel fit between observed and synthetic
 dep_tol = [0 0]; % [sta1 sta2] OBS depth tolerance
+wl_tol = 2; % Minimum wavelength requirement
 
 % Plotting parameters
 ylims_aniso = [-3 3];
@@ -74,62 +75,15 @@ nsta=parameters.nsta; % number of target stations to calculate for
 DIRS = dir([XSP_path,'*_xsp.mat']);
 nxsp = size(DIRS,1);
 
+filename = [XSP_path,DIRS(1).name];
+load(filename);
+npers = length(xspinfo.c_start);
+
 %%% --- Loop through XSP files --- %%%
-weight_sum = 0;
-err_sum = 0;
-weight_sum_snr = 0;
-snr_sum = 0;
-phV = [];
-azi = [];
-for ixsp=1:nxsp
-    
-    filename = [XSP_path,DIRS(ixsp).name];
 
-    if ~exist(filename,'file')
-        disp(['not exist ',filename])
-        continue;
-    end
-
-    % LOAD PHV CURVES
-    load(filename);
-
-    % SETUP PHV AND AZI ARRAYS
-    phV = [phV; xspinfo.r./xspinfo.tw];
-    [~,S1az]=distance(xspinfo.lat1,xspinfo.lon1,xspinfo.lat2,xspinfo.lon2);
-    if S1az > 180
-        S1az = S1az - 360;
-    end
-    azi = [azi; S1az];
-    %if xspinfo.snr >= snr_tol && xspinfo.r >= r_tol
-    if xspinfo.snr >= 5 && xspinfo.r >= 100
-        sta1 = xspinfo.sta1;
-        sta2 = xspinfo.sta2;
-        c = xspinfo.r./xspinfo.tw1;
-        c_fit = xspinfo.r./xspinfo.tw;
-        periods = 1./xspinfo.twloc*2*pi;
-        err = xspinfo.sumerr;
-        snr = xspinfo.snr;
-        [~,ierr] = min(abs(err-clr_err));
-        [~,isnr] = min(abs(snr-clr_snr));
-        [~,S1az]=distance(xspinfo.lat1,xspinfo.lon1,xspinfo.lat2,xspinfo.lon2);
-
-        % Weighted sum error
-        weight_sum = weight_sum + c_fit./err;
-        err_sum = err_sum + 1/err;
-
-        % Weighted sum snr
-        weight_sum_snr = weight_sum_snr + c_fit.*snr;
-        snr_sum = snr_sum + snr;
-
-    end
-        
-end  %end of ixsp
-c_weight_avg = weight_sum./err_sum;
-c_weight_avg_snr = weight_sum_snr./snr_sum;
-
-phV_QC = [];
-azi_QC = [];
-err_QC = [];
+phV_QC = nan(nxsp,npers);
+azi_QC = nan(nxsp,1);
+err_QC = inf(nxsp,1);
 lats_QC = [];
 lons_QC = [];
 for ixsp=1:nxsp
@@ -144,6 +98,12 @@ for ixsp=1:nxsp
     load(filename);
     if xspinfo.snr >= snr_tol && xspinfo.r >= r_tol && xspinfo.sumerr <= err_tol ...
             && DEPTHS(strcmp(xspinfo.sta1,STAS)) <= dep_tol(1) && DEPTHS(strcmp(xspinfo.sta2,STAS)) <= dep_tol(2)
+        
+        % Determine whether passes wavelength criterion
+        isgood_wl = xspinfo.isgood_wl;
+        I_isgood_wl_tol = xspinfo.r ./ (xspinfo.c .* xspinfo.per) >= wl_tol;
+        isgood_wl(~I_isgood_wl_tol) = 0;
+        
         sta1 = xspinfo.sta1;
         lats_QC = [lats_QC; xspinfo.lat1 xspinfo.lat2];
         lons_QC = [lons_QC; xspinfo.lon1 xspinfo.lon2];
@@ -153,17 +113,17 @@ for ixsp=1:nxsp
         periods = 1./xspinfo.twloc*2*pi;
         err = xspinfo.sumerr;
         snr = xspinfo.snr;
-        [~,ierr] = min(abs(err-clr_err));
-        [~,isnr] = min(abs(snr-clr_snr));
+%         [~,ierr] = min(abs(err-clr_err));
+%         [~,isnr] = min(abs(snr-clr_snr));
         [~,S1az]=distance(xspinfo.lat1,xspinfo.lon1,xspinfo.lat2,xspinfo.lon2);
         if S1az > 180
             S1az = S1az-360;
         end
         
         % MAKE PHV & AZI ARRAYS
-        phV_QC = [phV_QC; c_fit];
-        azi_QC = [azi_QC; S1az];
-        err_QC = [err_QC; err];
+        phV_QC(ixsp,isgood_wl) = c_fit(isgood_wl);
+        azi_QC(ixsp) = S1az;
+        err_QC(ixsp) = err;
         
         xspinfo.S1az = S1az;
         xspinfo.c_start = c;
@@ -175,7 +135,7 @@ for ixsp=1:nxsp
 end
 
 % Fit Anisotropy QC
-phv_std = std(phV);
+% phv_std = std(phV);
 for iper = 1:length(periods)
     %varargin{1} = phv_std(iper);
     varargin = sqrt(err_QC);
@@ -206,7 +166,7 @@ for iper = 1:length(periods)
 end
         
 % Phase velocity variations (percent)
-c_weight_avg = repmat(c_weight_avg,size(phV_QC,1),1);
+% c_weight_avg = repmat(c_weight_avg,size(phV_QC,1),1);
 %c_perc = (phV_QC-c_weight_avg)./c_weight_avg*100; % from weighted average
 isophv_mat = repmat(isophv,size(phV_QC,1),1);
 c_perc = (phV_QC-isophv_mat)./isophv_mat*100;
@@ -380,17 +340,17 @@ end
 %% Plot Phase Velocities
 
 figure(54); clf;
-h54(1) = plot(periods,c_weight_avg(1,:),'-ok','linewidth',2); hold on;
+% h54(1) = plot(periods,c_weight_avg(1,:),'-ok','linewidth',2); hold on;
 %plot(periods,isophv,'-or','linewidth',2);
-h54(2) = errorbar(periods,isophv,err,'-or','linewidth',2);
-h54(3) = plot(periods,xspinfo.c_start,'-o','linewidth',2,'color',[0.5 0.5 0.5]);
+h54(1) = errorbar(periods,isophv,err,'-or','linewidth',2); hold on;
+h54(2) = plot(periods,xspinfo.c_start,'-o','linewidth',2,'color',[0.5 0.5 0.5]);
 
 ylim(ylims);
 xlim([1/frange(2) 1/frange(1)]);
 xlabel('Period (s)','fontsize',15);
 ylabel('Phase Velocity (km/s)','fontsize',15);
 set(gca,'fontsize',12);
-legend(h54,{'PHV_{avg}','PHV_{iso}','PHV_{start}'},'fontsize',12,'location','southeast');
+legend(h54,{'PHV_{iso}','PHV_{start}'},'fontsize',12,'location','southeast');
 
 %%
 % PLOT Amplitude and Fast direction
