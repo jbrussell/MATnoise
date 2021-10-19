@@ -7,10 +7,6 @@ ccf = 'ccf_raw';
 windir = 'window3hr';
 % windir = 'window3hr_Zcorr_tiltcomp'; % Tilt & compliance corrected
 
-% comp = 'ZZ';
-% ccf = 'ccf_OBNW';
-% windir = 'window3hr';
-
 %% PARAMETERS
 % Normalization option for plotting
 is_globnorm = 0; % 1 for normalize radon panel by global max; 0 for column norm
