@@ -2,7 +2,7 @@
 addpath('./functions/'); addpath('./functions/CG_methods/'); addpath('../functions/');
 
 % Input data
-comp = 'PP'; %'ZZ'; 'RR'; 'TT';
+comp = 'ZZ'; %'PP'; 'RR'; 'TT';
 ccf = 'ccf_raw';
 windir = 'window3hr';
 % windir = 'window3hr_Zcorr_tiltcomp'; % Tilt & compliance corrected
