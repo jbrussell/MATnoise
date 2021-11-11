@@ -212,7 +212,9 @@ for ip = 1:Nfreq
     mat(ip).omega = 2*pi/t_vec_all(ip);
     mat(ip).c_pre = c_all(ip);
     mat(ip).xsp_real = [];
+    mat(ip).xsp_imag = [];
     mat(ip).r = [];
+    mat(ip).azi = [];
 end
 %%% --- Loop through station 1 --- %%%
 for ista1=1:nsta
@@ -247,6 +249,7 @@ for ista1=1:nsta
         
         data1 = load(filename);
         r1 = distance(data1.stapairsinfo.lats(1),data1.stapairsinfo.lons(1),data1.stapairsinfo.lats(2),data1.stapairsinfo.lons(2),referenceEllipsoid('GRS80'))/1000;
+        az1 = azimuth(data1.stapairsinfo.lats(1),data1.stapairsinfo.lons(1),data1.stapairsinfo.lats(2),data1.stapairsinfo.lons(2),referenceEllipsoid('GRS80'));
         groupv_max = data1.max_grv;
         groupv_min = data1.min_grv;
         
@@ -291,6 +294,8 @@ for ista1=1:nsta
         xcorf = xcorf1;
         xcorf1 = real(xcorf1(1:N));
         xcorf1(1) = 0;
+        xcorf1_imag = imag(xcorf(1:N));
+        xcorf1_imag(1) = 0;
         
         if isfigure2 
             figure(1)
@@ -317,6 +322,8 @@ for ista1=1:nsta
         
         xsp_real_f = interp1(faxis*2*pi,xcorf1,2*pi./t_vec);
         xsp_real_f = smooth(xsp_real_f,npts_smooth);
+        xsp_imag_f = interp1(faxis*2*pi,xcorf1_imag,2*pi./t_vec);
+        xsp_imag_f = smooth(xsp_imag_f,npts_smooth);
         
         
         %% %%% Calculate SNR %%%
@@ -331,7 +338,9 @@ for ista1=1:nsta
         
         for ip = 1:Nfreq
             mat(ip).xsp_real = [mat(ip).xsp_real; xsp_real_f(ip)];
+            mat(ip).xsp_imag = [mat(ip).xsp_imag; xsp_imag_f(ip)];
             mat(ip).r = [mat(ip).r; r1];
+            mat(ip).azi = [mat(ip).azi; az1];
         end
         
         %%
@@ -386,11 +395,11 @@ for ip = 1:length(mat)
     ylabel('Phase Velocity (km/s)');
 end
 
-%% Plot
+%% Plot by frequency
 figure(20); clf;
 
-Nrow = 4;
-Ncol = 4;
+Nrow = 5;
+Ncol = 5;
 for ip = 1:length(mat)
     subplot(Nrow,Ncol,ip); hold on;
     
@@ -459,5 +468,72 @@ for ip = 1:length(mat)
     ylabel('Re(\rho)');
 end
 
+%% Polar plots by frequency (REAL)
+figure(22); clf;
+set(gcf,'position',[59           4         837        1021]);
 
+Nrow = 5;
+Ncol = 5;
+sgtitle('Real','fontsize',25,'fontweight','bold');
+for ip = per_ind %1:2:length(mat)
+    ax = subplot(Nrow,Ncol,ip); %hold on;
+    
+    c = mat(ip).c;
+%     c_pre = 12;
+    period = mat(ip).period;
+    omega = mat(ip).omega;
+    xsp_real = mat(ip).xsp_real;
+    r = mat(ip).r;
+    azi = mat(ip).azi;
+    wavelength = c .* period;
+    Nwl = r ./ wavelength;
+    
+    % Plot observed
+%     plot(r,xsp_real,'.');
+    polarscatter(azi,r,25,xsp_real,'filled'); hold on;
+    polarscatter(azi+180,r,25,xsp_real,'filled'); hold on;
+    colormap(jet); 
+    cb = colorbar;
+    ylabel(cb,'Real Cross-spectrum');
+    caxis(max(max([mat(:).xsp_real]))*0.5*[-1 1]);
+    rlim([0 max(max([mat(:).r]))]);
+    title([num2str(round(mat(ip).period)),' s'])
+    set(gca,'ThetaZeroLocation','top','RTickLabel',[],'fontsize',15,'linewidth',2);
+end
 
+save2pdf(['./figs_paper/polarNCF_imag.pdf'],22,250);
+
+%% Polar plots by frequency (IMAGINARY)
+figure(23); clf;
+set(gcf,'position',[59           4         837        1021]);
+
+Nrow = 5;
+Ncol = 5;
+sgtitle('Imaginary','fontsize',25,'fontweight','bold');
+for ip = per_ind %1:2:length(mat)
+    ax = subplot(Nrow,Ncol,ip); %hold on;
+    
+    c = mat(ip).c;
+%     c_pre = 12;
+    period = mat(ip).period;
+    omega = mat(ip).omega;
+    xsp_imag = mat(ip).xsp_imag;
+    r = mat(ip).r;
+    azi = mat(ip).azi;
+    wavelength = c .* period;
+    Nwl = r ./ wavelength;
+    
+    % Plot observed
+%     plot(r,xsp_real,'.');
+    polarscatter(azi,r,25,xsp_imag,'filled'); hold on;
+    polarscatter(azi+180,r,25,xsp_imag,'filled'); hold on;
+    colormap(jet); 
+    cb = colorbar;
+    ylabel(cb,'Imaginary Cross-spectrum');
+    caxis(max(max([mat(:).xsp_real]))*0.5*[-1 1]);
+    rlim([0 max(max([mat(:).r]))]);
+    title([num2str(round(mat(ip).period)),' s'])
+    set(gca,'ThetaZeroLocation','top','RTickLabel',[],'fontsize',15,'linewidth',2);
+end
+
+save2pdf(['./figs_paper/polarNCF_imag.pdf'],23,250);
