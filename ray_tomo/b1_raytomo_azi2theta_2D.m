@@ -406,9 +406,7 @@ for ip=1:length(Tperiods)
     if sum(size(GV)==size(Ac)) == 2
         GV_aznode = GV;
     else
-        [ymesh,xmesh] = meshgrid(ynode,xnode);
-        [ymesh_azi,xmesh_azi] = meshgrid(ynode_azi,xnode_azi);
-        GV_aznode = interp2(ymesh,xmesh,GV,ymesh_azi,xmesh_azi);
+        interp2(yi,xi,GV,yi_azi,xi_azi)
     end
     % get azimuthal anisotropy
     Ac2 = Ac.*GV_aznode; % s/km -> %
