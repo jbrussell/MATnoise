@@ -23,8 +23,8 @@ Np = 4; % # of subplot columns
 
 setup_parameters_tomo;
 comp = parameters.comp; % {'ZZ'};
-xspdir = prameters.xspdir; % 'phv_dir'; %'Nomelt3inttaper_iso.s0to333_br1avg'; %'4.0_S1_10pers_avg'; %'Nomelt3inttaper_iso.s0to333_br1avg'; %'4.0_S0_waverage';
-windir = prameters.windir; %'window3hr'; 
+xspdir = parameters.xspdir; % 'phv_dir'; %'Nomelt3inttaper_iso.s0to333_br1avg'; %'4.0_S1_10pers_avg'; %'Nomelt3inttaper_iso.s0to333_br1avg'; %'4.0_S0_waverage';
+windir = parameters.windir; %'window3hr'; 
 N_wl = parameters.N_wl;
 frange = parameters.frange; %[1/10 1/5]; % [Hz]
 per_ind = parameters.per_ind; % [1:12]; % index of periods to consider
@@ -196,7 +196,7 @@ end % end of loop ixsp'
 for ip=1:length(Tperiods)
     disp(' ');
     disp(['Inversing Period: ',num2str(Tperiods(ip))]);
-    clear rays dt fiterr mat phaseg err raydense dist azi mat_azi phv
+    clear rays dt fiterr mat phaseg err raydense dist azi mat_azi phv phv_std dt_std
     raynum = 0;
 
     for ixsp = 1:length(xspsum)
@@ -221,6 +221,11 @@ for ip=1:length(Tperiods)
         dist(raynum) = distance(rays(raynum,1),rays(raynum,2),rays(raynum,3),rays(raynum,4),referenceEllipsoid('GRS80'))/1000;
         dt(raynum) = xspsum(ixsp).tw(ip);
         phv(raynum) = dist(raynum)./dt(raynum);
+        
+        % convert uncertainty in velocity to uncertainty in time
+        % dt = |r / v^2 * dv| = t^2 / r * dv
+        phv_std(raynum,1) = xspsum(ixsp).c_std(ip);
+        dt_std(raynum,1) = abs( dt(raynum).^2 / dist(raynum) * phv_std(raynum) );
         
         dep1 = sta.dep(strcmp(xspsum(raynum).sta1,sta.name));
         dep2 = sta.dep(strcmp(xspsum(raynum).sta2,sta.name));
@@ -368,6 +373,29 @@ for ip=1:length(Tperiods)
         
     end
     
+    % Calculate model resolution and chi2
+    Ginv = (A'*A)\mat'*W.^2;
+    R = Ginv * mat; % model resolution
+    Rdiag = diag(R);
+    [~,~,resol] = vec2mesh(ynode,xnode,Rdiag(1:Nx*Ny));
+    % degrees of freedom
+    v = length(dt) - trace(R);
+    % normalized chi2 uncertainties
+    res = (mat*phaseg - dt);
+    res(diag(W)==0) = nan;
+    rms_res = sqrt(nanmean(res.^2));
+    dt_std(dt_std<0.10*rms_res) = 0.10*rms_res;
+    chi2 = nansum(res.^2./dt_std.^2)/v;
+    
+    % Calculate model uncertainties
+    slo_std = diag(Ginv*diag(rms_res.^2)*Ginv').^(1/2);
+    % convert from dslow to dv
+    phv_std = phaseg(1:Nx*Ny).^(-2) .* slo_std(1:Nx*Ny);
+    [~,~,GV_std] = vec2mesh(ynode,xnode,phv_std(1:Nx*Ny));
+    
+    % Model Rougness
+    R2 = nanmean((F*phaseg).^2);
+    
     % Isotropic phase velocity
     phv_iso = dist'./(mat_iso*phaseg(1:Nx*Ny));
     
@@ -411,6 +439,10 @@ for ip=1:length(Tperiods)
     phi4 = 1/4*atan2d(As4,Ac4);
 
     raytomo(ip).GV = GV;
+    raytomo(ip).GV_std = GV_std;
+    raytomo(ip).resol = resol;
+    raytomo(ip).chi2 = chi2;
+    raytomo(ip).res = res;
     raytomo(ip).mat = mat;
     raytomo(ip).raydense = raydense;
     raytomo(ip).period = Tperiods(ip);
@@ -434,6 +466,7 @@ for ip=1:length(Tperiods)
     raytomo(ip).A4 = A4;
     raytomo(ip).phi2 = phi2;
     raytomo(ip).phi4 = phi4;
+    raytomo(ip).R2 = R2;
     raytomo(ip).phv = phv;
     raytomo(ip).azi = azi;
     raytomo(ip).isgood = raytomo(ip).w~=0;
@@ -608,6 +641,64 @@ for ip=per_ind
 %     [c,h] = contourm(age_grid.LAT,age_grid.LON,age_grid.AGE,'k','LevelStep',5);
 end
 save2pdf([phv_fig_path,'TEI19_',comp{1}(1),'_','r',num2str(r_tol_min),'_',num2str(r_tol_max),'_snr',num2str(snr_tol),'_err',num2str(err_tol),'_raytomo_TEI19_perc.pdf'],fig19,1000);
+
+%%
+% MODEL RESOLUTION
+fig21 = figure(21);
+set(gcf,'position',[1    1   1244   704],'color','w');
+clf
+ii = 0;
+for ip=per_ind
+    if sum(~isnan(raytomo(ip).GV(:))) == 0
+        continue
+    end
+    ii = ii + 1;
+subplot(Mp,Np,ii); hold on;
+    ax = worldmap(lalim, lolim);
+    set(ax, 'Visible', 'off')
+%     surfacem(xi,yi,(raytomo(ip).resol));
+    surfacem(xi,yi,(raytomo(ip).resol)./prctile(abs(raytomo(ip).resol(:)),99));
+%     contourfm(xi,yi,(raytomo(ip).resol)./prctile(abs(raytomo(ip).resol(:)),99),[0:0.05:1],'edgecolor','none');
+%     drawlocal
+    title([num2str(Tperiods(ip))],'fontsize',15)
+    colorbar
+    colormap(flip(hot));
+%     caxis([0 prctile(abs(raytomo(ip).resol(:)),99)])
+%     caxis([0 0.02]);
+    caxis([0 0.5]);
+%     RES = (raytomo(ip).resol)./max(abs(raytomo(ip).resol(:)));
+%     contourm(xi,yi,RES,[0.1],'-g');
+    plotm(sta.lat,sta.lon,'ob','markerfacecolor',[0 0 1]);
+end
+% save2pdf([phv_fig_path,'TEI19_',comp{1}(1),'_','r',num2str(r_tol_min),'_',num2str(r_tol_max),'_snr',num2str(snr_tol),'_err',num2str(err_tol),'_ModelResolution.pdf'],fig21,1000);
+
+
+% MODEL UNCERTAINTY
+fig22 = figure(22);
+set(gcf,'position',[1    1   1244   704],'color','w');
+clf
+ii = 0;
+cmap = tomo_cmap(200);
+for ip=per_ind
+    if sum(~isnan(raytomo(ip).GV(:))) == 0
+        continue
+    end
+    ii = ii + 1;
+subplot(Mp,Np,ii); hold on;
+    ax = worldmap(lalim, lolim);
+    set(ax, 'Visible', 'off')
+%     surfacem(xi,yi,raytomo(ip).GV_std);
+    surfacem(xi,yi,raytomo(ip).GV_std./raytomo(ip).GV*100);
+%     drawlocal
+    title([num2str(Tperiods(ip))],'fontsize',15)
+    colorbar
+    colormap(cmap);
+%     caxis([0 500])
+    caxis([0 1]);
+    plotm(sta.lat,sta.lon,'ok','markerfacecolor',[0 0 0]);
+end
+% save2pdf([phv_fig_path,'TEI19_',comp{1}(1),'_','r',num2str(r_tol_min),'_',num2str(r_tol_max),'_snr',num2str(snr_tol),'_err',num2str(err_tol),'_ModelUncertainty.pdf'],fig22,1000);
+
 
 %%
 % RAY DENSITY

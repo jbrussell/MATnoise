@@ -19,8 +19,6 @@ err_tol = parameters.err_tol; % = 0.5; % maximum misfit of bessel fit between ob
 
 %==========================================================%
 %%
-% Load color scale
-load seiscmap.mat
 % figure output path
 phv_fig_path = ['./figs/',windir,'/fullStack/raytomo/',num2str(1/frange(2)),'_',num2str(1/frange(1)),'s_',xspdir,'/'];
 if ~exist(phv_fig_path)    

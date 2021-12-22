@@ -22,8 +22,8 @@ Np = 4; % # of subplot columns
 
 setup_parameters_tomo;
 comp = parameters.comp; % {'ZZ'};
-xspdir = prameters.xspdir; % 'phv_dir'; %'Nomelt3inttaper_iso.s0to333_br1avg'; %'4.0_S1_10pers_avg'; %'Nomelt3inttaper_iso.s0to333_br1avg'; %'4.0_S0_waverage';
-windir = prameters.windir; %'window3hr'; 
+xspdir = parameters.xspdir; % 'phv_dir'; %'Nomelt3inttaper_iso.s0to333_br1avg'; %'4.0_S1_10pers_avg'; %'Nomelt3inttaper_iso.s0to333_br1avg'; %'4.0_S0_waverage';
+windir = parameters.windir; %'window3hr'; 
 N_wl = parameters.N_wl;
 frange = parameters.frange; %[1/10 1/5]; % [Hz]
 per_ind = parameters.per_ind; % [1:12]; % index of periods to consider
@@ -575,8 +575,8 @@ for ip=per_ind
     plotm(sta.lat,sta.lon,'ok','markerfacecolor',[0 0 0]);
     % Plot reference
     refstick = scale*0.02;
-    plotm([min(lalim) min(lalim)]+0.5,[max(lolim)-refstick/2 max(lolim)+refstick/2]-0.5,'-','Color',[0.9 0 0],'linewidth',2);
-    textm(min(lalim)+0.25,max(lolim)-0.5,'2%','fontsize',12,'HorizontalAlignment', 'center');
+    plotm([min(lalim) min(lalim)]+abs(diff(lalim))*0.15,[max(lolim)-refstick/2 max(lolim)+refstick/2]-abs(diff(lolim))*0.15,'-','Color',[0.9 0 0],'linewidth',2);
+    textm(min(lalim)+abs(diff(lalim))*0.09,max(lolim)-abs(diff(lolim))*0.15,'2%','fontsize',12,'HorizontalAlignment', 'center');
 end
 save2pdf([phv_fig_path,comp{1}(1),'_','r',num2str(r_tol_min),'_',num2str(r_tol_max),'_snr',num2str(snr_tol),'_err',num2str(err_tol),'_raytomo_2Dazimuthal.pdf'],fig16,1000);
 

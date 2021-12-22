@@ -43,8 +43,8 @@ parameters.aziweight = 1; % global weight
 % Smoothing parameters (2D phv and anisotropy)
 parameters.smweight0 = 100; % isotropic second derivative smoothing
 parameters.smweight0_azi = 1e3; %1000; % anisotropic second derivative smoothing
-parameters.flweight0_azi = 1000; %1000; % anisotropic first derivative flatness
-parameters.damp0_azi = 0; % anisotropic norm damping
+parameters.flweight0_azi = 0; %1000; % anisotropic first derivative flatness
+parameters.damp0_azi = 0; % anisotropic norm damping (damp to zero)
 
 % parameters for the tomography (QC)
 parameters.raydensetol=deg2km(parameters.gridsize)*0.25; %deg2km(parameters.gridsize); %deg2km(parameters.gridsize)*2;
