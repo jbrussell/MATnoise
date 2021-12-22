@@ -524,25 +524,6 @@ if isoutput
     save('coor.mat','xi','yi','xnode','ynode','gridsize','lalim','lolim');
 end
 
-%% TEST COLORMAP
-figure(200); clf;
-% pos01 = [0    0.1667    0.3333    0.5000    0.6667    0.75 0.95 1.0000];
-% clrs = [0 0 0; 224 0 0; 242 222 0; 255 255 255; 120 204 145; 0 157 219; 88 23 137; 70 17 109]/255;
-
-% pos01 = [0    0.1    0.4999   0.5000 1.0000];
-% clrs = [193 0 0; 224 0 0; 252 214 0; 81 211 255; 0 73 209]/255;
-
-pos01 = [0    0.1    0.4 0.4001 0.5999   0.6000 1.0000];
-clrs = [193 0 0; 224 0 0; 252 214 0; 235 235 235; 235 235 235; 81 211 255; 0 73 209]/255;
-
-% pos01 = [0    0.5  1.0000];
-% clrs = [0, 87, 229; 229, 0, 0; 0, 87, 229]/255;
-
-mycolormap = customcolormap(pos01, clrs, 200);
-colorbar;
-colormap(mycolormap);
-axis off;
-
 %% Phase Velocity Maps (km/s)
 % Load seafloor age
 % load('age_grid.mat');
@@ -570,7 +551,7 @@ for ip=per_ind
     contourfm(xi,yi,raytomo(ip).GV,levels,'edgecolor','none');
 %     drawlocal
 %     title([num2str(round(Tperiods(ip))),' s'],'fontsize',15)
-    textm(36.5,-76.7,[num2str(round(Tperiods(ip))),' s'],'fontsize',15,'fontweight','bold');
+    text(0.05,0.85,[num2str(round(Tperiods(ip))),' s'],'fontsize',15,'fontweight','bold','Units','normalized','HorizontalAlignment','left');
     caxis([avgv*(1-r) avgv*(1+r)])
     cb = colorbar;
     ylabel(cb,'Phase Velocity (km/s)','fontsize',15);

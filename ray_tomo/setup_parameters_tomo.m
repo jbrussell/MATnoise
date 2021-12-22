@@ -14,7 +14,7 @@ parameters.lolim = [-136 -130];
 parameters.gridsize = 0.25; % degrees?
 parameters.agebins = [165:5:175];
 parameters.bathybins = [-9000 :5000: 1000];
-parameters.gridsize_azi = 0.25; %3; %1.5; % gridsize for 2D azimuthal anisotropy (degrees)
+parameters.gridsize_azi = 0.5; %3; %1.5; % gridsize for 2D azimuthal anisotropy (degrees)
 parameters.r = 0.03; %0.01; % controls color bar [avgv(1-r) avgv(1+r)]
 
 % Smoothing parameters
