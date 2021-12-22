@@ -4,17 +4,18 @@
 clear; close all;
 
 %======================= PARAMETERS =======================%
-comp = {'ZZ'};
-xspdir = 'phv_dir';
-windir = 'window3hr'; 
-
-frange = [1/10 1/5]; % [Hz]
+setup_parameters_tomo;
+comp = parameters.comp; % = {'ZZ'};
+xspdir = parameters.xspdir; % = 'phv_dir';
+windir = parameters.windir; % = 'window3hr'; 
+N_wl = parameters.N_wl;
+frange = parameters.frange; % = [1/10 1/5]; % [Hz]
 
 % QC parameters
-snr_tol = 3; % minimum signal-to-noise
-r_tol_min = 90; % [km] minimum station separation
-r_tol_max = 600; % [km] maximum station separation
-err_tol = 0.5; % maximum misfit of bessel fit between observed and synthetic
+snr_tol = parameters.snr_tol; % = 3; % minimum signal-to-noise
+r_tol_min = parameters.r_tol_min; % = 90; % [km] minimum station separation
+r_tol_max = parameters.r_tol_max; % = 600; % [km] maximum station separation
+err_tol = parameters.err_tol; % = 0.5; % maximum misfit of bessel fit between observed and synthetic
 
 %==========================================================%
 %%
@@ -27,7 +28,6 @@ if ~exist(phv_fig_path)
 end
 
 % Set up geometry parameters
-setup_parameters_tomo;
 setup_parameters;
 station_list = parameters.station_list;
 lalim = parameters.lalim;

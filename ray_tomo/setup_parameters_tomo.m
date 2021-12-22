@@ -17,7 +17,30 @@ parameters.bathybins = [-9000 :5000: 1000];
 parameters.gridsize_azi = 0.5; %3; %1.5; % gridsize for 2D azimuthal anisotropy (degrees)
 parameters.r = 0.03; %0.01; % controls color bar [avgv(1-r) avgv(1+r)]
 
-% Smoothing parameters
+% Parameters for reading XSP files
+parameters.comp = {'ZZ'}; % component
+parameters.xspdir = 'phv_dir'; % directory name
+parameters.windir = 'window3hr'; % window type
+parameters.N_wl = 1; % number of wavelengths to consider during bessel fit measurements
+parameters.frange = [1/10 1/5]; % [Hz]
+parameters.per_ind = [1:12]; % index of periods to consider
+% QC parameters
+parameters.snr_tol = 3; % minimum signal-to-noise
+parameters.r_tol_min = 0; % [km] minimum station separation
+parameters.r_tol_max = 600; % [km] maximum station separation
+parameters.err_tol = inf; % maximum misfit of bessel fit between observed and synthetic
+parameters.is_rtolmin_wavelength = 1; parameters.wl_fac = 1.0; % determine distance tolerance by wavelength?
+parameters.dep_tol = [0 0]; % [sta1 sta2] OBS depth tolerance
+parameters.is_raydensity_thresh = 0; % Apply raydensity threshold to wipe out poorly constrained grid cells?
+parameters.min_dep = 9999; %-3500 for min station depth to use
+
+% 1-D Anisotropy parameters (1Dazi scripts)
+parameters.azi_bin_deg = 20; % (degrees) size of azimuthal data bin
+% Norm damping for azimuthal anisotropy
+parameters.damp_azi = [1 1 1e10 1e10]; % [2c 2s 4c 4s] % Damping individual parameters
+parameters.aziweight = 1; % global weight
+
+% Smoothing parameters (2D phv and anisotropy)
 parameters.smweight0 = 100; % isotropic second derivative smoothing
 parameters.smweight0_azi = 1e3; %1000; % anisotropic second derivative smoothing
 parameters.flweight0_azi = 1000; %1000; % anisotropic first derivative flatness

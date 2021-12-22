@@ -13,34 +13,37 @@ clear; close all;
 %%
 %======================= PARAMETERS =======================%
 
-% RAYLEIGH FUND MODE
-comp = {'ZZ'};
-xspdir = 'ZZ_0S_LRT_smEnv'; 
-windir = 'window3hr'; 
-N_wl = 1; %
-frange = [1/25 1/3]; % [Hz]
-per_ind = [1, 15, 20, 22, 23, 24, 26, 28, 29];
-Mp = 3; % rows for plotting
-Np = 3; % columns for plotting
-% Quality control parameters:
-snr_tol = 3; % minimum signal-to-noise
-is_rtolmin_wavelength = 1; wl_fac = 1.0; % determine distance tolerance by wavelength?
-is_raydensity_thresh = 0; % Apply raydensity threshold to wipe out poorly constrained grid cells?
-r_tol_min = 0; % [km] minimum station separation
-r_tol_max = 600; % [km] maximum station separation
-err_tol = inf; % maximum misfit of bessel fit between observed and synthetic
-azi_bin_deg = 20; % (degrees) size of azimuthal data bin
-min_dep = 9999; %-3500 for min station depth to use
-% Norm damping for azimuthal anisotropy
-damp_azi = [1 1 1e10 1e10]; % [2c 2s 4c 4s] % Damping individual parameters
-aziweight = 1; % global weight
+% Save results?
+isoutput = 1;
+savefile = ['test'];
 fastdir = 78; % Fast direction for azimuthal anisotropy (only for plotting purposes);
 iscompare_aniso = 0; % compare to old anisotropic measurements
+Mp = 4; % # of subplot rows
+Np = 4; % # of subplot columns
 
+setup_parameters_tomo;
+comp = parameters.comp; % {'ZZ'};
+xspdir = prameters.xspdir; % 'phv_dir'; %'Nomelt3inttaper_iso.s0to333_br1avg'; %'4.0_S1_10pers_avg'; %'Nomelt3inttaper_iso.s0to333_br1avg'; %'4.0_S0_waverage';
+windir = prameters.windir; %'window3hr'; 
+N_wl = parameters.N_wl;
+frange = parameters.frange; %[1/10 1/5]; % [Hz]
+per_ind = parameters.per_ind; % [1:12]; % index of periods to consider
 
-% Save results?
-isoutput = 0;
-savefile = ['test'];
+% QC parameters
+snr_tol = parameters.snr_tol; % 3; % minimum signal-to-noise
+is_rtolmin_wavelength = parameters.is_rtolmin_wavelength; % 0; 
+wl_fac = parameters.wl_fac; % 1.0; % determine distance tolerance by wavelength?
+r_tol_min = parameters.r_tol_min; %90; % [km] minimum station separation
+r_tol_max = parameters.r_tol_max; %600; % [km] maximum station separation
+err_tol = parameters.err_tol; %0.5; % maximum misfit of bessel fit between observed and synthetic
+is_raydensity_thresh = parameters.is_raydensity_thresh; % Apply raydensity threshold to wipe out poorly constrained grid cells?
+min_dep = parameters.min_dep; %= 9999; %-3500 for min station depth to use
+
+% Damping parameters
+azi_bin_deg = parameters.azi_bin_deg; % 20; % (degrees) size of azimuthal data bin
+% Norm damping for azimuthal anisotropy
+damp_azi = parameters.damp_azi; % [1 1 1e10 1e10]; % [2c 2s 4c 4s] % Damping individual parameters
+aziweight = parameters.aziweight; %1; % global weight
 
 
 %% Figure output
@@ -59,7 +62,6 @@ if iscompare_aniso
 end
 
 % Set up geometry parameters
-setup_parameters_tomo;
 setup_parameters;
 lalim = parameters.lalim;
 lolim = parameters.lolim;

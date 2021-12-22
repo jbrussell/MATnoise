@@ -12,27 +12,31 @@ clear; close all;
 
 %%
 %======================= PARAMETERS =======================%
-comp = {'ZZ'};
-xspdir = 'phv_dir'; %'Nomelt3inttaper_iso.s0to333_br1avg'; %'4.0_S1_10pers_avg'; %'Nomelt3inttaper_iso.s0to333_br1avg'; %'4.0_S0_waverage';
-windir = 'window3hr'; 
-
 % Save results?
 isoutput = 1;
 savefile = ['test'];
-
-frange = [1/10 1/5]; % [Hz]
-
-average_vel = 3.8; % [km/s] For calculating wavelength for determining r_tol_min
-
-% QC parameters
-snr_tol = 3; % minimum signal-to-noise
-is_rtolmin_wavelength = 0; wl_fac = 1.0; % determine distance tolerance by wavelength?
-r_tol_min = 90; % [km] minimum station separation
-r_tol_max = 600; % [km] maximum station separation
-err_tol = 0.5; % maximum misfit of bessel fit between observed and synthetic
-
 fastdir = 78; % Fast direction for azimuthal anisotropy (only for plotting purposes);
 iscompare_aniso = 0; % compare to old anisotropic measurements
+Mp = 4; % # of subplot rows
+Np = 4; % # of subplot columns
+
+setup_parameters_tomo;
+comp = parameters.comp; % {'ZZ'};
+xspdir = prameters.xspdir; % 'phv_dir'; %'Nomelt3inttaper_iso.s0to333_br1avg'; %'4.0_S1_10pers_avg'; %'Nomelt3inttaper_iso.s0to333_br1avg'; %'4.0_S0_waverage';
+windir = prameters.windir; %'window3hr'; 
+N_wl = parameters.N_wl;
+frange = parameters.frange; %[1/10 1/5]; % [Hz]
+per_ind = parameters.per_ind; % [1:12]; % index of periods to consider
+
+% QC parameters
+snr_tol = parameters.snr_tol; % 3; % minimum signal-to-noise
+is_rtolmin_wavelength = parameters.is_rtolmin_wavelength; % 0; 
+wl_fac = parameters.wl_fac; % 1.0; % determine distance tolerance by wavelength?
+r_tol_min = parameters.r_tol_min; %90; % [km] minimum station separation
+r_tol_max = parameters.r_tol_max; %600; % [km] maximum station separation
+err_tol = parameters.err_tol; %0.5; % maximum misfit of bessel fit between observed and synthetic
+is_raydensity_thresh = parameters.is_raydensity_thresh; % Apply raydensity threshold to wipe out poorly constrained grid cells?
+min_dep = parameters.min_dep; %= 9999; %-3500 for min station depth to use
 
 %==========================================================%
 %%
@@ -43,7 +47,6 @@ if iscompare_aniso
 end
 
 % Set up geometry parameters
-setup_parameters_tomo;
 setup_parameters;
 lalim = parameters.lalim;
 lolim = parameters.lolim;
@@ -64,6 +67,10 @@ damp0_azi = parameters.damp0_azi;
 dterrtol = parameters.dterrtol;
 raydensetol = parameters.raydensetol;
 raydensetol_azi = parameters.raydensetol_azi;
+if ~is_raydensity_thresh 
+    raydensetol = 1;
+    raydensetol_azi = 1;
+end
 r = parameters.r;
 
 xnode=lalim(1):gridsize:lalim(2);
