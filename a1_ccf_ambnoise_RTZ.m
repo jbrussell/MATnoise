@@ -281,12 +281,22 @@ for ista1=1:nsta
             data2cZ =  [datadir,sta2,'/',year,'/',data2cZ.name];
 
             %------------------- TEST IF DATA EXIST------------------------
-            [S1H1t,S1H1raw,~,S1H1tstart] = load_sac(data1cH1);
-            [S1H2t,S1H2raw,~,S1H2tstart] = load_sac(data1cH2);
-            [S1Zt,S1Zraw,S1,S1Ztstart] = load_sac(data1cZ);
-            [S2H1t,S2H1raw,~,S2H1tstart] = load_sac(data2cH1);
-            [S2H2t,S2H2raw,~,S2H2tstart] = load_sac(data2cH2);
-            [S2Zt,S2Zraw,S2,S2Ztstart] = load_sac(data2cZ);
+            try
+                [S1H1t,S1H1raw,~,S1H1tstart] = load_sac(data1cH1);
+                [S1H2t,S1H2raw,~,S1H2tstart] = load_sac(data1cH2);
+                [S1Zt,S1Zraw,S1,S1Ztstart] = load_sac(data1cZ);
+            catch
+                disp(['Problem loading all channels from ',sta1,'... skipping'])
+                continue
+            end
+            try
+                [S2H1t,S2H1raw,~,S2H1tstart] = load_sac(data2cH1);
+                [S2H2t,S2H2raw,~,S2H2tstart] = load_sac(data2cH2);
+                [S2Zt,S2Zraw,S2,S2Ztstart] = load_sac(data2cZ);
+            catch
+                disp(['Problem loading all channels from ',sta2,'... skipping'])
+                continue
+            end
             
             % Make sure all times are relative to same reference point
             starttime = S1Ztstart;
