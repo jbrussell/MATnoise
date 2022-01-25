@@ -302,7 +302,7 @@ for ista1=1:nsta
                 dist=deg2km(delta);
 
                 Delta=S1.DELTA;
-                if(abs(Delta-dt) >= 0.01*dt )
+                if (abs(S1.DELTA-dt) >= 0.01*dt ) || (abs(S2.DELTA-dt) >= 0.01*dt )
                     error('sampling interval does not match data! check dt');
                 end
 

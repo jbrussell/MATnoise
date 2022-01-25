@@ -282,16 +282,16 @@ for ista1=1:nsta
 
             %------------------- TEST IF DATA EXIST------------------------
             try
-                [S1H1t,S1H1raw,~,S1H1tstart] = load_sac(data1cH1);
-                [S1H2t,S1H2raw,~,S1H2tstart] = load_sac(data1cH2);
+                [S1H1t,S1H1raw,S1H1,S1H1tstart] = load_sac(data1cH1);
+                [S1H2t,S1H2raw,S1H2,S1H2tstart] = load_sac(data1cH2);
                 [S1Zt,S1Zraw,S1,S1Ztstart] = load_sac(data1cZ);
             catch
                 disp(['Problem loading all channels from ',sta1,'... skipping'])
                 continue
             end
             try
-                [S2H1t,S2H1raw,~,S2H1tstart] = load_sac(data2cH1);
-                [S2H2t,S2H2raw,~,S2H2tstart] = load_sac(data2cH2);
+                [S2H1t,S2H1raw,S2H1,S2H1tstart] = load_sac(data2cH1);
+                [S2H2t,S2H2raw,S2H2,S2H2tstart] = load_sac(data2cH2);
                 [S2Zt,S2Zraw,S2,S2Ztstart] = load_sac(data2cZ);
             catch
                 disp(['Problem loading all channels from ',sta2,'... skipping'])
@@ -389,7 +389,8 @@ for ista1=1:nsta
                 dist=deg2km(delta);
 
                 Delta=S1.DELTA;
-                if(abs(Delta-dt) >= 0.01*dt )
+                if (abs(S1.DELTA-dt) >= 0.01*dt ) || (abs(S1H1.DELTA-dt) >= 0.01*dt ) || (abs(S1H2.DELTA-dt) >= 0.01*dt ) || ...
+                   (abs(S2.DELTA-dt) >= 0.01*dt ) || (abs(S2H1.DELTA-dt) >= 0.01*dt ) || (abs(S2H2.DELTA-dt) >= 0.01*dt )
                     error('sampling interval does not match data! check dt');
                 end
 
