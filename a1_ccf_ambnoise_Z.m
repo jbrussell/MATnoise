@@ -232,6 +232,11 @@ for ista1=1:nsta
             if abs(seconds(S1Ztstart-S2Ztstart)) > S1.DELTA
                 error('Station files do not have same start time');
             end
+            
+            % Make sure sample rates all match
+            if (abs(S1.DELTA-dt) >= 0.01*dt ) || (abs(S2.DELTA-dt) >= 0.01*dt )
+                error('sampling interval does not match data! check dt');
+            end
 
             %------------------- Remove instrument response ------------------------
         if IsRemoveIR
@@ -300,11 +305,6 @@ for ista1=1:nsta
                 [delta,S2az]=distance(lat2,lon2,lat1,lon1);
 
                 dist=deg2km(delta);
-
-                Delta=S1.DELTA;
-                if (abs(S1.DELTA-dt) >= 0.01*dt ) || (abs(S2.DELTA-dt) >= 0.01*dt )
-                    error('sampling interval does not match data! check dt');
-                end
 
                 if(dist < dist_min)
                     display(['distance shorter than ',num2str(dist_min),' km, skip']);
