@@ -71,7 +71,7 @@ for i = 1:nray
 	% closest to
 
 	[lat_way,lon_way] = gcwaypts(lat1,lon1,lat2,lon2,Nr);
-    dr = gc_raydr_km(lat_way,lon_way);
+    [dr, azi_ray] = gc_raydr_km(lat_way,lon_way);
 	% mid point location of segment
 	xv = 0.5*(lat_way(1:Nr)+lat_way(2:Nr+1));
 	yv = 0.5*(lon_way(1:Nr)+lon_way(2:Nr+1));
@@ -88,10 +88,12 @@ for i = 1:nray
     % sum binned dr values
     qv = sort(qv);    
     drq = zeros(size(unique(qv)'));
+    azq = zeros(size(unique(qv)'));
     ii = 0;
     for iq = unique(qv)'
         ii = ii+1;
         drq(ii) = sum(dr(qv==iq));
+        azq(ii) = mean(azi_ray(qv==iq));
     end
     % now count of the ray segments in each pixel of the
     % image, and use the count to increment the appropriate
@@ -99,8 +101,8 @@ for i = 1:nray
     % the counting is a bit weird, but it seems to work
     count=hist(qv,bins); 
     icount = find( count~=0 );
-    Gc(i,icount) = Gc(i,icount) + drq.*cosd(2*azi);
-    Gs(i,icount) = Gs(i,icount) + drq.*sind(2*azi);
+    Gc(i,icount) = Gc(i,icount) + drq.*cosd(2*azq);
+    Gs(i,icount) = Gs(i,icount) + drq.*sind(2*azq);
     G_hits(i, icount) = G_hits(i,icount) + drq;
     
     % plot paths
@@ -172,14 +174,15 @@ G = [Gc, Gs];
 
 return
 
-function [dr_ray] = gc_raydr_km(lat_way,lon_way)
+function [dr_ray,azi_ray] = gc_raydr_km(lat_way,lon_way)
     % Calculate dr vector in units of km for lat-lon waypoints using great circle
     % approximations along each segment. (If assume straight rays, can
     % accumulate errors of ~20% !)
     % JBR 5/8/2020
     %
-    dr_ray = distance(lat_way(1:end-1),lon_way(1:end-1),...
-                             lat_way(2:end),lon_way(2:end),referenceEllipsoid('GRS80'))/1000;
+    [dr_ray,azi_ray] = distance(lat_way(1:end-1),lon_way(1:end-1),...
+                             lat_way(2:end),lon_way(2:end),referenceEllipsoid('GRS80'));
+    dr_ray = dr_ray / 1000;
 end
 
 end
