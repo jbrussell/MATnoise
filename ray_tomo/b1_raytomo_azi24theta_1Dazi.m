@@ -101,7 +101,7 @@ end
 % Set up initial smoothing kernel
 [i,j] = ndgrid(1:Nx,2:(Ny-1));
 ind = j(:) + Ny*(i(:)-1);
-dy = diff(ynode);
+dy = diff(ynode)*cosd(mean(xnode));  % correct smoothing for latitude;
 dy1 = dy(j(:)-1);
 dy2 = dy(j(:));
 Areg = sparse(repmat(ind,1,3),[ind-1,ind,ind+1], ...
