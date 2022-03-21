@@ -14,17 +14,19 @@ Ny = length(ynode);
 % Smoothing in y
 [i,j] = ndgrid(1:Nx,1:(Ny-1));
 ind = j(:) + Ny*(i(:)-1);
-dy = diff(ynode);
-% dy1 = dy(j(:)-1);
-dy2 = dy(j(:));
+% dy = diff(ynode);
+% % dy1 = dy(j(:)-1);
+% dy2 = dy(j(:));
+dy2 = km2deg(distance(xnode(i),ynode(j),xnode(i),ynode(j+1),referenceEllipsoid('GRS80'))/1000);
 Areg = sparse(repmat(ind,1,2),[ind,ind+1], ...
     [-1./dy2, 1./dy2],N,N);
 % Smoothing in x
 [i,j] = ndgrid(1:(Nx-1),1:Ny);
 ind = j(:) + Ny*(i(:)-1);
-dx = diff(xnode);
-% dx1 = dx(i(:)-1);
-dx2 = dx(i(:));
+% dx = diff(xnode);
+% % dx1 = dx(i(:)-1);
+% dx2 = dx(i(:));
+dx2 = km2deg(distance(xnode(i),ynode(j),xnode(i+1),ynode(j),referenceEllipsoid('GRS80'))/1000);
 Areg = [Areg;sparse(repmat(ind,1,2),[ind,ind+Ny], ...
     [-1./dx2, 1./dx2],N,N)];
 F=Areg;
