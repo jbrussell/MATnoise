@@ -217,8 +217,8 @@ for ip=1:length(Tperiods)
         phv_std(raynum,1) = xspsum(ixsp).c_std(ip);
         dt_std(raynum,1) = abs( dt(raynum).^2 / dist(raynum) * phv_std(raynum) );
         
-        dep1 = sta.dep(strcmp(xspsum(raynum).sta1,sta.name));
-        dep2 = sta.dep(strcmp(xspsum(raynum).sta2,sta.name));
+        dep1 = sta.dep(strcmp(xspsum(ixsp).sta1,sta.name));
+        dep2 = sta.dep(strcmp(xspsum(ixsp).sta2,sta.name));
         dep(raynum) = mean([dep1 dep2]);
         
         %JRB - load azimuthal anisotropy
