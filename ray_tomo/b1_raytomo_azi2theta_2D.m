@@ -222,7 +222,12 @@ for ip=1:length(Tperiods)
         dep(raynum) = mean([dep1 dep2]);
         
         %JRB - load azimuthal anisotropy
-        [~,azi(raynum)]=distance(xspsum(ixsp).lat1,xspsum(ixsp).lon1,xspsum(ixsp).lat2,xspsum(ixsp).lon2);
+        Nr = 100;
+        [lat_way,lon_way] = gcwaypts(rays(raynum,1),rays(raynum,2),rays(raynum,3),rays(raynum,4),Nr);
+        [dr_ray,azi_ray] = distance(lat_way(1:end-1),lon_way(1:end-1),...
+                             lat_way(2:end),lon_way(2:end),referenceEllipsoid('GRS80'));
+        rayazi_mean = angmean(azi_ray(:)*pi/180)*180/pi;
+        azi(raynum) = rayazi_mean;
         if azi(raynum) > 180
             azi(raynum) = azi(raynum) - 360;
         end
