@@ -188,6 +188,9 @@ function [t1, t2, d] = readsac(filenames)
 %
 %        Xiaoning Yang, xyang@lanl.gov   2002, 2008
 %
+% jbrussell 3/29/2022: updated "char" to "uchar" for compatibility with newer
+% versions of matlab. Credit to William Hawley for finding this quick fix.
+%
 
 % process input argument
 if nargin < 1
@@ -253,7 +256,8 @@ for f = 1:nfiles
          [A count1] = fread(fid, [70 1], 'float32');
          [B count2] = fread(fid, [40 1], 'int32');
       end
-      [C count3] = fread(fid, [1 192], 'char');
+      % [C count3] = fread(fid, [1 192], 'char');
+      [C count3] = fread(fid, [1 192], 'uchar');
       C = char(C);
 
       % process valid SAC data file
