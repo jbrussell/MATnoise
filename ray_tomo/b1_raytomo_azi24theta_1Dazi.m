@@ -293,15 +293,16 @@ for ip=1:length(Tperiods)
     % Calculate the weighting matrix
     W = sparse(length(dt),length(dt));
     for i=1:length(dt)
-        W(i,i)=1./fiterr(i);
+        % W(i,i)=1./fiterr(i);
+        W(i,i)=1./dt_std(i);
     end
-    ind = find(W > maxerrweight);
-    W(ind) = maxerrweight;
-    ind = find(W < 1/fiterrtol);
-    W(ind) = 0;
-    for i=1:length(dt)
-        W(i,i)=W(i,i).*(csnum(i).^0.5);
-    end
+    % ind = find(W > maxerrweight);
+    % W(ind) = maxerrweight;
+    % ind = find(W < 1/fiterrtol);
+    % W(ind) = 0;
+    % for i=1:length(dt)
+    %     W(i,i)=W(i,i).*(csnum(i).^0.5);
+    % end
     para = polyfit(dist(:),dt,1);
     polyerr = polyval(para,dist(:)) - dt;
     errind = find(abs(polyerr) > polyfit_dt_err);
@@ -380,8 +381,8 @@ for ip=1:length(Tperiods)
     end
     
     % Calculate model resolution and chi2
-    Ginv = (A'*A)\mat'*W.^2;
-    R = Ginv * mat; % model resolution
+    Ginv = (A'*A)\mat'*W;
+    R = Ginv * W*mat; % model resolution
     Rdiag = diag(R);
     [~,~,resol] = vec2mesh(ynode,xnode,Rdiag(1:Nx*Ny));
     % degrees of freedom
@@ -394,7 +395,8 @@ for ip=1:length(Tperiods)
     chi2 = nansum(res.^2./dt_std.^2)/v;
     
     % Calculate model uncertainties
-    slo_std = diag(Ginv*diag(rms_res.^2)*Ginv').^(1/2);
+    % slo_std = diag(Ginv*diag(rms_res.^2)*Ginv').^(1/2);
+    slo_std = diag(inv(A'*A)).^(1/2);
     % convert from dslow to dv
     phv_std = phaseg(1:Nx*Ny).^(-2) .* slo_std(1:Nx*Ny);
     [~,~,GV_std] = vec2mesh(ynode,xnode,phv_std(1:Nx*Ny));
