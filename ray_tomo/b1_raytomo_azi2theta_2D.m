@@ -282,10 +282,15 @@ for ip=1:length(Tperiods)
     
     % Calculate the weighting matrix
     W = sparse(length(dt),length(dt));
+    dt_err_frac = dt_std./dt; % error fraction of total travel time
     for i=1:length(dt)
         % W(i,i)=1./fiterr(i);
-        W(i,i)=1./dt_std(i);
+%         W(i,i)=1./dt_std(i);
+        W(i,i)=1./dt_err_frac(i);
     end
+    dt_err_frac_thresh = prctile(dt_err_frac,5);
+    ind = find(W > 1./dt_err_frac_thresh); % avoid having a few measurements dominate the inversion
+    W(ind) = 1./dt_err_frac_thresh;
     % ind = find(W > maxerrweight);
     % W(ind) = maxerrweight;
     % ind = find(W < 1/fiterrtol);
@@ -393,7 +398,10 @@ for ip=1:length(Tperiods)
     
     % Calculate model uncertainties
     % slo_std = diag(Ginv*diag(rms_res.^2)*Ginv').^(1/2);
-    slo_std = diag(inv(A'*A)).^(1/2);
+    % slo_std = diag(inv(A'*A)).^(1/2);
+    A_dt = A;
+    A_dt(1:length(dt),:) = diag(1./dt) * A(1:length(dt),:); % scale by dt to get units correct
+    slo_std = diag(inv(A_dt'*A_dt)).^(1/2);
     % convert from dslow to dv
     phv_std = phaseg(1:Nx*Ny).^(-2) .* slo_std(1:Nx*Ny);
     [~,~,GV_std] = vec2mesh(ynode,xnode,phv_std(1:Nx*Ny));
