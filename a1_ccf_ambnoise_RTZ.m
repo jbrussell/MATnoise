@@ -1,7 +1,6 @@
 % Calculate ambient noise cross correlation record from multiple stationpairs 
 % for (Z, R, T) using the methods from Bensen et al. (2007) GJI 
 % DOI:10.1111/j.1365-246X.2007.03374.x
-% !! Currently requires data to be downsampled to 1 Hz !!
 %
 % Expects files organized like so:
 % {datadirectory}/{station}/{station}.{yyyy}.{jday}.{hh}.{mm}.{SS}.{COMP}.sac
@@ -12,6 +11,10 @@
 % extraction compared to typical one-bit noralization and whitening of Bensen et
 % al. (2007) GJI. Faster FiltFiltM() can be replaced with MATLAB's slower 
 % built-in filtfilt().
+%
+% JBR, update: We have found that doing no time or frequency normalization at all
+% can produce higher SNR traces than doing one-bit or time-frequency normalization. 
+% Therefore, the default is to use the raw seismograms as is without any preprocessing.
 %
 % (NOTE: FUNCTIONIZE IN THE FUTURE)
 % Patty Lin -- 10/2014
