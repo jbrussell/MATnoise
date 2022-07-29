@@ -600,8 +600,8 @@ for ip=per_ind
     levels = linspace(avgv*(1-r), avgv*(1+r),100);
     contourfm(xi,yi,raytomo(ip).GV,levels,'edgecolor','none');
 %     drawlocal
-%     title([num2str(round(Tperiods(ip))),' s'],'fontsize',15)
-    text(0.05,0.85,[num2str(round(Tperiods(ip))),' s'],'fontsize',15,'fontweight','bold','Units','normalized','HorizontalAlignment','left');
+    title([num2str((Tperiods(ip))),' s'],'fontsize',15)
+    % text(0.05,0.85,[num2str(round(Tperiods(ip))),' s'],'fontsize',15,'fontweight','bold','Units','normalized','HorizontalAlignment','left');
     caxis([avgv*(1-r) avgv*(1+r)])
     cb = colorbar;
     ylabel(cb,'Phase Velocity (km/s)','fontsize',15);
@@ -639,15 +639,17 @@ for ip=per_ind
     avgv = nanmean(raytomo(ip).GV(:));
     resid = (raytomo(ip).GV-avgv)./avgv;
 %     surfacem(xi,yi,resid);
-    levels = linspace(vperc(1),vperc(2),10)*100;
+    % levels = linspace(vperc(1),vperc(2),10)*100;
+    levels = [-r:0.0025:r]*100;
     contourfm(xi,yi,resid*100,levels);
 %     drawlocal
     title([num2str(Tperiods(ip))],'fontsize',15)
 %     caxis([-r r])
     caxis([min(levels) max(levels)])
-    colorbar
+    cb = colorbar;
+    ylabel(cb,'{\delta}c/c (%)','fontsize',15);
 %     colormap(seiscmap)
-    rbc = flip(redbluecmap);
+    rbc = flip(redblue(length(levels)-1));
 %     rbc = rbc([1 2 3 4 5 7 8 9 10 11],:);
     colormap(rbc);
     
@@ -726,12 +728,13 @@ for ip=per_ind
 subplot(Mp,Np,ii)
     ax = worldmap(lalim, lolim);
     set(ax, 'Visible', 'off')
-    surfacem(xi,yi,raytomo(ip).raydense);
+    surfacem(xi,yi,raytomo(ip).raydense ./ deg2km(gridsize));
 %     drawlocal
     title([num2str(Tperiods(ip))],'fontsize',15)
-    colorbar
+    cb = colorbar;
+    ylabel(cb,'Hits','fontsize',15);
     colormap(flip(hot));
-    caxis([0 500])
+    caxis([0 20])
 end
 save2pdf([phv_fig_path,'TEI19_',comp{1}(1),'_','r',num2str(r_tol_min),'_',num2str(r_tol_max),'_snr',num2str(snr_tol),'_err',num2str(err_tol),'_raydense_TEI19.pdf'],fig18,1000);
 
