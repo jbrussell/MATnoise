@@ -298,7 +298,7 @@ for ip=1:length(Tperiods)
 %         W(i,i)=1./dt_std(i);
         W(i,i)=1./dt_err_frac(i);
     end
-    dt_err_frac_thresh = prctile(dt_err_frac,5);
+    dt_err_frac_thresh = prctile(dt_err_frac,25); % 25th percentile cutoff
     ind = find(W > 1./dt_err_frac_thresh); % avoid having a few measurements dominate the inversion
     W(ind) = 1./dt_err_frac_thresh;
     % ind = find(W > maxerrweight);
