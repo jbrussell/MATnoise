@@ -314,7 +314,7 @@ for ip=1:length(Tperiods)
         plot([min(dist),max(dist)],1./dt_err_frac_thresh*[1 1],'--g','linewidth',2);
         xlabel('Distance (km)');
         ylabel('Weighting');
-        legend({'no threshold','with threshold','threshold'},'location','eastoutside')
+        legend({'before threshold','after threshold','threshold'},'location','eastoutside')
         pause;
     end
     
