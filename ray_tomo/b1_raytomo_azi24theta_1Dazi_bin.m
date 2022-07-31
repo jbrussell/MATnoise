@@ -314,6 +314,19 @@ for ip=1:length(Tperiods)
         W(i,i) = 0;
     end
     
+    if 0 % Set [1] to plot
+        % Plot data weighting threshold
+        figure(99); clf;
+        w = diag(W);
+        plot(dist,1./dt_err_frac,'.r'); hold on;
+        plot(dist,w,'ob'); hold on;
+        plot([min(dist),max(dist)],1./dt_err_frac_thresh*[1 1],'--g','linewidth',2);
+        xlabel('Distance (km)');
+        ylabel('Weighting');
+        legend({'no threshold','with threshold','threshold'},'location','eastoutside')
+        pause;
+    end
+    
     % calculate the smoothing weight
     smweight = smweight0;
     NR=norm(F,1);
