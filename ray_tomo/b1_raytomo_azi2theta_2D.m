@@ -443,10 +443,13 @@ for ip=1:length(Tperiods)
             end
         end
     end
+    Igood = find(diag(W)~=0);
+    mat_azi_hits_good = mat_azi_hits(Igood,:);
     for i=1:Nx_azi
         for j=1:Ny_azi 
             n=Ny_azi*(i-1)+j;
-            raydense_azi(i,j) = sum(mat_azi_hits(:,n));
+%             raydense_azi(i,j) = sum(mat_azi_hits(:,n));
+            raydense_azi(i,j) = sum(mat_azi_hits_good(:,n));
             if raydense_azi(i,j) < raydensetol_azi
                 phaseg_azic(n)=NaN;
                 phaseg_azis(n)=NaN;
