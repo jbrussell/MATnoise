@@ -661,20 +661,25 @@ save2pdf([phv_fig_path,'',comp{1}(1),'_','r',num2str(r_tol_min),'_',num2str(r_to
 % load('age_grid.mat');
 
 fig19 = figure(19);
-set(gcf,'position',[1    1   1244   704],'color','w');
+set(gcf,'position',[1    1   1244   704]);
 clf
 vperc = [-r r];
-for ip=1:length(Tperiods)
-    subplot(Mp,Np,ip)
+ii = 0;
+for ip=per_ind
+    ii = ii + 1;
+    subplot(Mp,Np,ii)
     ax = worldmap(lalim, lolim);
     set(ax, 'Visible', 'off')
     set(gcf,'color',[0.9 0.9 0.9])
     avgv = nanmean(raytomo(ip).GV(:));
     resid = (raytomo(ip).GV-avgv)./avgv;
+%     surfacem(xi,yi,resid);
     % levels = linspace(vperc(1),vperc(2),10)*100;
     levels = [-r:0.0025:r]*100;
     contourfm(xi,yi,resid*100,levels);
+%     drawlocal
     title([num2str(Tperiods(ip))],'fontsize',15)
+%     caxis([-r r])
     caxis([min(levels) max(levels)])
     cb = colorbar;
     ylabel(cb,'{\delta}c/c (%)','fontsize',15);
@@ -687,7 +692,7 @@ for ip=1:length(Tperiods)
     plotm(sta.lat,sta.lon,'ok','markerfacecolor',[0 0 0]);
 %     [c,h] = contourm(age_grid.LAT,age_grid.LON,age_grid.AGE,'k','LevelStep',5);
 end
-% save2pdf([phv_fig_path,comp{1}(1),'_','r',num2str(r_tol_min),'_',num2str(r_tol_max),'_snr',num2str(snr_tol),'_err',num2str(err_tol),'_raytomo_perc.pdf'],fig19,1000);
+save2pdf([phv_fig_path,'TEI19_',comp{1}(1),'_','r',num2str(r_tol_min),'_',num2str(r_tol_max),'_snr',num2str(snr_tol),'_err',num2str(err_tol),'_raytomo_TEI19_perc.pdf'],fig19,1000);
 
 %%
 % MODEL RESOLUTION
@@ -750,11 +755,12 @@ end
 %%
 % RAY DENSITY
 fig18 = figure(18);
-set(gcf,'position',[1    1   1244   704],'color','w');
+set(gcf,'position',[94     1   599   704]);
 clf
-
-for ip=1:length(Tperiods)
-subplot(Mp,Np,ip)
+ii = 0;
+for ip=per_ind
+    ii = ii + 1;
+subplot(Mp,Np,ii)
     ax = worldmap(lalim, lolim);
     set(ax, 'Visible', 'off')
     surfacem(xi,yi,raytomo(ip).raydense ./ deg2km(gridsize));
@@ -765,7 +771,7 @@ subplot(Mp,Np,ip)
     colormap(flip(hot));
     caxis([0 20])
 end
-save2pdf([phv_fig_path,comp{1}(1),'_','r',num2str(r_tol_min),'_',num2str(r_tol_max),'_snr',num2str(snr_tol),'_err',num2str(err_tol),'_raydense.pdf'],fig18,1000);
+save2pdf([phv_fig_path,'TEI19_',comp{1}(1),'_','r',num2str(r_tol_min),'_',num2str(r_tol_max),'_snr',num2str(snr_tol),'_err',num2str(err_tol),'_raydense_TEI19.pdf'],fig18,1000);
 
 % % ERRORS ON XSP
 % fig19 = figure(19)
