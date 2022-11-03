@@ -18,7 +18,7 @@ parameters.gridsize = 0.25; % degrees?
 
 % Parameters for reading in matnoise Bessel fits
 % RAYLEIGH 1st OVERTONE
-parameters.station_list = '../stations_all.txt';
+parameters.station_list = './stations_all.txt';
 parameters.compnoise = {'ZZ'}; % component
 parameters.xspdir = 'ZZ_1S_LRT_N20'; % directory name
 parameters.windir = 'window3hr_Zcorr_tiltcomp'; % window type
