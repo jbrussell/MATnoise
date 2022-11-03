@@ -71,7 +71,12 @@ for iev = 1:length(sta.name)
         if strcmp(stasrc,sta1)
             continue
         end
-        temp = load([Xsp_path,'/',stasrc,'_',sta1,'_xsp.mat']);
+        file_sta1 = [Xsp_path,'/',stasrc,'_',sta1,'_xsp.mat'];
+        if ~exist(file_sta1)
+            disp(['No file for ',stasrc,'_',sta1,'... skipping']);
+            continue
+        end
+        temp = load(file_sta1);
         xspinfo1 = temp.xspinfo;
         % Treat station 1 as the source
         evla = xspinfo1.lat1;
@@ -89,8 +94,13 @@ for iev = 1:length(sta.name)
             if strcmp(sta1,sta2) || strcmp(stasrc,sta2)
                 continue
             end
+            file_sta2 = [Xsp_path,'/',stasrc,'_',sta2,'_xsp.mat'];
+            if ~exist(file_sta2)
+                disp(['No file for ',stasrc,'_',sta2,'... skipping']);
+                continue
+            end
             ii = ii+1;
-            temp = load([Xsp_path,'/',stasrc,'_',sta2,'_xsp.mat']);
+            temp = load(file_sta2);
             xspinfo2 = temp.xspinfo;
             % Treat station 2 as the receiver (2)
             lat2 = xspinfo2.lat2;
