@@ -40,7 +40,7 @@ if exist('periods.mat')
     parameters.periods = periods;
 else
 %     parameters.periods = round(logspace(log10(20),log10(150),15));
-    parameters.periods = ones(length(parameters.per_ind));
+    parameters.periods = ones(1,length(parameters.per_ind));
 end
 
 
