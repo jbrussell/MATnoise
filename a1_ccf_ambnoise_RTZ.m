@@ -301,6 +301,11 @@ for ista1=1:nsta
                 continue
             end
             
+            % Check that sample rates are the same
+            if S1.DELTA ~= S2.DELTA || S1H1.DELTA ~= S2H1.DELTA || S1H2.DELTA ~= S2H2.DELTA
+                error('S1 and S2 sample rates don''t match!');
+            end
+            
             % Make sure all times are relative to same reference point
             starttime = S1Ztstart;
             S1H1t = S1H1t + seconds(S1H1tstart-starttime);

@@ -226,6 +226,11 @@ for ista1=1:nsta
             [S1Zt,S1Zraw,S1,S1Ztstart] = load_sac(data1cZ);
             [S2Zt,S2Zraw,S2,S2Ztstart] = load_sac(data2cZ);
             
+            % Check that sample rates are the same
+            if S1.DELTA ~= S2.DELTA
+                error('S1 and S2 sample rates don''t match!');
+            end
+            
             % Make sure all times are relative to same reference point
             starttime = S1Ztstart;
             S1Zt = S1Zt + seconds(S1Ztstart-starttime);

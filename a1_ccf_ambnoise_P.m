@@ -24,24 +24,21 @@
 clear;
 setup_parameters;
 
-% strSACcomp = 'Z';
-% strNAMEcomp = 'ZZ';
-
 strSACcomp = 'BDH'; % 'Z'
 strNAMEcomp = 'PP'; % 'ZZ'
-
 IsFigure1 = 1;
 IsFigure2 = 0;
 
 % OUTPUT SETTINGS
 IsOutputFullstack = 1; % Save full year ccf stacks
 IsOutputMonthstack = 0; % save month ccf stacks
-IsOutputDaystack = 1; % save day ccf stacks
+IsOutputDaystack = 0; % save day ccf stacks
 IsOutputSinglestack = 0; % save single ccf before stacking
 IsOutputSeismograms = 0; % save raw seismograms before cross-correlating
 
 % GENERAL PROCESSING
 IsRemoveIR = 0; % remove instrument response
+units_RemoveIR = 'M'; % 'M' displacement | 'M/S' velocity
 IsDetrend = 1; % detrend the data
 IsTaper = 1; % Apply cosine taper to data chunks
 
@@ -198,7 +195,9 @@ for ista1=1:nsta
             % Check that day file exists for station 2
             Nchar = length(sta1);
             file2cZ = dir([datadir,sta2,'/',sta2,file1cZ(Nchar+1:end)]);
-            hdayid = file1cZ(6:22);
+            str = strsplit(file1cZ,'.');
+            hdayid = [str{2},'.',str{3},'.',str{4},'.',str{5},'.',str{6}];
+            
             if isempty(file2cZ)
                 disp(['No data for ',sta2,' on day ',hdayid,'... skipping'])
                 continue
@@ -227,87 +226,45 @@ for ista1=1:nsta
             [S1Zt,S1Zraw,S1,S1Ztstart] = load_sac(data1cZ);
             [S2Zt,S2Zraw,S2,S2Ztstart] = load_sac(data2cZ);
             
-            S2Zt = S2Zt + seconds(S2Ztstart-S1Ztstart);
+            % Check that sample rates are the same
+            if S1.DELTA ~= S2.DELTA
+                error('S1 and S2 sample rates don''t match!');
+            end
             
+            % Make sure all times are relative to same reference point
             starttime = S1Ztstart;
+            S1Zt = S1Zt + seconds(S1Ztstart-starttime);
+            S2Zt = S2Zt + seconds(S2Ztstart-starttime);
             
-            
-% %             [S1Zt,S1Zraw]=readsac(data1cZ);
-% %             [S2Zt,S2Zraw]=readsac(data2cZ);
-%             S1 = readsac(data1cZ);
-%             S2 = readsac(data2cZ);
-%             S1Zraw = S1.DATA1;
-%             S2Zraw = S2.DATA1;
-%             S1Zt = [0:S1.NPTS-1]'*S1.DELTA;
-%             S2Zt = [0:S2.NPTS-1]'*S2.DELTA;
-%             
-%             tstart1 = datetime(S1.NZYEAR,1,S1.NZJDAY,S1.NZHOUR,S1.NZMIN,S1.NZSEC,S1.NZMSEC);
-%             tstart2 = datetime(S2.NZYEAR,1,S2.NZJDAY,S2.NZHOUR,S2.NZMIN,S2.NZSEC,S2.NZMSEC);
-% %             datestr(tstart2,'YYYYmmddHHMMSSFFF')
-% 
-%             S2Zt = S2Zt + seconds(tstart2-tstart1);
-                        
             % Ensure that files have same start time to within 1 sample
             if abs(seconds(S1Ztstart-S2Ztstart)) > S1.DELTA
                 error('Station files do not have same start time');
             end
             
+            % Make sure sample rates all match
             if (abs(S1.DELTA-dt) >= 0.01*dt ) || (abs(S2.DELTA-dt) >= 0.01*dt )
                 error('sampling interval does not match data! check dt');
             end
-            
+
             %------------------- Remove instrument response ------------------------
         if IsRemoveIR
-            pzfile1 = dir([PZpath,'SAC_PZs_*',sta1,'_*Z_*']); % PZ for H1 and H2 are identical
-            pzfile2 = dir([PZpath,'SAC_PZs_*',sta2,'_*Z_*']);
+            pzfile1 = dir([PZpath,'/RESP.*.',sta1,'.*.*Z']); % PZ for H1 and H2 are identical
+            pzfile2 = dir([PZpath,'/RESP.*.',sta2,'.*.*Z']);
 
-            % do lazy checks to make sure only one PZ file is found for each station
-            if length(pzfile1) ~= 1
-                pzfile = pzfile1;
+            % Read RESP file for station 1
+            [z,p,c,units] = read_sac_RESP([PZpath,pzfile1.name],units_RemoveIR);
 
-                % Figure out which response to read
-                for ii = 1:length(pzfile)
-                    pzdate(ii) = doy2date(str2num(pzfile(ii).name(19:21)),str2num(pzfile(ii).name(14:17)));
-                end
-                otime = datenum(hdayid,'yyyymmddHHMMSS');
-                ind = find(abs(otime-pzdate) == min(abs(otime-pzdate)));
-                if ind > length(pzfile) & ind > 1
-                    ind = ind(end)-1;
-                end
-                pzfile = pzfile(ind);
-                pzfile1 = pzfile;
+            dt1 = abs(S1Zt(1)-S1Zt(2));
+            dt2 = abs(S2Zt(1)-S2Zt(2));
 
-            elseif length(pzfile2) ~= 1
-                pzfile = pzfile2;
+            % Remove instrument response for station 1 Z
+            S1Zraw = rm_resp(S1Zraw,z,p,c,dt1);
 
-                % Figure out which response to read
-                for ii = 1:length(pzfile)
-                    pzdate(ii) = doy2date(str2num(pzfile(ii).name(19:21)),str2num(pzfile(ii).name(14:17)));
-                end
-                otime = datenum(hdayid,'yyyymmddHHMMSS');
-                ind = find(abs(otime-pzdate) == min(abs(otime-pzdate)));
-                if ind > length(pzfile) & ind > 1
-                    ind = ind(end)-1;
-                end
-                pzfile = pzfile(ind);
-                pzfile2 = pzfile;
-            end
-            dt_new = parameters.dt;
+            % Read RESP file for station 2
+            [z,p,c,units] = read_sac_RESP([PZpath,pzfile2.name],units_RemoveIR);
 
-        % Read sacpz file for station 1
-        [p,z,c] = read_SACPZ([PZpath,pzfile1.name]);
-
-        dt1 = abs(S1Zt(1)-S1Zt(2));
-        dt2 = abs(S2Zt(1)-S2Zt(2));
-
-        % Remove instrument response for station 1 Z
-        S1Zraw = rm_SACPZ(S1Zraw,z,p,c,dt1);
-
-        % Read sacpz file for station 2
-        [p,z,c] = read_SACPZ([PZpath,pzfile2.name]);
-
-        % Remove instrument response for station 2 Z
-        S2Zraw = rm_SACPZ(S2Zraw,z,p,c,dt2);
+            % Remove instrument response for station 2 Z
+            S2Zraw = rm_resp(S2Zraw,z,p,c,dt2);
         end
 
 
@@ -341,9 +298,6 @@ for ista1=1:nsta
 
             if(~exist('lat2','var'));
 
-%                 S1 = readsac(data1cZ);
-%                 S2 = readsac(data2cZ);
-
                 lat1=S1.STLA;
                 lon1=S1.STLO;
                 dep1=S1.STEL; % depth is negative for OBS and positive for land stations
@@ -369,6 +323,8 @@ for ista1=1:nsta
             stapairsinfo.stanames = {sta1,sta2};
             stapairsinfo.lats = [lat1,lat2];
             stapairsinfo.lons = [lon1,lon2];
+            stapairsinfo.dt = dt;
+            stapairsinfo.r = dist;
             
 %             % Frequency-time normalization
 %             if IsFTN
@@ -395,7 +351,6 @@ for ista1=1:nsta
             end
 			
 %             tic
-%             for iwin = 1:nwin
             parfor iwin = 1:nwin
 %				clear tcut S1R S2R S1T S2T S1Z S2Z fftS1R fftS2R fftS1T fftS2T fftS1Z fftS2Z
 
@@ -409,7 +364,7 @@ for ista1=1:nsta
                 end
 
                 if pts_begin > length(S1Zraw) || pts_begin > length(S2Zraw) || pts_end > length(S1Zraw) || pts_end > length(S2Zraw)
-% 					disp(['(',strNAMEcomp(1),') Points greater than the data... fixing window']);
+					% disp('(Z) Points greater than the data... fixing window');
 					pts_begin = length(S1Zraw)-win_length-Nstart;
                     pts_end = pts_begin+win_length;
                     %continue
@@ -510,11 +465,10 @@ for ista1=1:nsta
             
             if IsOutputDaystack
                 % Save day stack
+                daystr = datestr(starttime,'YYYYmmddHHMMSS');
                 ccfZ_daystack_path = [ccf_daystack_path,'ccf',strNAMEcomp,'/'];
                 clear coh_sum
                 coh_sum = coh_sumZ_day;
-%                 save(sprintf('%s%s/%s_%s_day%d_f.mat',ccfZ_daystack_path,sta1,sta1,sta2,ihday),'coh_sum','coh_num_day','stapairsinfo');
-                daystr = datestr(starttime,'YYYYmmddHHMMSS');
                 save(sprintf('%s%s/%s_%s_%s_f.mat',ccfZ_daystack_path,sta1,sta1,sta2,daystr),'coh_sum','coh_num_day','stapairsinfo','starttime');
             end
             if IsOutputMonthstack
@@ -542,12 +496,11 @@ for ista1=1:nsta
                 plot(faxis(ind),smooth(real(coh_sumZ(ind)/coh_num),100));
                 title(sprintf('%s %s coherency %s ,station distance: %f km',sta1,sta2,strNAMEcomp(1),dist));
                 xlim([0.01 0.5])
-%                 xlim([0.01 25])
                 %xlim([0.04 0.16])
                 xlabel('Frequency')
                 drawnow
 
-                print(f101,'-dpsc',[fig_winlength_path,sta1,'_',sta2,'.ps']);
+                print(f101,'-dpsc',[fig_winlength_path,sta1,'_',sta2,'_',strNAMEcomp,'.ps']);
                 %pause;
             end
             if IsOutputFullstack
