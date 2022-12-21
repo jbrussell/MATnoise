@@ -302,7 +302,7 @@ for ista1=1:nsta
             end
             
             % Check that sample rates are the same
-            if S1.DELTA ~= S2.DELTA || S1H1.DELTA ~= S2H1.DELTA || S1H2.DELTA ~= S2H2.DELTA
+            if S1.DELTA ~= S2.DELTA %|| S1H1.DELTA ~= S2H1.DELTA || S1H2.DELTA ~= S2H2.DELTA
                 error('S1 and S2 sample rates don''t match!');
             end
             
