@@ -138,7 +138,7 @@ stalist = parameters.stalist;
 nsta=parameters.nsta; % number of target stations to calculate for
 
 % READ OBS ORIENTATIONS
-[slist, orientations] = textread(orientation_path,'%s%f\n');
+% [slist, orientations] = textread(orientation_path,'%s%f\n');
 
 % Calculate filter coefficients for FTN
 if IsFTN

@@ -190,7 +190,7 @@ for ista1=1:nsta
         mkdir([seisH2_path,sta1]);
     end
 
-    list1 = dir([datadir,sta1,'/*Z.sac']);
+    list1 = dir([datadir,sta1,'/',comp,'Z.sac']);
 
     for ista2=1:nsta
         clear lat1 lat2 lon1 lon2 dist az baz vec_tz2 Z2raw vec_tz Z1raw
@@ -269,12 +269,12 @@ for ista1=1:nsta
 
             disp(['Looking at ',hdayid,' ',sta2]);
 
-            data1cH1=dir([datadir,sta1,'/',year,'/',sta1,'.',hdayid,'.*1.sac']);
-            data1cH2=dir([datadir,sta1,'/',year,'/',sta1,'.',hdayid,'.*2.sac']);
-            data1cZ= dir([datadir,sta1,'/',year,'/',sta1,'.',hdayid,'.*Z.sac']);
-            data2cH1=dir([datadir,sta2,'/',year,'/',sta2,'.',hdayid,'.*1.sac']);
-            data2cH2=dir([datadir,sta2,'/',year,'/',sta2,'.',hdayid,'.*2.sac']);
-            data2cZ= dir([datadir,sta2,'/',year,'/',sta2,'.',hdayid,'.*Z.sac']);
+            data1cH1=dir([datadir,sta1,'/',year,'/',sta1,'.',hdayid,'.',comp,'1.sac']);
+            data1cH2=dir([datadir,sta1,'/',year,'/',sta1,'.',hdayid,'.',comp,'2.sac']);
+            data1cZ= dir([datadir,sta1,'/',year,'/',sta1,'.',hdayid,'.',comp,'Z.sac']);
+            data2cH1=dir([datadir,sta2,'/',year,'/',sta2,'.',hdayid,'.',comp,'1.sac']);
+            data2cH2=dir([datadir,sta2,'/',year,'/',sta2,'.',hdayid,'.',comp,'2.sac']);
+            data2cZ= dir([datadir,sta2,'/',year,'/',sta2,'.',hdayid,'.',comp,'Z.sac']);
 
             data1cH1 = [datadir,sta1,'/',year,'/',data1cH1.name];
             data1cH2 = [datadir,sta1,'/',year,'/',data1cH2.name];
