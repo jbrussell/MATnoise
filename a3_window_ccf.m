@@ -94,7 +94,9 @@ for icomp = 1:length(comps) % loop over components
             sta1sta2_dist{ista1}(nstapair) = deg2km(distance(data.stapairsinfo.lats(1),data.stapairsinfo.lons(1),data.stapairsinfo.lats(2),data.stapairsinfo.lons(2)));
             
             % Window CCF                      
-            time = [-floor(N/2):1:floor(N/2)];
+            % time = [-floor(N/2):1:floor(N/2)];
+            time = ([0:N-1]-floor(N/2))*dt;
+            time = [time(time<0), time(time>=0)];
             ccf_ifft_full = fftshift(ccf_ifft_full); % Rearrange for windowing
             if sta1sta2_dist{ista1}(nstapair) >= 100  
                 t_pos = sta1sta2_dist{ista1}(nstapair)/min_grv;
@@ -158,7 +160,9 @@ end % icomp
 %%
 %----------- PLOT ALL CCFs STATION PAIRS IN DISTANCE-TIME -------------%
 N= length(ccf_ifft);
-time = [-N/2:N/2];
+% time = [-N/2:N/2];
+time = ([0:N-1]-floor(N/2))*dt;
+time = [time(time<0), time(time>=0)];
 amp = 1e1;
 indtime = find(abs(time)<=500);
 
