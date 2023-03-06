@@ -1,4 +1,4 @@
-function fout=spectrumwhiten(fin, pctwl)
+function fout=spectrumwhiten_smooth(fin, pctwl)
     % pctwl : waterlevel as percent of max (default was 0.001)
     
     % Calculate smooth spectra
