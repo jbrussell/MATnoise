@@ -276,7 +276,7 @@ if isplotwin
     plot([min(sta1sta2_dist_all) max(sta1sta2_dist_all)]/-min_grv,[min(sta1sta2_dist_all) max(sta1sta2_dist_all)],'color',[1 0 0],'linewidth',2);    
 end
 
-if isploth20 && comp(1) == 'Z'
+if isploth20 && (comp(1) == 'Z' || comp(1) == 'P')
     plot([min(sta1sta2_dist_all) max(sta1sta2_dist_all)]/h20_grv,[min(sta1sta2_dist_all) max(sta1sta2_dist_all)],'--','color',[0.5 0.5 1],'linewidth',2);
     plot([min(sta1sta2_dist_all) max(sta1sta2_dist_all)]/-h20_grv,[min(sta1sta2_dist_all) max(sta1sta2_dist_all)],'--','color',[0.5 0.5 1],'linewidth',2);
 end
