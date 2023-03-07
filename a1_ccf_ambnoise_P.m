@@ -515,7 +515,8 @@ for ista1=1:nsta
                 time = [time(time<0), time(time>=0)];
                 plot(time,ccf_ifft,'-r');
                 phv_min_win = 0.8; % km/s
-                xlim([-1 1]*max([stapairsinfo.r/phv_min_win,100]));
+                % xlim([-1 1]*max([stapairsinfo.r/phv_min_win,100]));
+                xlim([-250 250])
                 %xlim([0.04 0.16])
                 xlabel('Lag Time')
                 drawnow
