@@ -8,6 +8,7 @@ setup_parameters;
 %======================= PARAMETERS =======================%
 comp = 'ZZ'; %'ZZ'; %'RR'; %'TT';
 windir = 'window3hr'; 
+xlim_per = [1/20 1]; % Period bounds for plotting
 
 %==========================================================%
 
@@ -143,7 +144,7 @@ for ista1=1:nsta % loop over all stations
             %pause
         end
         h1 = semilogx((1./faxis(ind)),ccf_psd_log_staMean{ista1}(ind),'-k','linewidth',3);
-        xlim([2 100]);
+        xlim(xlim_per);
         xlabel('Period (s)','fontsize',18);
         ylabel('Power','fontsize',18);
         title(['reference station:',sta1,' ',comp(1)],'fontsize',18,'fontweight','bold');
@@ -159,7 +160,7 @@ for ista1=1:nsta % loop over all stations
             %pause
         end
         h1 = plot((1./faxis(ind)),ccf_psd_log_staMean{ista1}(ind),'-k','linewidth',3);
-        xlim([2 10]);
+        xlim(xlim_per);
         xlabel('Period (s)','fontsize',18);
         ylabel('Power','fontsize',18);
         title(['reference station:',sta1,' ',comp(1)],'fontsize',18,'fontweight','bold');
@@ -185,7 +186,7 @@ for istapair = 1: npairall
 end
 h1 = semilogx((1./faxis(ind)),ccf_psd_log_allMean(ind),'-k','linewidth',3);
 axis tight;
-xlim([2 100]);
+xlim(xlim_per);
 ylim([-140 -80]); 
 xlabel('Period (s)','fontsize',18);
 ylabel('Power','fontsize',18);
