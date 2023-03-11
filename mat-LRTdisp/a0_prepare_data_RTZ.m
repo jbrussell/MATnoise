@@ -28,9 +28,6 @@ snr_thresh = 5; % Signal-to-noise tolerance
 xlims = [0 500];
 ylims = [0 450];
 
-ccfpath = '../ccf/';
-% ccf_path = '/data/irma6/jrussel/YoungPacificORCA/ccf_FTN/';
-
 
 %%% --- Parameters to build up gaussian filters --- %%% 
 % (effects the width of the filter in the frequency domain)

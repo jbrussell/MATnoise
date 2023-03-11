@@ -27,9 +27,6 @@ xlims = [0 500];
 ylims = [0 470];
 IsButterworth = 1;
 
-ccfpath = '../ccf/';
-% ccf_path = '/data/irma6/jrussel/YoungPacificORCA/ccf_FTN/';
-
 %%% --- Parameters to build up gaussian filters --- %%% 
 % (effects the width of the filter in the frequency domain)
 costap_wid = 0.2; % 0 => box filter; 1 => Hann window

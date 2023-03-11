@@ -6,6 +6,7 @@ comp = 'ZZ'; %'PP'; 'RR'; 'TT';
 ccf = 'ccf';
 windir = 'window3hr';
 % windir = 'window3hr_Zcorr_tiltcomp'; % Tilt & compliance corrected
+ccfpath = '../ccf/';
 
 %% PARAMETERS
 % Normalization option for plotting
