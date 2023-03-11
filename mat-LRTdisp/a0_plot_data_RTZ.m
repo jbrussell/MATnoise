@@ -216,7 +216,8 @@ for ista1=1:nsta % loop over all stations
         %----------- PLOT CCFs IN DISTANCE-TIME -------------%
         f101 = figure(101); clf; hold on;
         N= length(ccf_ifft);
-        time = [-N/2:N/2]; % build lagtime vector for plotting
+        time = ([0:N-1]-floor(N/2))*dt;  % build lagtime vector for plotting
+        time = [time(time<0), time(time>=0)];
 %         amp = 1e1; % amplitude to plot data
         indtime = find(abs(time)<=500); % Time index -500 to 500 seconds
         set(gca,'YDir','reverse');
@@ -238,7 +239,7 @@ end % ista1
 
 %% %----------- PLOT ALL CCFs STATION PAIRS IN DISTANCE-TIME -------------%
 N= length(ccf_ifft);
-time = [0:N-1]-floor(N/2);
+time = ([0:N-1]-floor(N/2))*dt;  % build lagtime vector for plotting
 time = [time(time<0), time(time>=0)];
 % amp = 1e1;
 if isploth20 && comp(1) == 'Z'

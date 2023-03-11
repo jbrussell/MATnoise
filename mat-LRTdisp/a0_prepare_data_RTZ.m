@@ -139,7 +139,7 @@ for icomp = 1:length(comps)
             ccf_ifft = cos_taper(ccf_ifft);
 
             % Build time axis [-lag:0:lag] and index positive and negative waveforms
-            time = [0:N-1]-floor(N/2);
+            time = ([0:N-1]-floor(N/2))*dt;  % build lagtime vector for plotting
             time = [time(time<0), time(time>=0)];
             indtime_pos = find(abs(time)<=xlims(2) & time>=0);
             indtime_neg = find(abs(time)<=xlims(2) & time<=0);
