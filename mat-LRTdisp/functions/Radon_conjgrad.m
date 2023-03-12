@@ -35,9 +35,11 @@ p_block = repmat(p,iDelta,1); %repmat(p',blk_h,1);
 m0 = zeros(length(p),1);
 Rfft = zeros(ip,iF);
 rfft = zeros(size(Mfft));
+ii = 0;
 for j = f_ind(:)'
-    if mod(j,250) == 0 || j==1
-        disp([num2str(j),'/',num2str(length(f_ind))]);
+    ii = ii + 1;
+    if mod(ii,250) == 0 || ii==1
+        disp([num2str(ii),'/',num2str(length(f_ind))]);
     end
     exp_arg = -1i*2*pi*f(j).*delta_block.*p_block;
     L = exp(exp_arg);
