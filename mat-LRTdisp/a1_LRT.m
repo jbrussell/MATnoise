@@ -25,7 +25,8 @@ else
     dat = M;
 end
 tic;
-[ Rfft,f ] = Radon_conjgrad(P_axis,t,dat,Delta,f_min,f_max,maxiter,rthresh,method);
+[ Rfft,f ] = Radon_conjgrad(P_axis,t,dat,Delta,maxiter,rthresh,method);
+[ Rfft,f ] = Radon_conjgrad_fast(P_axis,t,dat,Delta,f_min,f_max,maxiter,rthresh,method);
 toc
 
 [~,I_fmin_plot] = min(abs(f-f_min)); [~,I_fmax_plot] = min(abs(f-f_max));

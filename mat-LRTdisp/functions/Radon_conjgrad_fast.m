@@ -1,5 +1,8 @@
-function [ Rfft,f ] = Radon_conjgrad(p,t,M,delta,maxiter,rthresh,method)
-% Solve radon transform using the conjugate gradient method. 
+function [ Rfft,f ] = Radon_conjgrad_fast(p,t,M,delta,f_min,f_max,maxiter,rthresh,method)
+% Solve radon transform using the conjugate gradient method. This version only calculates 
+% the frequencies of interest defined by [f_min, f_max], which can be significantly faster.
+% The disadvantage of this approach is that the waveforms cannot be reconstructed without 
+% the full frequency axis.
 %
 % Options for 4 different conjugate gradient methods:
 %
@@ -24,6 +27,9 @@ Mfft=fft(M,iF,2);
 dF=1/(t(1)-t(2));
 f = ((  [1:floor((iF+1)/2)]  -1)/iF)*dF*-1;
 
+f_ind = find(f>=f_min*0.9 & f<=f_max*1.1);
+iF_ind = length(f_ind)*2;
+
 % Define blocks
 blk_w = ip; %block width within L
 blk_h = iDelta; % block height within L
@@ -31,11 +37,13 @@ delta_block = repmat(delta,ip,1)'; %repmat(delta,1,blk_w);
 p_block = repmat(p,iDelta,1); %repmat(p',blk_h,1);
 
 m0 = zeros(length(p),1);
-Rfft = zeros(ip,iF);
-rfft = zeros(size(Mfft));
-for j = 1:length(f)
-    if mod(j,250) == 0 || j==1
-        disp([num2str(j),'/',num2str(length(f))]);
+Rfft = zeros(ip,iF_ind);
+rfft = zeros(size(Mfft,1),iF_ind);
+ii = 0;
+for j = f_ind(:)'
+    ii = ii + 1;
+    if mod(ii,250) == 0 || ii==1
+        disp([num2str(ii),'/',num2str(length(f_ind))]);
     end
     exp_arg = -1i*2*pi*f(j).*delta_block.*p_block;
     L = exp(exp_arg);
@@ -52,8 +60,10 @@ for j = 1:length(f)
         otherwise
             error('Incorrect method name. Choose CGsimple, CGG_weight, CGhestenes, CG_IRLS');
     end
-    Rfft(:,j) = m;
-    rfft(:,j) = r;
+    Rfft(:,ii) = m;
+    rfft(:,ii) = r;
 %     Rfft_est(:,j) = L*m; % d_est
 end
 
+f = f(f_ind);
+    
