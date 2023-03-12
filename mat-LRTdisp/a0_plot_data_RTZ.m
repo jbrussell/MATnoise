@@ -9,6 +9,7 @@ if ~exist('setup_parameters_MATnoise.m')
     !cp ../setup_parameters.m ./setup_parameters_MATnoise.m
 end
 setup_parameters_MATnoise;
+setup_parameters;
 IsFigure = 0;
 IsFigure_GAUS = 0; % Plot frequency domain filtered and unfiltered
 
