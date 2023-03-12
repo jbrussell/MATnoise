@@ -1,4 +1,4 @@
-function [ Rfft,f ] = Radon_conjgrad(p,t,M,delta,maxiter,rthresh,method)
+function [ Rfft,f ] = Radon_conjgrad(p,t,M,delta,f_min,f_max,maxiter,rthresh,method)
 % Solve radon transform using the conjugate gradient method. 
 %
 % Options for 4 different conjugate gradient methods:
@@ -24,6 +24,8 @@ Mfft=fft(M,iF,2);
 dF=1/(t(1)-t(2));
 f = ((  [1:floor((iF+1)/2)]  -1)/iF)*dF*-1;
 
+f_ind = find(f>=f_min*0.9 & f<=f_max*1.1);
+
 % Define blocks
 blk_w = ip; %block width within L
 blk_h = iDelta; % block height within L
@@ -33,9 +35,9 @@ p_block = repmat(p,iDelta,1); %repmat(p',blk_h,1);
 m0 = zeros(length(p),1);
 Rfft = zeros(ip,iF);
 rfft = zeros(size(Mfft));
-for j = 1:length(f)
+for j = f_ind(:)'
     if mod(j,250) == 0 || j==1
-        disp([num2str(j),'/',num2str(length(f))]);
+        disp([num2str(j),'/',num2str(length(f_ind))]);
     end
     exp_arg = -1i*2*pi*f(j).*delta_block.*p_block;
     L = exp(exp_arg);
