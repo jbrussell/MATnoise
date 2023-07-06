@@ -437,8 +437,8 @@ for ista1=1:nsta
                     end
                 end
 
-                % calcaulate daily CCF and stack for radial
-                coh_trace = fftS1Z .* conj(fftS2Z);
+                % calcaulate daily CCF and stack for radial (1-->2 Causal; 2-->1 Acausal)
+                coh_trace = fftS2Z .* conj(fftS1Z);
                 coh_trace = coh_trace ./ abs(fftS1Z) ./ abs(fftS2Z);
                 coh_trace(isnan(coh_trace)) = 0;
                 coh_sumZ = coh_sumZ + coh_trace;
