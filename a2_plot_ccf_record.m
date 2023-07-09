@@ -119,8 +119,8 @@ for ista1=1:nsta % loop over all stations
         ccf_SNR = data_SNR.coh_sum./data_SNR.coh_num;
         ccf_SNR(isnan(ccf_SNR)) = 0;
         if size(ccf,1) == 1
-            ccf = ccf';
-            ccf_SNR = ccf_SNR';
+            ccf = conj(ccf');
+            ccf_SNR = conj(ccf_SNR');
         end
         
         %%
