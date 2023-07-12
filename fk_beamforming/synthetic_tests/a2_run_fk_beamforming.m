@@ -281,7 +281,7 @@ x = s_mat.*sind(baz_mat);
 y = s_mat.*cosd(baz_mat);
 
 figure(1); clf;
-set(gcf,'position',[616   587   504   431]);
+set(gcf,'position',[616   587   504   431],'color','w');
 [h,c] = polarPcolor(s_vec,baz_vec,P_abs,'Nspokes',9,'fontsize',13);
 colormap(viridis);
 c.LineWidth = 1.5;

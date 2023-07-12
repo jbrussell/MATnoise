@@ -244,7 +244,7 @@ P_abs = P_abs / max(P_abs(:));
 P_abs = 10*log10(P_abs);
 
 figure(1); clf;
-set(gcf,'position',[616   587   504   431]);
+set(gcf,'position',[616   587   504   431],'color','w');
 [h,c] = polarPcolor(s_vec,baz_vec,P_abs,'Nspokes',9,'fontsize',13);
 colormap(viridis);
 c.LineWidth = 1.5;
