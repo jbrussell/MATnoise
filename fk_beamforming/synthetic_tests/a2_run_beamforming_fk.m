@@ -38,7 +38,7 @@ per_vec = 1./f_vec;
 % Slowness values to search over
 s_min = 1/5; % s/km
 s_max = 1/2.5; % s/km
-Nslow = 100; % s/km
+Nslow = 100;
 s_vec = linspace(s_min,s_max,Nslow);
 
 % Back-azimuth values to search over

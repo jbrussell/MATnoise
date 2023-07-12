@@ -32,8 +32,8 @@ parameters.Npers = 30; % number of periods to consider
 % Slowness values to search over
 parameters.s_min = 1/5; % s/km
 parameters.s_max = 1/2.5; % s/km
-parameters.Nslow = 100/2; % s/km
+parameters.Nslow = 100;
 
 % Back-azimuth values to search over
-parameters.Nbaz = 360/2;
+parameters.Nbaz = 360;
 
