@@ -119,14 +119,15 @@ if is_azimuthal_weight
     for ibin = 1:length(az_bins)-1
         I = find(stainfo.az>=az_bins(ibin) & stainfo.az<az_bins(ibin+1));
         az_weights(ibin) = 1/length(I);
-        stainfo.w(I) = stainfo.w(I) * (1/length(I)).^(1/2);
+        stainfo.w(I) = stainfo.w(I) * (1/length(I));
     end
 end
 
 % Down weight shorter station separations
 if is_dist_weight
     dist_weights = (stainfo.r/max(stainfo.r));
-    stainfo.w = stainfo.w .* (stainfo.r/max(stainfo.r)).^(1/3);
+    stainfo.w = stainfo.w .* (stainfo.r/max(stainfo.r));
+%     stainfo.w(stainfo.r<200) = 0;
 end
 
 %% Load data and do beamforming
