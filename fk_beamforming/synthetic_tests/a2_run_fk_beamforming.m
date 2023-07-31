@@ -168,6 +168,7 @@ end
 
 %%% --- Loop through station 1 --- %%%
 Pf = zeros(Nbaz,Nslow,Npers);
+itestflag = 0;
 for ista1= 1:nsta
     
     sta1=char(stalist(ista1,:));
@@ -231,11 +232,12 @@ for ista1= 1:nsta
         ccf_fft = 2*ccf_fft(1:Nt/2+1);
         
         % Use all available frequencies between per_min and per_max
-        if is_all_freq
+        if is_all_freq && itestflag==0
             freq = f(f>=1/per_max & f<=1/per_min);
             per_vec = 1./freq;
             Npers = length(per_vec);
             Pf = zeros(Nbaz,Nslow,Npers);
+            itestflag = 1;
         end
         
         for iper = 1:Npers
