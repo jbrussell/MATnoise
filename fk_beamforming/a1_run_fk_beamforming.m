@@ -200,6 +200,7 @@ for ista1= 1:nsta
             freq = f(f>=1/per_max & f<=1/per_min);
             per_vec = 1./freq;
             Npers = length(per_vec);
+            Pf = zeros(Nbaz,Nslow,Npers);
         end
         for iper = 1:Npers
             per = per_vec(iper);
