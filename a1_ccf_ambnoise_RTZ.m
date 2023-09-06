@@ -509,13 +509,13 @@ for ista1=1:nsta
             
             % Apply prefilter
             if IsPrefilter
-                [b,a] = butter(2,frange_prefilt*2*dt);
-                S1H1 = FiltFiltM(b,a,S1H1);
-                S1H2 = FiltFiltM(b,a,S1H2);
-                S1Z =  FiltFiltM(b,a,S1Z);
-                S2H1 = FiltFiltM(b,a,S2H1);
-                S2H2 = FiltFiltM(b,a,S2H2);
-                S2Z =  FiltFiltM(b,a,S2Z);
+                [bb,aa] = butter(2,frange_prefilt*2*dt);
+                S1H1 = FiltFiltM(bb,aa,S1H1);
+                S1H2 = FiltFiltM(bb,aa,S1H2);
+                S1Z =  FiltFiltM(bb,aa,S1Z);
+                S2H1 = FiltFiltM(bb,aa,S2H1);
+                S2H2 = FiltFiltM(bb,aa,S2H2);
+                S2Z =  FiltFiltM(bb,aa,S2Z);
             end
 
                 % ROTATE FROM H1-H2 TO R-T

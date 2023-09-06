@@ -393,9 +393,9 @@ for ista1=1:nsta
             
             % Apply prefilter
             if IsPrefilter
-                [b,a] = butter(2,frange_prefilt*2*dt);
-                S1Z =  FiltFiltM(b,a,S1Z);
-                S2Z =  FiltFiltM(b,a,S2Z);
+                [bb,aa] = butter(2,frange_prefilt*2*dt);
+                S1Z =  FiltFiltM(bb,aa,S1Z);
+                S2Z =  FiltFiltM(bb,aa,S2Z);
             end
 
                 if IsFigure2
