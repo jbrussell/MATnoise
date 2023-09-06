@@ -37,7 +37,7 @@ parameters.winlength = 3; %hours
 parameters.Nstart_sec = 50; % number of sections to offset start of seismogram
 
 %%% --- Parameters for fitbessel --- %%%
-parameters.npts = parameters.winlength*3600;
+parameters.npts = parameters.winlength*3600 / parameters.dt;
 
 %%% --- Parameters for using Radon Transform picks --- %%%
 parameters.path_LRT_picks = './mat-LRTdisp/LRT_picks/';
