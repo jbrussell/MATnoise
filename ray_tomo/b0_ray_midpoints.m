@@ -99,7 +99,7 @@ end % end of loop ixsp'
 % Loop through periods
 for ip=1:length(Tperiods)
     disp(' ');
-    disp(['Inversing Period: ',num2str(Tperiods(ip))]);
+    disp(['Inverting Period: ',num2str(Tperiods(ip))]);
     clear rays dt fiterr mat phaseg err raydense dist snrs phv phv_cor
     raynum = 0;
     
