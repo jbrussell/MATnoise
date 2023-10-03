@@ -7,6 +7,8 @@
 % functions/calc_Rayleigh_disp for a simple layered model (does not work for 
 % models with a water column).
 %
+% NEED TO CHECK THAT faxis AND waxis ARE CORRECT FOR dt~=1 !!!
+%
 % https://github.com/jbrussell
 clear
 close all;
@@ -172,6 +174,7 @@ for ista1=1:nsta
         
         data1 = load(filename);
         r1 = distance(data1.stapairsinfo.lats(1),data1.stapairsinfo.lons(1),data1.stapairsinfo.lats(2),data1.stapairsinfo.lons(2),referenceEllipsoid('GRS80'))/1000;
+        dt = data1.stapairsinfo.dt;
         groupv_max = data1.max_grv;
         groupv_min = data1.min_grv;
         
@@ -228,7 +231,6 @@ for ista1=1:nsta
         if isfigure2 
             figure(1)
             T = length(xcorf1);
-            dt = 1;
             temp_faxis = [0:1/T:1/dt/2,-1/dt/2+1/T:1/T:-1/T];
             ind = find(temp_faxis>0);
             subplot(2,1,1)
@@ -343,7 +345,6 @@ for ista1=1:nsta
             b = besselj(0,x)*A;
             b = b./mean(abs(b)).*mean([abs(xsp1)]);           
             T = length(data1.coh_sum);
-            dt = 1;
             faxis = [0:1/T:1/dt/2,-1/dt/2+1/T:1/T:-1/T];
             ind = find(faxis>0);
             plot(faxis(ind),smooth(real(data1.coh_sum_win(ind)/data1.coh_num),npts_smooth),'-k','linewidth',3); hold on;
@@ -392,7 +393,6 @@ for ista1=1:nsta
             f12 = figure(12);
             clf
             T = length(data1.coh_sum);
-            dt = 1;
             faxis = [0:1/T:1/dt/2,-1/dt/2+1/T:1/T:-1/T];
             ind = find(faxis>0);
             plot(faxis(ind),smooth(real(data1.coh_sum(ind)/data1.coh_num),npts_smooth),'-r');
