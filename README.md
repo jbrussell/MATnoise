@@ -3,8 +3,6 @@
 
 This package consists of two parts: (1) Calculation of ambient noise cross-spectra and measuring interstation phase velocities and (2) inverting interstation velocities for 1D or 2D isotropic phase velocity maps and 1D or 2D azimuthal anisotropy.
 
-> :warning: **WARNING**: This code has only been tested with data that are in 24 hour segments and have been downsampled to 1 Hz!
-
 ## 1. Ambient noise & phase velocities (a1-a7)
 - **a1** - Calculate ambient noise cross correlations (vertical, radial, transverse) in the frequency domain.
 

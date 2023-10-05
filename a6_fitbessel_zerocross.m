@@ -7,7 +7,6 @@
 % functions/calc_Rayleigh_disp for a simple layered model (does not work for 
 % models with a water column).
 %
-% NEED TO CHECK THAT faxis AND waxis ARE CORRECT FOR dt~=1 !!!
 %
 % https://github.com/jbrussell
 clear
