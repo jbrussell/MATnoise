@@ -27,7 +27,6 @@ stalist = parameters.stalist;
 nsta = parameters.nsta;
 winlength = parameters.winlength;
 figpath = parameters.figpath;
-dt = parameters.dt;
 %fig_winlength_path = [figpath,'window',num2str(winlength),'hr/fullStack/'];
 % custom directory names
     fig_winlength_path = [figpath,windir,'/fullStack/'];
@@ -81,6 +80,7 @@ for icomp = 1:length(comps) % loop over components
 
             %----------- LOAD DATA -------------%
             data = load(filename);
+            dt = data.stapairsinfo.dt; 
             ccf = data.coh_sum./data.coh_num;
             if size(ccf,1)==1
                 ccf = ccf';

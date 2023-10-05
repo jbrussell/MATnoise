@@ -8,7 +8,7 @@ setup_parameters;
 %======================= PARAMETERS =======================%
 comp = 'ZZ'; %'ZZ'; %'RR'; %'TT';
 windir = 'window3hr'; 
-xlim_per = [1/20 1]; % Period bounds for plotting
+xlim_per = [1/10 100]; % Period bounds for plotting
 
 %==========================================================%
 
@@ -19,7 +19,6 @@ figpath = parameters.figpath;
 %fig_winlength_path = [figpath,'window',num2str(winlength),'hr/fullStack/'];
 % custom directory names
     fig_winlength_path = [figpath,windir,'/fullStack/'];
-dt = parameters.dt;
 
 %------------ PATH INFORMATION -------------%
 ccf_path = parameters.ccfpath;
@@ -69,6 +68,7 @@ for ista1=1:nsta % loop over all stations
         
         %----------- LOAD DATA -------------%
         data = load(filename);
+        dt = data.stapairsinfo.dt;
         ccf = data.coh_sum_win./data.coh_num;
         if ~isempty(ccf(isnan(ccf)))
             display(['skipping ',sta1,'-',sta2]);

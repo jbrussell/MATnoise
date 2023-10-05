@@ -1,11 +1,12 @@
-function plot_SNR( ccf, grv_min, grv_max, r, ax )
+function plot_SNR( ccf, grv_min, grv_max, r, dt, ax )
 % Calc SNR within the specified group velocity window
 % JBR 7/8/18
 
 snrdata = real(ifft((ccf)));
 snrdata = fftshift(snrdata);
 NN= length(snrdata);
-lag = [-floor(NN/2):floor(NN/2)];
+lag = ([0:NN-1]-floor(NN/2))*dt;  % build lagtime vector for plotting
+lag = [lag(lag<0), lag(lag>=0)];
 win_min = r./grv_max;
 win_max = r./grv_min;
 if win_min < 15; win_min = 0; end

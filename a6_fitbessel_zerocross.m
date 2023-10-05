@@ -31,7 +31,6 @@ Ninterp = 25; % [] or Number of points to interpolate to;
 is_LRT_picks = 1; % Use picks from Radon Transform to determine starting dispersion model and frequencies
 LRT_method = 'CGG_weight';
 mode_br = 0; % desired mode branch [0=fund.]
-xlims = [1/100 1/9]; % limits for plotting
 frange_LRT = [1/100 1/10]; % Frequency range of LRT panel for reading in picks
 frange_fit = [1/40 1/10]; % Frequency range to fit over! Can be more restrictive than where picks were made
 damp = [1; 1; 1]; % [fit, smoothness, slope]
@@ -43,6 +42,8 @@ if ~is_LRT_picks
     Npers = 18; % Number of periods
     t_vec_all = 1./flip(linspace(frange_fit(1) , frange_fit(2) ,Npers)); % periods at which to extract phase velocity
 end
+
+xlims = [min(frange_fit)*0.9 max(frange_fit)*1.1]; % limits for plotting
 
 is_resume = 0; % Resume from last processed file or overwrite
 iswin = 1; % Use the time-domain windowed ccfs?
@@ -289,7 +290,7 @@ for ista1=1:nsta
         end
 
         %%% - Convert xcorf into spherical frequency - %%%
-        faxis = [0:N-1]*1/wholesec;
+        faxis = [0:(N-mod(N-1,2))/2 , -(N-mod(N,2))/2:-1]/dt/N;
         xsp1 = interp1(faxis*2*pi,xcorf1,waxis);
 
         %xsp1 = smooth(xsp1,50);
@@ -385,8 +386,8 @@ for ista1=1:nsta
 
         %% %%% Calculate SNR %%%
         xcorf1 = data1.coh_sum./data1.coh_num;
-        xcorf1_filtered = tukey_filt( xcorf1,[min(t_vec) max(t_vec)],1,0.25 );
-        [snr, signal_ind] = calc_SNR(xcorf1_filtered,groupv_min,groupv_max,r1,isfigure_snr);
+        xcorf1_filtered = tukey_filt( xcorf1,[min(t_vec) max(t_vec)],dt,0.25 );
+        [snr, signal_ind] = calc_SNR(xcorf1_filtered,groupv_min,groupv_max,r1,dt,isfigure_snr);
         %%
 
         xspinfo.filename = filename;
@@ -408,7 +409,7 @@ for ista1=1:nsta
             set(gcf,'color','w','Position',[289     1   517   704]);
 
             ax1 = subplot(3,1,1);
-            plot_SNR(xcorf1_filtered,groupv_min,groupv_max,r1,ax1);
+            plot_SNR(xcorf1_filtered,groupv_min,groupv_max,r1,dt,ax1);
             set(ax1,'box','off');
 
             % REAL PART (J0)

@@ -23,12 +23,14 @@ setup_parameters;
 comp = {'ZZ'}; %'RR'; 'ZZ'; 'TT'
 windir = 'window3hr';
 xspdir = 'phv_dir'; % output directory of phase velocities
-frange = [1/5 1/10]; % frequency range over which to fit bessel function
+% frange = [1/5 1/10]; % frequency range over which to fit bessel function
+frange = [1/14 1/25]; % frequency range over which to fit bessel function
 N_wl = 1; % Number of wavelengths required
 
 
-Npers = 21; % Number of periods
-xlims = [1/12 1/3]; % limits for plotting
+Npers = 10; % Number of periods
+% xlims = [1/12 1/3]; % limits for plotting
+xlims = [min(frange)*0.9 max(frange)*1.1]; % limits for plotting
 t_vec_all = 1./flip(linspace(frange(1) , frange(2) ,Npers)); % periods at which to extract phase velocity
 
 damp = [1; 1; 1]; % [fit, smoothness, slope]
@@ -63,12 +65,16 @@ isfigure_snr = 1;
 % 10.0000   11.2063   12.5580   14.0729   15.7704   17.6727   19.8045   22.1935   24.8706   27.8706   31.2325   35.0000
 % c = [3    3.2    3.3    3.4464    3.8400    3.9589    4.0097    4.0363    4.0515    4.0600    4.0644    4.0661];
 
-% From MINEOS .q file (https://github.com/jbrussell/MINEOS_synthetics)
-qfile = ['./qfiles/Nomelt_taper_eta_crust_INVpconstr_xi1.06_GRL19_ORCAiso_INV.s0to200.q'];
-mode = 0;
-if exist('c','var') == 0 % check if phase velocities exist, if not read them in
-    [~,~,c_all] = readMINEOS_qfile2(qfile,t_vec_all,mode);
-end
+% % From MINEOS .q file (https://github.com/jbrussell/MINEOS_synthetics)
+% qfile = ['./qfiles/Nomelt_taper_eta_crust_INVpconstr_xi1.06_GRL19_ORCAiso_INV.s0to200.q'];
+% mode = 0;
+% if exist('c','var') == 0 % check if phase velocities exist, if not read them in
+%     [~,~,c_all] = readMINEOS_qfile2(qfile,t_vec_all,mode);
+% end
+% c_start = c_all;
+% c_all_std = zeros(size(c_all));
+
+c_all = linspace(4.0,3.8,length(t_vec_all));
 c_start = c_all;
 c_all_std = zeros(size(c_all));
 %==========================================================%
@@ -246,7 +252,7 @@ for ista1=1:nsta
         end
 
         %%% - Convert xcorf into spherical frequency - %%%
-        faxis = [0:N-1]*1/wholesec;
+        faxis = [0:(N-mod(N-1,2))/2 , -(N-mod(N,2))/2:-1]/dt/N;
         xsp1 = interp1(faxis*2*pi,xcorf1,waxis);
 
         %xsp1 = smooth(xsp1,50);
@@ -311,8 +317,8 @@ for ista1=1:nsta
 
         %% %%% Calculate SNR %%%
         xcorf1 = data1.coh_sum./data1.coh_num;
-        xcorf1_filtered = tukey_filt( xcorf1,[min(t_vec) max(t_vec)],1,0.25 );
-        [snr, signal_ind] = calc_SNR(xcorf1_filtered,groupv_min,groupv_max,r1,isfigure_snr);
+        xcorf1_filtered = tukey_filt( xcorf1,[min(t_vec) max(t_vec)],dt,0.25 );
+        [snr, signal_ind] = calc_SNR(xcorf1_filtered,groupv_min,groupv_max,r1,dt,isfigure_snr);
         %%
 
         xspinfo.filename = filename;
@@ -334,7 +340,7 @@ for ista1=1:nsta
             set(gcf,'color','w','Position',[289     1   517   704]);
 
             ax1 = subplot(3,1,1);
-            plot_SNR(xcorf1_filtered,groupv_min,groupv_max,r1,ax1);
+            plot_SNR(xcorf1_filtered,groupv_min,groupv_max,r1,dt,ax1);
             set(ax1,'box','off');
 
             % REAL PART (J0)
@@ -345,7 +351,7 @@ for ista1=1:nsta
             b = besselj(0,x)*A;
             b = b./mean(abs(b)).*mean([abs(xsp1)]);           
             T = length(data1.coh_sum);
-            faxis = [0:1/T:1/dt/2,-1/dt/2+1/T:1/T:-1/T];
+            faxis = [0:(T-mod(T-1,2))/2 , -(T-mod(T,2))/2:-1]/dt/T;
             ind = find(faxis>0);
             plot(faxis(ind),smooth(real(data1.coh_sum_win(ind)/data1.coh_num),npts_smooth),'-k','linewidth',3); hold on;
             if ~iswin
@@ -393,7 +399,7 @@ for ista1=1:nsta
             f12 = figure(12);
             clf
             T = length(data1.coh_sum);
-            faxis = [0:1/T:1/dt/2,-1/dt/2+1/T:1/T:-1/T];
+            faxis = [0:(T-mod(T-1,2))/2 , -(T-mod(T,2))/2:-1]/dt/T;
             ind = find(faxis>0);
             plot(faxis(ind),smooth(real(data1.coh_sum(ind)/data1.coh_num),npts_smooth),'-r');
             xlim([frange(1) frange(2)])

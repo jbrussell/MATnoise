@@ -22,7 +22,6 @@ min_grv = 2.2; %1.6; % FOR WINDOWING!
 %==========================================================%
 xlims = [-500 500];
 
-dt = parameters.dt;
 stalist = parameters.stalist;
 % stalist =  stalist(1:21);
 nsta = length(stalist);
@@ -98,6 +97,7 @@ for ista1=1:nsta % loop over all stations
         for ifil = 1:length(fils)
             fldr = [ccf_daystack_path,'ccf',comp,'/',sta1,'/'];
             temp = load([fldr,'/',fils(ifil).name]);
+            dt = temp.stapairsinfo.dt;
         %     temp = load([fils(ifil).folder,'/',fils(ifil).name]);
             tvec(ifil) = temp.starttime;
             ccf_day = temp.coh_sum./temp.coh_num_day;

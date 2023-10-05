@@ -8,7 +8,7 @@ setup_parameters;
 
 %======================= PARAMETERS =======================%
 comp = 'ZZ'; %'ZZ'; %'RR'; %'TT';
-period_lims = [2 50];
+period_lims = [2 100];
 windir = 'window3hr';
 pts_smooth = 20; % just for plotting purposes
 issemilogx = 0;
@@ -21,7 +21,6 @@ figpath = parameters.figpath;
 %fig_winlength_path = [figpath,'window',num2str(winlength),'hr/fullStack/'];
 % custom directory names
     fig_winlength_path = [figpath,windir,'/fullStack/'];
-dt = parameters.dt;
 
 %------------ PATH INFORMATION -------------%
 ccf_path = parameters.ccfpath;
@@ -71,6 +70,7 @@ for ista1=1:nsta % loop over all stations
         
         %----------- LOAD DATA -------------%
         data = load(filename);
+        dt = data.stapairsinfo.dt;
         ccf = data.coh_sum./data.coh_num;
         ccfreal = smooth(real(ccf),pts_smooth);
         ccfimag = smooth(imag(ccf),pts_smooth);
@@ -106,9 +106,8 @@ for ista1=1:nsta % loop over all stations
         set(gcf,'position',[308   115   600   590]);
         
         subplot(3,1,1)
-        dt = 1;
         T = length(ccfreal);
-        faxis = [0:1/T:1/dt/2,-1/dt/2+1/T:1/T:-1/T];
+        faxis = [0:(T-mod(T-1,2))/2 , -(T-mod(T,2))/2:-1]/dt/T;
         ind = find(faxis>0);
         if issemilogx
             h(1) = semilogx((faxis(ind)),ccfreal(ind),'-','color',[0.5, 0.5, 0.5],'linewidth',2); hold on;
@@ -127,10 +126,6 @@ for ista1=1:nsta % loop over all stations
         set(gca,'linewidth',1.5);
         
         subplot(3,1,2)
-        dt = 1;
-        T = length(ccfimag);
-        faxis = [0:1/T:1/dt/2,-1/dt/2+1/T:1/T:-1/T];
-        ind = find(faxis>0);
         if issemilogx
             h(1) = semilogx((faxis(ind)),ccfimag(ind),'-','color',[0.5, 0.5, 0.5],'linewidth',2); hold on;
             h(2) = semilogx((faxis(ind)),ccfimag_win(ind),'-k','linewidth',2);
@@ -147,10 +142,6 @@ for ista1=1:nsta % loop over all stations
         set(gca,'linewidth',1.5);
         
         subplot(3,1,3)
-        dt = 1;
-        T = length(ccfimag);
-        faxis = [0:1/T:1/dt/2,-1/dt/2+1/T:1/T:-1/T];
-        ind = find(faxis>0);
         if issemilogx
             h(1) = semilogx((faxis(ind)),ccfamp(ind),'-','color',[0.5, 0.5, 0.5],'linewidth',2); hold on;
             h(2) = semilogx((faxis(ind)),ccfamp_win(ind),'-k','linewidth',2);
