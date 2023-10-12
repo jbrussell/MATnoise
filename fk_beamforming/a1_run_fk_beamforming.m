@@ -95,7 +95,7 @@ for ista1= 1:nsta
         ccf = fftshift(real(ifft(ccf_filtered)));
         %----------- SIGNAL TO NOISE RATIO -------------%
         isfigure_snr = 0;
-        [snr, signal_ind] = calc_SNR(ccf_filtered,min_grv_snr,max_grv_snr,r1,isfigure_snr);
+        [snr, signal_ind] = calc_SNR(ccf_filtered,min_grv_snr,max_grv_snr,r1,dt,isfigure_snr);
         
         if snr < snr_thresh
             continue
