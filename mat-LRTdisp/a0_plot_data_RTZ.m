@@ -39,7 +39,6 @@ isfigure_snr = 0;
 h20_grv = 1.5;
 %==========================================================%
 
-dt = parameters.dt;
 stalist = parameters.stalist;
 nsta = parameters.nsta;
 nsta = length(stalist);
@@ -117,6 +116,7 @@ for ista1=1:nsta % loop over all stations
         
         %----------- LOAD DATA -------------%
         data = load(filename);
+        dt = data.stapairsinfo.dt;
         data_SNR = load(filename_SNR);
         ccf = data.coh_sum./data.coh_num;
         ccf(isnan(ccf)) = 0;
@@ -204,8 +204,8 @@ for ista1=1:nsta % loop over all stations
         existpair(npairall) = {[sta1,'_',sta2]};
         
         % SNR
-        [snr(npairall), signal_ind] = calc_SNR(ccf_filtered,min_grv,max_grv,sta1sta2_dist(nstapair),isfigure_snr);
-        [snr_compare(npairall), ~] = calc_SNR(ccf_filtered_SNR,min_grv,max_grv,sta1sta2_dist(nstapair),isfigure_snr);
+        [snr(npairall), signal_ind] = calc_SNR(ccf_filtered,min_grv,max_grv,sta1sta2_dist(nstapair),dt,isfigure_snr);
+        [snr_compare(npairall), ~] = calc_SNR(ccf_filtered_SNR,min_grv,max_grv,sta1sta2_dist(nstapair),dt,isfigure_snr);
         dep1(npairall) = DEPTHS(strcmp(sta1,STAS));
         dep2(npairall) = DEPTHS(strcmp(sta2,STAS));
         

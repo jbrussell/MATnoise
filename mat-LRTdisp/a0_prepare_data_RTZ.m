@@ -40,7 +40,6 @@ isfigure_snr = 0;
 h20_grv = 1.5;
 %==========================================================%
 
-dt = parameters.dt;
 stalist = parameters.stalist;
 nsta = parameters.nsta;
 nsta = length(stalist);
@@ -117,6 +116,7 @@ for icomp = 1:length(comps)
 
             %----------- LOAD DATA -------------%
             data = load(filename);
+            dt = data.stapairsinfo.dt;
             ccf = data.coh_sum./data.coh_num;
             ccf(isnan(ccf)) = 0;
             if size(ccf,1) == 1
@@ -125,7 +125,7 @@ for icomp = 1:length(comps)
             
             % Calculate SNR
             r = distance(data.stapairsinfo.lats(1),data.stapairsinfo.lons(1),data.stapairsinfo.lats(2),data.stapairsinfo.lons(2),referenceEllipsoid('GRS80'))/1000;
-            [snr, signal_ind] = calc_SNR(ccf,min_grv,max_grv,r,isfigure_snr);
+            [snr, signal_ind] = calc_SNR(ccf,min_grv,max_grv,r,dt,isfigure_snr);
             if snr < snr_thresh
                 continue
             end
