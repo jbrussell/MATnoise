@@ -1,14 +1,25 @@
-% Run beamforming roughly following Gal et al. (2014) doi: 10.1093/gji/ggu183 
-% "Improved implementation of the fk and Capon methods for array analysis 
-% of seismic noise"
+% Calculate Array Response Function (ARF). The ARF depends only on the 
+% geometry of the seismic array and not on the data, but running it
+% after the ccfs have been calculated allows us to examine the effect of
+% SNR threshold and distance and azimuth weighting as would be done
+% with the real dataset. 
 %
-% Modeled code after: https://geophydog.cool/post/ncf_cross_spectral_beamforming/
+% See Eq. 2.16 of "Seismic Ambient Noise" by Nakata, Gualtieri, & Fichtner
 %
-% jbrussell - 7/2023
+% jbrussell - 2/2024
 
 clear; close all;
 
 setup_parameters_beamforming;
+
+%========== Define plane wave properties for Array Response Function ==========%
+
+f_p = 1/8; % [Hz] frequency of plane wave
+az_p = 0; %[deg] propagation azimuth. 0=North propagation (i.e., arriving from south)
+slow_p = 0; %1/3.5; %[s/km] slowness of plane wave (zero gives vertically incident wave)
+% Slowness vector pointing from source N toward array
+%                  x           y
+s_p = slow_p*[sind(az_p); cosd(az_p)]; 
 
 %======================= PARAMETERS =======================%
 is_azimuthal_weight = 1; % apply azimuthal weights to downweight redundant azimuths?
@@ -24,20 +35,17 @@ is_all_freq = 0; % Use all available frequencies between per_min and per_max? (t
 comp = parameters.comp;
 windir = parameters.windir;
 
-% Time window to consider
-t_min = parameters.t_min;
-t_max = parameters.t_max;
 
 % Periods to average over
-per_min = parameters.per_min;
-per_max = parameters.per_max;
-Npers = parameters.Npers;
+per_min = 1/f_p; %5; % [sec] minimum period
+per_max = 1/f_p; %10; % [sec] maximum period
+Npers = 1;  %30; % number of periods to consider
 f_vec = linspace(1/per_max,1/per_min,Npers);
 per_vec = 1./f_vec;
 
 % Slowness values to search over
-s_min = parameters.s_min;
-s_max = parameters.s_max;
+s_min = 0; %1/5; % s/km
+s_max = 1/2.5; % s/km
 Nslow = parameters.Nslow;
 s_vec = linspace(s_min,s_max,Nslow);
 
@@ -195,39 +203,9 @@ for ista1= 1:nsta
         % ccf in frequency domain
         ccf_fft = data1.coh_sum ./ data1.coh_num;
         
-        % Build frequency and time axes
-        Nt = length(ccf_fft);
-        dt = data1.stapairsinfo.dt;
-        Fs = 1./dt;
-        f = Fs*(0:(Nt/2))/Nt; % positive frequencies
-        time = ([0:Nt-1]-floor(Nt/2))*dt;  % build lagtime vector for plotting
-        time = [time(time<0), time(time>=0)];
-        
-        % Index desired time window
-        ccf = real(ifft(ccf_fft,Nt)); % inverse FFT to get time domain
-        ccf = fftshift(ccf); % rearrange values as [-lag lag]
-        ccf = detrend(ccf);
-        ccf = cos_taper(ccf);
-        ccf(time<t_min | time>t_max) = 0;
-        ccf(time>=t_min & time<=t_max) = cos_taper(ccf(time>=t_min & time<=t_max));
-        % Shift back to frequency domain
-        ccf_fft = fft(fftshift(ccf));
-        
-        % Index positive frequencies
-        ccf_fft = 2*ccf_fft(1:Nt/2+1);
-        
-        % Use all available frequencies between per_min and per_max
-        if is_all_freq && itestflag==0
-            freq = f(f>=1/per_max & f<=1/per_min);
-            per_vec = 1./freq;
-            Npers = length(per_vec);
-            Pf = zeros(Nbaz,Nslow,Npers);
-            itestflag = 1;
-        end
         for iper = 1:Npers
             per = per_vec(iper);
             omega = 2*pi ./ per;
-            ccf_fft_i = interp1(f,ccf_fft,1/per);
             
             for islow = 1:Nslow
                 slow = s_vec(islow);
@@ -240,11 +218,10 @@ for ista1= 1:nsta
                     s_v = slow*[sind(baz-180); cosd(baz-180)]; 
                     
                     % slowness direction dotted onto interstation path
-                    sdotr = s_v'*r_v;
+                    sdotr = (s_v-s_p)'*r_v;
                     
                     % Estimate power
-                    Pf(ibaz,islow,iper) = Pf(ibaz,islow,iper) + w * ccf_fft_i * exp(1i*omega * sdotr);
-
+                    Pf(ibaz,islow,iper) = Pf(ibaz,islow,iper) + w * exp(1i*omega * sdotr);
                 end
             end
         end
@@ -276,5 +253,12 @@ set(gca,'fontsize',15,'linewidth',1.5)
 caxis([prctile(P_abs(:),80) 0]);
 titl = title([num2str(per_min),'-',num2str(per_max),'s']);
 titl.Position(2) = titl.Position(2) + 0.25;
+hp = polar((az_p+180+90)*pi/180,slow_p/(s_max-s_min),'-or');
+hp.LineWidth = 1.5;
+hp.MarkerEdgeColor = 'w';
+hp.MarkerFaceColor = 'r';
+sg = sgtitle([num2str(1/f_p),'s'],'fontsize',18,'fontweight','bold');
 
-save2pdf([figpath,'fk_beamform.pdf'],1,250);
+save2pdf([figpath,'fk_array_response_',num2str(1/f_p),'s.pdf'],1,250);
+
+
