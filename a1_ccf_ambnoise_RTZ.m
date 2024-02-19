@@ -190,7 +190,7 @@ for ista1=1:nsta
         mkdir([seisH2_path,sta1]);
     end
 
-    list1 = dir([datadir,sta1,'/',comp,'Z.sac']);
+    list1 = dir([datadir,sta1,'/*',comp,'Z.sac']);
 
     for ista2=1:nsta
         clear lat1 lat2 lon1 lon2 dist az baz vec_tz2 Z2raw vec_tz Z1raw
