@@ -284,6 +284,36 @@ if isploth20 && (comp(1) == 'Z' || comp(1) == 'P')
 end
 
 %pause;
+
+%% Plot all binned CCF
+time_v = time(indtime(1):indtime(end));
+dkm = 1;
+dist_v = floor(min(sta1sta2_dist_all)) : dkm : ceil((max(sta1sta2_dist_all)+.001)*10/5)*5/10;
+[TIME, DIST] = meshgrid(time_v,dist_v);
+WAVEFORM_MAP = zeros(size(TIME));
+icount_dist = zeros(size(DIST));
+for istapair = 1: npairall
+    ccf_waveform = ccf_all{istapair}(indtime(1):indtime(end));
+    dist_pair = sta1sta2_dist_all(istapair);
+    [~, indx] = histc(dist_pair, dist_v);
+    icount_dist(indx,:) = icount_dist(indx,:) + 1;
+    WAVEFORM_MAP(indx,:) = WAVEFORM_MAP(indx,:) + ccf_waveform;
+end
+WAVEFORM_MAP = WAVEFORM_MAP ./ icount_dist;
+WAVEFORM_MAP(isnan(WAVEFORM_MAP)) = 0;
+
+figure(103); clf;
+set(gcf,'color','w')
+colormap(redbluecmap)
+imagesc(time_v,dist_v,WAVEFORM_MAP);
+hold on; box on;
+xlabel('Time (s)');
+ylabel('Distance (km)');
+title([comp(1),'-component: ',num2str(coperiod(1)), ' - ',num2str(coperiod(2)),' s']);
+set(gca,'LineWidth',1.5,'FontSize',16)
+
+save2pdf([figpath,'all_ccf',comp,'_binned_cmap.pdf'],103,500);
+
 %% Plot SNR Values
 figure(101); clf;
 plot([0 1000],[1 1],'-k','linewidth',3); hold on;
