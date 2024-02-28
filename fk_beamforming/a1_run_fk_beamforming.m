@@ -47,6 +47,9 @@ baz_vec = linspace(0,360,Nbaz);
 
 %% Plot station geometry
 figpath = parameters.figpath;
+if ~exist(figpath)
+    mkdir(figpath)
+end
 
 figure(98); clf;
 set(gcf,'color','w');
