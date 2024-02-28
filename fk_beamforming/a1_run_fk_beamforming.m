@@ -10,6 +10,8 @@ clear; close all;
 
 setup_parameters_beamforming;
 
+is_save_mat = 1; % save output mat file?
+
 %======================= PARAMETERS =======================%
 is_azimuthal_weight = 1; % apply azimuthal weights to downweight redundant azimuths?
 dazi = 10; % [deg] bin width for azimuthal homogenization
@@ -278,6 +280,25 @@ ylabel(c,'Relative Power (dB)','fontsize',15);
 set(gca,'fontsize',15,'linewidth',1.5)
 caxis([prctile(P_abs(:),80) 0]);
 titl = title([num2str(per_min),'-',num2str(per_max),'s']);
-titl.Position(2) = titl.Position(2) + 0.25;
+titl.Position(2) = titl.Position(2) + 0.1;
+titl.Position(1) = titl.Position(1) + 0;
 
-save2pdf([figpath,'fk_beamform.pdf'],1,250);
+save2pdf([figpath,'fk_beamform_',comp{:},'_',num2str(per_min),'_',num2str(per_max),'s.pdf'],1,250);
+
+%% Save beam
+
+matpath = './beam_out/';
+if is_save_mat
+    if ~exist(matpath)
+        mkdir(matpath)
+    end
+    
+    beam.P = P;
+    beam.P_abs = P_abs;
+    beam.s_vec = s_vec;
+    beam.baz_vec = baz_vec;
+    beam.parameters = parameters;
+
+    save([matpath,'fk_beamform_',comp{:},'_',num2str(per_min),'_',num2str(per_max),'s.mat'],'beam');
+end
+
