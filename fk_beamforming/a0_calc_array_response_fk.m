@@ -247,20 +247,56 @@ P_abs = P_abs / max(P_abs(:));
 P_abs = 10*log10(P_abs);
 
 figure(1); clf;
-set(gcf,'position',[616   587   504   431],'color','w');
+set(gcf,'position',[159           3        1282        1022],'color','w');
+
+% Plot station map
+subplot(2,2,1);
+box on; hold on;
+load coastlines
+plot(coastlon,coastlat,'-b');
+plot(stalon,stalat,'ok','markerfacecolor','r','markersize',8,'linewidth',1.5)
+axis square; axis equal;
+set(gca,'fontsize',15,'linewidth',1.5,'layer','top');
+xlabel('Lon (X)');
+ylabel('Lat (Y)');
+xlim([min(stalon)-1 max(stalon)+1]);
+ylim([min(stalat)-1 max(stalat)+1]);
+title('Station Geometry');
+
+% Plot beam
+subplot(2,2,2)
 [h,c] = polarPcolor(s_vec,baz_vec,P_abs,'Nspokes',9,'fontsize',13);
 colormap(viridis);
 c.LineWidth = 1.5;
 ylabel(c,'Relative Power (dB)','fontsize',15);
 set(gca,'fontsize',15,'linewidth',1.5)
 caxis([prctile(P_abs(:),80) 0]);
-titl = title([num2str(per_min),'-',num2str(per_max),'s']);
-titl.Position(2) = titl.Position(2) + 0.25;
-hp = polar((az_p+180+90)*pi/180,slow_p/(s_max-s_min),'-or');
+titl = title([num2str(1/f_p),'s']);
+titl.Position(2) = titl.Position(2) + 0.2;
+hp = polar((-az_p+180+90)*pi/180,slow_p/(s_max-s_min),'-or');
 hp.LineWidth = 1.5;
 hp.MarkerEdgeColor = 'w';
 hp.MarkerFaceColor = 'r';
-sg = sgtitle([num2str(1/f_p),'s'],'fontsize',18,'fontweight','bold');
+
+% Plot beam cross-section through true value
+subplot(2,2,4)
+box on; hold on;
+[s_mat,baz_mat] = meshgrid(s_vec,baz_vec);
+s_q = [flip(s_vec), s_vec];
+az_p_180 = az_p+180;
+az_p_180(az_p_180>360) = az_p_180(az_p_180>360)-360;
+baz_q = [az_p*ones(size(s_vec)), az_p_180*ones(size(s_vec))];
+P_abs_xsec = interp2(s_mat,baz_mat,P_abs,s_q,baz_q);
+s_q(1:length(s_q)/2) = -1*s_q(1:length(s_q)/2);
+plot(s_q,P_abs_xsec,'-r','linewidth',2);
+yvals = get(gca,'YLim');
+xvals = get(gca,'XLim');
+plot([slow_p,slow_p],yvals,'--b','linewidth',1.5);
+text(slow_p+range(xvals)*0.025,yvals(1)+range(yvals)*0.1,'True','fontsize',15,'color','b');
+ylim(yvals);
+xlabel('Slowness (s/km)');
+ylabel('Relative Power (dB)');
+set(gca,'fontsize',15,'linewidth',1.5);
 
 save2pdf([figpath,'fk_array_response_',num2str(1/f_p),'s.pdf'],1,250);
 
