@@ -288,7 +288,7 @@ end
 %% Plot all binned CCF
 time_v = time(indtime(1):indtime(end));
 dkm = 1;
-dist_v = floor(min(sta1sta2_dist_all)) : dkm : ceil((max(sta1sta2_dist_all)+.001)*10/5)*5/10;
+dist_v = floor(min(sta1sta2_dist_all)) : dkm : ceil((max(sta1sta2_dist_all)+1+.001)*10/5)*5/10;
 [TIME, DIST] = meshgrid(time_v,dist_v);
 WAVEFORM_MAP = zeros(size(TIME));
 icount_dist = zeros(size(DIST));
