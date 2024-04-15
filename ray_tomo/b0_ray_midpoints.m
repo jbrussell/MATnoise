@@ -76,7 +76,8 @@ for ixsp = 1:length(xspfiles)
     xspinfo = temp.xspinfo;
     
     if ixsp ==1
-        Tperiods = (2*pi)./temp.twloc;
+%         Tperiods = (2*pi)./temp.twloc;
+        Tperiods = xspinfo.per_start;
         waxis = temp.waxis;
         twloc = temp.twloc;
         xspinfo.isgood = 0;
@@ -95,7 +96,7 @@ for ixsp = 1:length(xspfiles)
         disp(['Looking at #',num2str(ixsp),' of ',num2str(length(xspfiles))])
     end
 end % end of loop ixsp'
-
+%%
 % Loop through periods
 for ip=1:length(Tperiods)
     disp(' ');
@@ -104,7 +105,7 @@ for ip=1:length(Tperiods)
     raynum = 0;
     
     for ixsp = 1:length(xspsum)
-        if xspsum(ixsp).isgood ==0;
+        if xspsum(ixsp).isgood ==0
             continue;
         end
         
@@ -115,7 +116,6 @@ for ip=1:length(Tperiods)
         rays(raynum,4) = xspsum(ixsp).lon2;
         
         dist(raynum) = deg2km(distance(rays(raynum,1),rays(raynum,2),rays(raynum,3),rays(raynum,4)));
-        dt(raynum) = xspsum(ixsp).tw(ip);
         snrs(raynum) = xspsum(ixsp).snr;
         
         % Midpoint of rays
@@ -123,7 +123,7 @@ for ip=1:length(Tperiods)
         midlon(raynum) = (rays(raynum,2)+rays(raynum,4))./2;
         
         % Phase velocity of ray
-        phv(raynum) = dist(raynum)./dt(raynum); % km/s
+        phv(raynum) = xspsum(ixsp).c(ip); % km/s
         
         % Azimuth of rays
         [~,azi(raynum)]=distance(xspsum(ixsp).lat1,xspsum(ixsp).lon1,xspsum(ixsp).lat2,xspsum(ixsp).lon2);
@@ -134,7 +134,7 @@ for ip=1:length(Tperiods)
     end
     dat(ip).rays = rays;
     dat(ip).dist = dist;
-    dat(ip).dt = dt; 
+%     dat(ip).dt = dt; 
     dat(ip).midlat = midlat;
     dat(ip).midlon = midlon;
     dat(ip).phv = phv;
@@ -143,9 +143,9 @@ for ip=1:length(Tperiods)
     dat(ip).snrs = snrs;
 end
 
-%%
+%% Plot interstation rays colored by phase velocity
 
-Mp = 3; Np = 4;
+Mp = 4; Np = 5;
 
 fig20 = figure(20);
 set(gcf,'position',[1    1   1244   704]);
@@ -156,6 +156,11 @@ for ip=1:length(Tperiods)
 subplot(Mp,Np,ip)
     ax = worldmap(lalim, lolim);
     set(ax, 'Visible', 'off')
+
+    if isempty(find(~isnan(dat(ip).phv)))
+        disp(['All nan values for ',num2str(Tperiods(ip)),'... skipping'])
+        continue
+    end
     
 %     avgv = nanmean(dat(ip).phv_cor);
     avgv = nanmean(dat(ip).phv);
@@ -187,7 +192,8 @@ subplot(Mp,Np,ip)
 end
 save2pdf([phv_fig_path,comp{1}(1),'_','r',num2str(r_tol_min),'_',num2str(r_tol_max),'_snr',num2str(snr_tol),'_err',num2str(err_tol),'_rays.pdf'],fig20,1000);
 
-%%
+%% Plot interstation mid points colored by phase velocity
+
 fig22 = figure(22); % without azi corr
 set(gcf,'position',[1    1   1244   704]);
 clf
@@ -195,6 +201,12 @@ for ip=1:length(Tperiods)
     subplot(Mp,Np,ip)
     ax = worldmap(lalim, lolim);
     set(ax, 'Visible', 'off')
+
+    if isempty(find(~isnan(dat(ip).phv)))
+        disp(['All nan values for ',num2str(Tperiods(ip)),'... skipping'])
+        continue
+    end
+
 %     surfacem(xi,yi,raytomo(ip).err);
 %     drawpng
 % scatterm(dat(ip).midlat,dat(ip).midlon,30,dat(ip).phv,'filled'); 
