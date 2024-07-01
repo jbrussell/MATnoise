@@ -147,14 +147,14 @@ for ixsp = 1:length(xspfiles)
         xspinfo.isgood = zeros(size(Tperiods));
         xspinfo.waxis = waxis;
         xspsum = xspinfo;
-        wavelength = xspinfo.c .* xspinfo.per;
+        wavelength = xspinfo.c .* xspinfo.per_start;
     else
         waxis = temp.waxis;
         twloc = temp.twloc;
         xspinfo.isgood = zeros(size(Tperiods));
         xspinfo.waxis = waxis;
         xspsum = [xspsum;xspinfo];
-        wavelength = xspinfo.c .* xspinfo.per;
+        wavelength = xspinfo.c .* xspinfo.per_start;
     end
     clear temp
     dep1 = sta.dep(strcmp(xspsum(ixsp).sta1,sta.name));
@@ -166,7 +166,7 @@ for ixsp = 1:length(xspfiles)
 %             && xspsum(ixsp).snr > snrtol && xspsum(ixsp).coherenum > mincoherenum
 %         xspsum(ixsp).isgood = 1;
 %     end
-    for ip = 1:length(xspinfo.per)
+    for ip = 1:length(xspinfo.per_start)
         if ~is_rtolmin_wavelength && xspinfo.snr >= snr_tol && xspinfo.r >= r_tol_min && xspinfo.r <= r_tol_max && xspinfo.sumerr <= err_tol
             xspsum(ixsp).isgood(ip) = 1;
         elseif  is_rtolmin_wavelength && xspinfo.snr >= snr_tol && xspinfo.r >= wavelength(ip)*wl_fac && xspinfo.r <= r_tol_max && xspinfo.sumerr <= err_tol
