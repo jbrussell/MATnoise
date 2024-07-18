@@ -341,9 +341,11 @@ for ista1=1:nsta
         tw1_zc_all = nan(size(t_vec_all));
         tw_bfit_all = nan(size(t_vec_all));
         sigma_m_c_all = nan(size(t_vec_all));
+        twloc_all = nan(size(t_vec_all));
         tw1_zc_all(I_zc & I_wl) = tw1_zc;
         tw_bfit_all(I_zc & I_wl) = tw_bfit;
         sigma_m_c_all(I_zc & I_wl) = sigma_m_c;
+        twloc_all(I_zc & I_wl) = twloc;
         
         %%% - Set up the variable structure - %%%
         xspinfo.sta1 = sta1;
@@ -368,10 +370,10 @@ for ista1=1:nsta
         end
         xspinfo.err = err./weight(:);
         xspinfo.tw_zc = tw1_zc_all;
-        xspinfo.twloc = twloc;
+        xspinfo.twloc = twloc_all;
         xspinfo.c = r1./tw_bfit_all;
         xspinfo.c_std = sigma_m_c_all;
-        xspinfo.per = 1./(twloc/2/pi);
+        xspinfo.per = 1./(twloc_all/2/pi);
         xspinfo.c_zc = r1./tw1_zc_all;
         xspinfo.N_zc = N_zc;
         xspinfo.c_start = c_start;
