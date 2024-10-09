@@ -524,7 +524,7 @@ for ista1=1:nsta
                 Ista = strcmp(sta2,slist);
                 S2phi = orientations(Ista); % angle between H1 and N (CW from north)
                 [S1R,S1T] = rotate_vector(S1H1,S1H2,S1az-S1phi);
-                [S2R,S2T] = rotate_vector(S2H1,S2H2,S2az-S2phi);
+                [S2R,S2T] = rotate_vector(S2H1,S2H2,S2az-S2phi+180);
 
                 if IsFigure2
                     figure(49)
