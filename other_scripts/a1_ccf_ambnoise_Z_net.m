@@ -563,7 +563,7 @@ for ista1=1:nsta
                 xlabel('Lag Time')
                 drawnow
 
-                print(f101,'-dpsc',[fig_winlength_path,sta1,'_',sta2,'_',strNAMEcomp,'.ps']);
+                print(f101,'-dpng',[fig_winlength_path,sta1,'_',sta2,'_',strNAMEcomp,'.png']);
                 %pause;
             end
             if IsOutputFullstack
