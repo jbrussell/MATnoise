@@ -134,7 +134,7 @@ for ipath = 1:length(PATHS)
 end
 
 % Build File Structure: figures
-fig_winlength_path = [figpath,'window',num2str(winlength),'hr/a1_ccf/'];
+fig_winlength_path = [figpath,'window',num2str(winlength),'hr_ellip/a1_ccf/'];
 if ~exist(figpath)
     mkdir(figpath);
 end
@@ -143,7 +143,7 @@ if ~exist(fig_winlength_path)
 end
 
 % Build File Structure: windowed seismograms
-seis_winlength_path = [seis_path,'window',num2str(winlength),'hr/'];
+seis_winlength_path = [seis_path,'window',num2str(winlength),'hr_ellip/'];
 if ~exist(seis_path)
     mkdir(seis_path);
 end
