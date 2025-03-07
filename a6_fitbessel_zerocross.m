@@ -421,7 +421,7 @@ for ista1=1:nsta
             b = besselj(0,x)*A;
             b = b./mean(abs(b)).*mean([abs(xsp1)]);           
             T = length(data1.coh_sum);
-            faxis = [0:1/T:1/dt/2,-1/dt/2+1/T:1/T:-1/T];
+            faxis = [0:(T-mod(T-1,2))/2 , -(T-mod(T,2))/2:-1]/dt/T;
             ind = find(faxis>0);
             plot(faxis(ind),smooth(real(data1.coh_sum_win(ind)/data1.coh_num),npts_smooth),'-k','linewidth',3); hold on;
             if ~iswin
@@ -470,7 +470,7 @@ for ista1=1:nsta
             f12 = figure(12);
             clf
             T = length(data1.coh_sum);
-            faxis = [0:1/T:1/dt/2,-1/dt/2+1/T:1/T:-1/T];
+            faxis = [0:(T-mod(T-1,2))/2 , -(T-mod(T,2))/2:-1]/dt/T;
             ind = find(faxis>0);
             plot(faxis(ind),smooth(real(data1.coh_sum(ind)/data1.coh_num),npts_smooth),'-r');
             xlim([frange_fit(1) frange_fit(2)])

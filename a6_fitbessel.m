@@ -19,7 +19,7 @@ global weight
 setup_parameters;
 
 %======================= PARAMETERS =======================%
-comp = {'ZZ'}; %'RR'; 'ZZ'; 'TT'
+dcomp = {'ZZ'}; %'RR'; 'ZZ'; 'TT'
 windir = 'window3hr';
 xspdir = 'phv_dir'; % output directory of phase velocities
 % frange = [1/5 1/10]; % frequency range over which to fit bessel function
@@ -279,6 +279,17 @@ for ista1=1:nsta
         % Propogate model error to phase velocity
         % c = r1./tw;  therefore   dc = |r*t^(-2) * dt|
         sigma_m_c = abs(r1.*tw'.^(-2).*sigma_m_tw);
+
+        % Transform results back to original size (with NaNs)
+        I_bfit = ismember(t_vec_all,t_vec);
+        tw1_bfit_all = nan(size(t_vec_all));
+        tw_bfit_all = nan(size(t_vec_all));
+        sigma_m_c_all = nan(size(t_vec_all));
+        twloc_all = nan(size(t_vec_all));
+        tw1_bfit_all(I_bfit & I_wl) = tw1;
+        tw_bfit_all(I_bfit & I_wl) = tw;
+        sigma_m_c_all(I_bfit & I_wl) = sigma_m_c;
+        twloc_all(I_bfit & I_wl) = twloc;
         
         %%% - Set up the variable structure - %%%
         xspinfo.sta1 = sta1;
@@ -289,7 +300,7 @@ for ista1=1:nsta
         xspinfo.lon2 = data1.stapairsinfo.lons(2);
         
         xspinfo.r = r1;
-        xspinfo.tw = tw;
+        xspinfo.tw = tw_bfit_all;
         xspinfo.xsp = xsp1;
         xspinfo.xsp_norm = xsp1./abs(hilbert(xsp1));
         xspinfo.coherenum = data1.coh_num;
@@ -301,11 +312,11 @@ for ista1=1:nsta
             xspinfo.sumerr = sum(err.^2)./sum((xsp1./weight(:)).^2);
         end
         xspinfo.err = err./weight(:);
-        xspinfo.tw1 = tw1;
-        xspinfo.twloc = twloc;
-        xspinfo.c = r1./tw;
-        xspinfo.c_std = sigma_m_c;
-        xspinfo.per = 1./(twloc/2/pi);
+        xspinfo.tw1 = tw1_bfit_all;
+        xspinfo.twloc = twloc_all;
+        xspinfo.c = r1./tw_bfit_all;
+        xspinfo.c_std = sigma_m_c_all;
+        xspinfo.per = 1./(twloc_all/2/pi);
         xspinfo.c_start = c_start;
         xspinfo.c_std_start = c_all_std;
         xspinfo.per_start = t_vec_all;
