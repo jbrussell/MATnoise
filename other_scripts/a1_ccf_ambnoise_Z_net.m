@@ -114,7 +114,7 @@ for ipath = 1:length(PATHS)
 end
 
 % Build File Structure: figures
-fig_winlength_path = [figpath,'window',num2str(winlength),'hr/'];
+fig_winlength_path = [figpath,'window',num2str(winlength),'hr/a1_ccf/'];
 if ~exist(figpath)
     mkdir(figpath);
 end
