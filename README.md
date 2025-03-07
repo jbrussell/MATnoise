@@ -33,3 +33,9 @@ This package consists of two parts: (1) Calculation of ambient noise cross-spect
 ---
 ##### Acknowledgements:
 These codes have evolved over the years with the help of several people including Ge Jin, Natalie Accardo, and Pei-Ying (Patty) Lin.
+
+If you use this code, please cite the following:
+
+Russell, J. B.,Gaherty,J.B., Lin, P.-Y. P., Lizarralde, D., Collins, J. A., Hirth, G., & Evans, R. L. (2019). High-resolution constraints on Pacific upper mantle petrofabric inferred from surface-wave anisotropy. Journal of Geophysical Research: Solid Earth, 124, 631–657. [https://doi.org/10.1029/2018JB016598](https://doi.org/10.1029/2018JB016598)
+
+Russell, J. B., & Gaherty, J. B. (2021). Lithosphere structure and seismic anisotropy offshore eastern North America: Implications for continental breakup and ultra-slow spreading dynamics. Journal of Geophysical Research: Solid Earth, 126, e2021JB022955. [https://doi.org/10.1029/2021JB022955](https://doi.org/10.1029/2021JB022955)
