@@ -250,6 +250,7 @@ for ista1=1:nsta
         data1 = load(filename);
         r1 = distance(data1.stapairsinfo.lats(1),data1.stapairsinfo.lons(1),data1.stapairsinfo.lats(2),data1.stapairsinfo.lons(2),referenceEllipsoid('GRS80'))/1000;
         az1 = azimuth(data1.stapairsinfo.lats(1),data1.stapairsinfo.lons(1),data1.stapairsinfo.lats(2),data1.stapairsinfo.lons(2),referenceEllipsoid('GRS80'));
+        dt = data1.stapairsinfo.dt;
         groupv_max = data1.max_grv;
         groupv_min = data1.min_grv;
         
@@ -300,7 +301,6 @@ for ista1=1:nsta
         if isfigure2 
             figure(1)
             T = length(xcorf1);
-            dt = 1;
             temp_faxis = [0:1/T:1/dt/2,-1/dt/2+1/T:1/T:-1/T];
             ind = find(temp_faxis>0);
             subplot(2,1,1)
@@ -316,7 +316,7 @@ for ista1=1:nsta
         end
 
         %%% - Convert xcorf into spherical frequency - %%%
-        faxis = [0:N-1]*1/wholesec;
+        faxis = [0:(N-mod(N-1,2))/2 , -(N-mod(N,2))/2:-1]/dt/N;
 
 %         tw1 = ones(1,tN)*r1./c;
         
