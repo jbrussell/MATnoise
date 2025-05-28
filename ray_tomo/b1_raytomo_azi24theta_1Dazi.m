@@ -44,6 +44,7 @@ azi_bin_deg = parameters.azi_bin_deg; % 20; % (degrees) size of azimuthal data b
 % Norm damping for azimuthal anisotropy
 damp_azi = parameters.damp_azi; % [1 1 1e10 1e10]; % [2c 2s 4c 4s] % Damping individual parameters
 aziweight = parameters.aziweight; %1; % global weight
+is_wl_smooth = parameters.is_wl_smooth; % wavelength dependent smoothing
 
 
 %% Figure output
@@ -327,12 +328,19 @@ for ip=1:length(Tperiods)
         legend({'before threshold','after threshold','threshold'},'location','eastoutside')
         pause;
     end
+
+    if is_wl_smooth
+        wavelength = nanmean(phv) .* Tperiods(ip);
+        wl_smooth_factor = wavelength ./ deg2km(gridsize);
+    else
+        wl_smooth_factor = 1;
+    end
     
     % calculate the smoothing weight
     smweight = smweight0;
     NR=norm(F,1);
     NA=norm(W*mat,1);
-    smweight = smweight0*NA/NR;
+    smweight = smweight0*NA/NR * wl_smooth_factor;
     
     disp('start inverse');
 %     A=[W*mat; smweight*F; aziweight*F_azi_damp; aziweight*F_azi_smooth];
@@ -374,10 +382,17 @@ for ip=1:length(Tperiods)
         disp(['Good Measurement Number: ', num2str(length(diag(W))-length(ind))]);
         disp(['Bad Measurement Number: ', num2str(length(ind))]);
         
+        if is_wl_smooth
+            wavelength = 1./nanmean(phaseg(1:Nx*Ny)) .* Tperiods(ip);
+            wl_smooth_factor = wavelength ./ deg2km(gridsize);
+        else
+            wl_smooth_factor = 1;
+        end
+        
         % Rescale the smooth kernel
         NR=norm(F,1);
         NA=norm(W*mat,1);
-        smweight = smweight0*NA/NR;
+        smweight = smweight0*NA/NR * wl_smooth_factor;
         
         % Invert
 %         A=[W*mat;smweight*F];
@@ -482,7 +497,8 @@ for ip=1:length(Tperiods)
     raytomo(ip).sta_dep = dep;
     raytomo(ip).fiterr = fiterr;
     raytomo(ip).dt = dt;
-    raytomo(ip).smweight0 = smweight0;
+    raytomo(ip).smweight0 = smweight0 * wl_smooth_factor;
+    raytomo(ip).damp_azi = damp_azi;
     %JBR    
     raytomo(ip).phv_iso = phv_iso;    
     raytomo(ip).phv_av = phv_av;

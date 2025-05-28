@@ -64,6 +64,7 @@ smweight0 = parameters.smweight0;
 smweight0_azi = parameters.smweight0_azi;
 flweight0_azi = parameters.flweight0_azi;
 damp0_azi = parameters.damp0_azi;
+is_wl_smooth = parameters.is_wl_smooth; % wavelength dependent smoothing
 dterrtol = parameters.dterrtol;
 raydensetol = parameters.raydensetol;
 raydensetol_azi = parameters.raydensetol_azi;
@@ -318,10 +319,17 @@ for ip=1:length(Tperiods)
         pause;
     end
     
+    if is_wl_smooth
+        wavelength = nanmean(phv) .* Tperiods(ip);
+        wl_smooth_factor = wavelength ./ deg2km(gridsize);
+    else
+        wl_smooth_factor = 1;
+    end
+
     % calculate the smoothing weight
     NR=norm(F,1);
     NA=norm(W*mat,1);
-    smweight = smweight0*NA/NR;
+    smweight = smweight0*NA/NR * wl_smooth_factor;
     
     NR=norm(F_azi_damp,1);
     NA=norm(W*mat,1);
@@ -329,11 +337,11 @@ for ip=1:length(Tperiods)
     
     NR=norm(F_azic,1);
     NA=norm(W*mat,1);
-    smweight_azi = smweight0_azi*NA/NR;
+    smweight_azi = smweight0_azi*NA/NR * wl_smooth_factor;
     
     NR=norm(J_azic,1);
     NA=norm(W*mat,1);
-    flweight_azi = flweight0_azi*NA/NR;
+    flweight_azi = flweight0_azi*NA/NR * wl_smooth_factor;
     
     disp('start inverse');
     A=[W*mat; smweight*F; damp_azi*F_azi_damp; smweight_azi*F_azic; smweight_azi*F_azis; flweight_azi*J_azic; flweight_azi*J_azis];
@@ -368,11 +376,18 @@ for ip=1:length(Tperiods)
         disp('After iter:');
         disp(['Good Measurement Number: ', num2str(length(diag(W))-length(ind))]);
         disp(['Bad Measurement Number: ', num2str(length(ind))]);
+
+        if is_wl_smooth
+            wavelength = 1./nanmean(phaseg(1:Nx*Ny)) .* Tperiods(ip);
+            wl_smooth_factor = wavelength ./ deg2km(gridsize);
+        else
+            wl_smooth_factor = 1;
+        end
         
         % Rescale the smooth kernel
         NR=norm(F,1);
         NA=norm(W*mat,1);
-        smweight = smweight0*NA/NR;
+        smweight = smweight0*NA/NR * wl_smooth_factor;
         
         NR=norm(F_azi_damp,1);
         NA=norm(W*mat,1);
@@ -380,11 +395,11 @@ for ip=1:length(Tperiods)
         
         NR=norm(F_azic,1);
         NA=norm(W*mat,1);
-        smweight_azi = smweight0_azi*NA/NR;
+        smweight_azi = smweight0_azi*NA/NR * wl_smooth_factor;
         
         NR=norm(J_azic,1);
         NA=norm(W*mat,1);
-        flweight_azi = flweight0_azi*NA/NR;
+        flweight_azi = flweight0_azi*NA/NR * wl_smooth_factor;
         
         % Invert
         A=[W*mat; smweight*F; damp_azi*F_azi_damp; smweight_azi*F_azic; smweight_azi*F_azis; flweight_azi*J_azic; flweight_azi*J_azis];
@@ -504,9 +519,10 @@ for ip=1:length(Tperiods)
     raytomo(ip).rays = rays;
     raytomo(ip).fiterr = fiterr;
     raytomo(ip).dt = dt;
-    raytomo(ip).smweight0 = smweight0;
-    raytomo(ip).smweight0_azi = smweight0_azi;
-    raytomo(ip).flweight0_azi = flweight0_azi;
+    raytomo(ip).smweight0 = smweight0 * wl_smooth_factor;
+    raytomo(ip).smweight0_azi = smweight0_azi * wl_smooth_factor;
+    raytomo(ip).flweight0_azi = flweight0_azi * wl_smooth_factor;
+    raytomo(ip).damp0_azi = damp0_azi;
     %JBR    
     raytomo(ip).phv_iso = phv_iso;    
     raytomo(ip).phv_av = phv_av;
