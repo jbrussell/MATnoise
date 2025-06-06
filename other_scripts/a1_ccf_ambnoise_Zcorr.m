@@ -485,15 +485,36 @@ for ista1=1:nsta
                 f101 = figure(101);clf;
 %                 set(gcf,'position',[400 400 600 300]);
 
-                subplot(3,1,3)
+                subplot(3,1,2)
                 T = length(coh_sumZ);
                 faxis = [0:(T-mod(T-1,2))/2 , -(T-mod(T,2))/2:-1]/dt/T;
                 ind = find(faxis>0);
                 plot(faxis(ind),smooth(real(coh_sumZ(ind)/coh_num),100));
                 title(sprintf('%s %s coherency %s ,station distance: %f km',sta1,sta2,strNAMEcomp(1),dist));
+                %                 xlim([0.01 1/(dt*2.5)])
                 xlim([0.01 0.5])
                 %xlim([0.04 0.16])
                 xlabel('Frequency')
+
+                subplot(3,1,3)
+                costap_wid = 0.2;
+                coperiod = 1./[0.5 0.01];
+                ccf = coh_sumZ ./ coh_num;
+                N = length(ccf);
+                ccf_ifft = real(ifft(ccf,N)); % inverse FFT to get time domain
+                ccf_ifft = fftshift(ccf_ifft); % rearrange values as [-lag lag]
+                ccf_ifft = detrend(ccf_ifft);
+                ccf_ifft = cos_taper(ccf_ifft);
+                [ ccf_filtered ] = tukey_filt( fft(fftshift(ccf_ifft)),coperiod,dt,costap_wid );
+                ccf_ifft = fftshift(real(ifft(ccf_filtered)));
+                time = ([0:N-1]-floor(N/2))*dt;
+                time = [time(time<0), time(time>=0)];
+                plot(time,ccf_ifft,'-r');
+                phv_min_win = 0.8; % km/s
+                % xlim([-1 1]*max([stapairsinfo.r/phv_min_win,100]));
+                xlim([-250 250])
+                %xlim([0.04 0.16])
+                xlabel('Lag Time')
                 drawnow
 
                 print(f101,'-dpng',[fig_winlength_path,sta1,'_',sta2,'.png']);
