@@ -351,7 +351,8 @@ for ista1=1:nsta
             end
 			
 %             tic
-            parfor iwin = 1:nwin
+            % parfor iwin = 1:nwin
+            for iwin = 1:nwin
 %				clear tcut S1R S2R S1T S2T S1Z S2Z fftS1R fftS2R fftS1T fftS2T fftS1Z fftS2Z
 
 				% cut in time
