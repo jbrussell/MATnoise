@@ -120,7 +120,7 @@ for icomp = 1:length(comps)
             ccf = data.coh_sum./data.coh_num;
             ccf(isnan(ccf)) = 0;
             if size(ccf,1) == 1
-                ccf = ccf';
+                ccf = conj(ccf');
             end
             
             % Calculate SNR
