@@ -32,6 +32,7 @@ ylims = [0 450];
 %%% --- Parameters to build up gaussian filters --- %%% 
 % (effects the width of the filter in the frequency domain)
 costap_wid = 0.2; % 0 => box filter; 1 => Hann window
+coperiod = [1/f_max 1/f_min]; % for filtering prior to SNR calculation
 
 isplotwin = 1; %1;
 isploth20 = 0;
@@ -122,10 +123,14 @@ for icomp = 1:length(comps)
             if size(ccf,1) == 1
                 ccf = conj(ccf');
             end
+
+            % Filter in frequency domain before SNR calculation
+            [ ccf_filtered ] = tukey_filt( fft(fftshift(ccf_ifft)),coperiod,dt,costap_wid );
             
             % Calculate SNR
             r = distance(data.stapairsinfo.lats(1),data.stapairsinfo.lons(1),data.stapairsinfo.lats(2),data.stapairsinfo.lons(2),referenceEllipsoid('GRS80'))/1000;
-            [snr, signal_ind] = calc_SNR(ccf,min_grv,max_grv,r,dt,isfigure_snr);
+            % [snr, signal_ind] = calc_SNR(ccf,min_grv,max_grv,r,dt,isfigure_snr);
+            [snr, signal_ind] = calc_SNR(ccf_filtered,min_grv,max_grv,r,dt,isfigure_snr);
             if snr < snr_thresh
                 continue
             end
