@@ -48,7 +48,7 @@ set(gcf,'Position',[173.0000  262.0000  880.0000  438.0000]);
 
 
 subplot(1,2,1); hold on;
-plot(t,M./max(M,[],2)*10+Delta','-k','linewidth',1);
+plot(t,dat./max(dat,[],2)*10+Delta','-k','linewidth',1);
 % title('Love waves (0T-4T)'); 
 xlabel('Time (s)'); ylabel('Distance (km)');
 set(gca,'YDir','reverse');

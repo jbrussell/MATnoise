@@ -14,8 +14,10 @@ is_win = 0; % Use windowed waveforms?
 % Load precalculated LRT
 if is_win
     load([LRTmatpath,'LRT_',method,'_',comp,'_win.mat']);
+    dat = M_win;
 else
     load([LRTmatpath,'LRT_',method,'_',comp,'.mat']);
+    dat = M;
 end
 
 % Load waveforms
@@ -60,8 +62,8 @@ FS = 15;
 
 subplot(1,2,1); box on; hold on;
 % [Delta_srt,I_srt] = sort(Delta);
-% imagesc(t,Delta_srt,M(I_srt,:)); hold on;
-plot(t,M./max(M,[],2)*10+Delta','-k','linewidth',1);
+% imagesc(t,Delta_srt,dat(I_srt,:)); hold on;
+plot(t,dat./max(dat,[],2)*10+Delta','-k','linewidth',1);
 % title('Love waves (0T-4T)'); 
 xlabel('Time (s)'); ylabel('Distance (km)');
 set(gca,'YDir','reverse','FontSize',FS,'linewidth',1.5);
