@@ -4,12 +4,19 @@
 % is_true_station_geometry=1. Otherwise, it uses a user defined 
 % station geometry.
 %
-% jbrussell - 7/2023
+% Synthetic seismograms are saved as SAC files with the same structure
+% as output from fetch_NOISE. These can then be used as input for
+% the MATnoise ccf calculations.
+%
+% jbrussell - 6/2025
 
 clear; close all;
 rng default % for reproducibility
 
 setup_parameters_synth;
+
+% Path to output SAC files
+path2out = ['./SAC/'];
 
 is_true_station_geometry = 1; % Use real station geometry?
 
@@ -50,6 +57,7 @@ end
 dt = 1; % [sec] sample rate
 Ndays = 5; % Number of days to stack data
 t = [0:dt:60*60*24-dt]; % [sec] time axis
+tstart = datetime(2000,1,1); % initialize a datetime to start the experiment (it can be anything)
 
 % Location of "source" ring (S)
 N_sources = 1000; % Number of sources
@@ -87,7 +95,6 @@ Fs = 1./dt;
 f = Fs*(0:(Nt/2))/Nt;
 time = ([0:Nt-1]-floor(Nt/2))*dt;  % build lagtime vector for plotting
 time = [time(time<0), time(time>=0)];
-tstart = datetime(2000,1,1); % initialize random time to start;
 
 
 figure(98); clf;
@@ -113,7 +120,6 @@ colormap(viridis);
 
 %% Load station data
 R_Si_A = {};
-path2out = ['./SAC/'];
 for ista1 = 1:length(X_stas)
     sta1 = stalist{ista1};
         
