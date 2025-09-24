@@ -7,12 +7,10 @@
 %  e.g.: mydata/CC05/CC05.2018.112.00.00.00.BDH.sac
 %
 % JBR, Jan 2020: Implemented frequency-time normalization after 
-% Shen et al. (2012) BSSA; DOI:10.1785/0120120023. This greatly improves signal
-% extraction compared to typical one-bit noralization and whitening of Bensen et
-% al. (2007) GJI. Faster FiltFiltM() can be replaced with MATLAB's slower 
-% built-in filtfilt().
+% Shen et al. (2012) BSSA; DOI:10.1785/0120120023. Faster FiltFiltM() can 
+% be replaced with MATLAB's slower built-in filtfilt().
 %
-% JBR, update: We have found that doing no time or frequency normalization at all
+% JBR, update: We have found that doing no time domain normalization at all
 % can produce higher SNR traces than doing one-bit or time-frequency normalization. 
 % Therefore, the default is to use the raw seismograms as is without any preprocessing.
 %
@@ -42,7 +40,7 @@ IsTaper = 1; % Apply cosine taper to data chunks
 
 %%%%%%%%%%% OPTIONS FOR PREPROCESSING %%%%%%%%%%%%
 % (1) ONE-BIT NORMALIZATION & SPECTRAL WHITENING? (Bensen et al. 2007)
-IsSpecWhiten = 0; % Whiten spectrum
+IsSpecWhiten = 1; % Whiten spectrum
 IsOBN = 0; % One-bit normalization
 
 % (2) TIME-FREQUENCY NORMALIZATION (Ekstrom et al. 2009; Shen et al. 2011)
@@ -593,15 +591,17 @@ for ista1=1:nsta
                     fftS1T = fft(S1T);
                     fftS2T = fft(S2T);
                     %Whiten
-                    if IsSpecWhiten
-                        fftS1T = spectrumwhiten_smooth(fftS1T,0.001);
-                        fftS2T = spectrumwhiten_smooth(fftS2T,0.001);
-                    end
+                    % if IsSpecWhiten
+                    %     fftS1T = spectrumwhiten_smooth(fftS1T,0.001);
+                    %     fftS2T = spectrumwhiten_smooth(fftS2T,0.001);
+                    % end
                 end
 
                 % calcaulate daily CCF and stack for transverse (1-->2 Causal; 2-->1 Acausal)
                 coh_trace = fftS2T .* conj(fftS1T);
-                coh_trace = coh_trace ./ abs(fftS1T) ./ abs(fftS2T);
+                if IsSpecWhiten && ~IsFTN
+                    coh_trace = coh_trace ./ abs(fftS1T) ./ abs(fftS2T);
+                end
                 coh_trace(isnan(coh_trace)) = 0;
                 coh_sumT = coh_sumT + coh_trace;
                 coh_trace_T = coh_trace;
@@ -634,15 +634,17 @@ for ista1=1:nsta
                     fftS1R = fft(S1R);
                     fftS2R = fft(S2R);
                     %Whiten
-                    if IsSpecWhiten
-                        fftS1R = spectrumwhiten_smooth(fftS1R,0.001);
-                        fftS2R = spectrumwhiten_smooth(fftS2R,0.001);
-                    end
+                    % if IsSpecWhiten
+                    %     fftS1R = spectrumwhiten_smooth(fftS1R,0.001);
+                    %     fftS2R = spectrumwhiten_smooth(fftS2R,0.001);
+                    % end
                 end
 
                 % calcaulate daily CCF and stack for radial (1-->2 Causal; 2-->1 Acausal)
                 coh_trace = fftS2R .* conj(fftS1R);
-                coh_trace = coh_trace ./ abs(fftS1R) ./ abs(fftS2R);
+                if IsSpecWhiten && ~IsFTN
+                    coh_trace = coh_trace ./ abs(fftS1R) ./ abs(fftS2R);
+                end
                 coh_trace(isnan(coh_trace)) = 0;
                 coh_sumR = coh_sumR + coh_trace;
                 coh_trace_R = coh_trace;
@@ -666,15 +668,17 @@ for ista1=1:nsta
                     fftS1Z = fft(S1Z);
                     fftS2Z = fft(S2Z);
                     %Whiten
-                    if IsSpecWhiten
-                        fftS1Z = spectrumwhiten_smooth(fftS1Z,0.001);
-                        fftS2Z = spectrumwhiten_smooth(fftS2Z,0.001);
-                    end
+                    % if IsSpecWhiten
+                    %     fftS1Z = spectrumwhiten_smooth(fftS1Z,0.001);
+                    %     fftS2Z = spectrumwhiten_smooth(fftS2Z,0.001);
+                    % end
                 end
 
-                % calcaulate daily CCF and stack for radial (1-->2 Causal; 2-->1 Acausal)
+                % calcaulate daily CCF and stack for vertical (1-->2 Causal; 2-->1 Acausal)
                 coh_trace = fftS2Z .* conj(fftS1Z);
-                coh_trace = coh_trace ./ abs(fftS1Z) ./ abs(fftS2Z);
+                if IsSpecWhiten && ~IsFTN
+                    coh_trace = coh_trace ./ abs(fftS1Z) ./ abs(fftS2Z);
+                end
                 coh_trace(isnan(coh_trace)) = 0;
                 coh_sumZ = coh_sumZ + coh_trace;
                 coh_trace_Z = coh_trace;

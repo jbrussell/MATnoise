@@ -12,16 +12,6 @@
 % {datadirectory}/{station}/{station}.{yyyy}.{jday}.{hh}.{mm}.{SS}.{COMP}.sac
 %  e.g.: mydata/CC05/CC05.2018.112.00.00.00.BDH.sac
 %
-% JBR, Jan 2020: Implemented frequency-time normalization after 
-% Shen et al. (2012) BSSA; DOI:10.1785/0120120023. This greatly improves signal
-% extraction compared to typical one-bit noralization and whitening of Bensen et
-% al. (2007) GJI. Faster FiltFiltM() can be replaced with MATLAB's slower 
-% built-in filtfilt().
-%
-% JBR, update: We have found that doing no time or frequency normalization at all
-% can produce higher SNR traces than doing one-bit or time-frequency normalization. 
-% Therefore, the default is to use the raw seismograms as is without any preprocessing.
-%
 % JBR, Oct 2024: Update for RZ and ZR cross-terms, including new whitening approach
 % that preserves relative amplitudes of both components
 %
