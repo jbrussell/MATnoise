@@ -3,7 +3,7 @@ function [gausf,faxis] = build_gaus_filter(centf,dt,N,minwidth,maxwidth,isfigure
 % the output gausf has a structure as: 
 % gausf(:,ifreq)=exp(-(faxis-centf(ifreq)).^2./2./(width(ifreq)*centf(ifreq)).^2);
 
-faxis = [0:floor(N/2)]/dt/N;
+faxis = [0:(N-mod(N-1,2))/2 , -(N-mod(N,2))/2:-1]/dt/N;
 
 if ~exist('isfigure','var')
 	isfigure = 0;
@@ -13,7 +13,7 @@ end
 width = maxwidth - (maxwidth-minwidth)./(max(centf)-min(centf)).*(centf-min(centf));
 
 for ifreq = 1:length(centf)
-		gausf(:,ifreq)=exp(-(faxis-centf(ifreq)).^2./2./(width(ifreq)*centf(ifreq)).^2);
+		gausf(:,ifreq)=exp(-(abs(faxis)-centf(ifreq)).^2./2./(width(ifreq)*centf(ifreq)).^2);
 end 
 
 if isfigure
@@ -24,7 +24,7 @@ if isfigure
 	shading flat;
 	xlabel('Frequency axis');
 	ylabel('center frequency');
-	xlim([0 max(centf)*1.5])
+% 	xlim([0 max(centf)*1.5])
 end
 
 end
