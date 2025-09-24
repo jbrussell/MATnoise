@@ -118,7 +118,7 @@ for ista1=1:nsta % loop over all stations
             N = length(ccf_day_ifft);
             time = ([0:N-1]-floor(N/2))*dt;
             timeall = [time(time<0), time(time>=0)];
-            Ikeep = abs(timeall)<=500; % index data to keep
+            Ikeep = abs(timeall)<=max(xlims); % index data to keep
             timeflag(:,ifil) = timeall(Ikeep);
             din(:,ifil) = ccf_day_ifft(Ikeep);
 
@@ -153,7 +153,7 @@ for ista1=1:nsta % loop over all stations
         N= length(ccf_stack{npairall});
         % time = [-N/2:N/2]*dt; % build lagtime vector for plotting
         time = ([0:N-1]-floor(N/2))*dt;
-        indtime = find(abs(time)<=500);
+        indtime = find(abs(time)<=max(xlims));
         imagesc(timeflag(:,1)',dayvec,din_norm');
     %         imagesc(timeflag(:,1)',[1:length(fils)],din');
     %         plot(time(indtime),ccf_smartstack_all{npairall}(indtime)*10 - 10,'-r','linewidth',1);
