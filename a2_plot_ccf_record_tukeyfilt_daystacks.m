@@ -158,7 +158,7 @@ for ista1=1:nsta % loop over all stations
     %         imagesc(timeflag(:,1)',[1:length(fils)],din');
     %         plot(time(indtime),ccf_smartstack_all{npairall}(indtime)*10 - 10,'-r','linewidth',1);
         plot(time(indtime),dstack(indtime)*10-10,'-k','linewidth',1);
-        xlim([-250 250]);
+        xlim(xlims);
         ylim([-20 max(dayvec)]);
         xlabel('Lag time (s)','fontsize',15);
         ylabel('Day of deployment','fontsize',15);
