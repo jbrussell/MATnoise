@@ -4,4 +4,5 @@ function dataout = runwin_norm(datain)
 	dataout = datain(:)./smamp(:);
     Inan = find(isnan(dataout));
     dataout(Inan)=0;
+	dataout = dataout'; % transpose back to row vector
 return
