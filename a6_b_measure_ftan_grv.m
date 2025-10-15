@@ -182,7 +182,8 @@ for ista1=1:nsta % loop over all stations
             f2 = figure(2); clf;
             set(gcf,'position',[ 60    79   743   939]);
             box on; hold on;
-            time = [0:N-1]-floor(N/2);
+            time = ([0:N-1]-floor(N/2))*dt;  % build lagtime vector for plotting
+            time = [time(time<0), time(time>=0)];
             N = size(ccf_gaus,1);
             plot(time,ccf_orig_ifft./max(abs(ccf_orig_ifft)),'-k','linewidth',1.5); hold on;
             text(500*1.05,1,'Unfiltered','fontsize',12,'fontweight','bold');
@@ -202,7 +203,8 @@ for ista1=1:nsta % loop over all stations
         end
         
         % Get time and group velocity axes
-        time = [0:N-1]-floor(N/2);
+        time = ([0:N-1]-floor(N/2))*dt;  % build lagtime vector for plotting
+        time = [time(time<0), time(time>=0)];
         grv_axis = abs(r./time(time>=0)); % index only positive time
         
         % Calculate analytic envelope of waveform
