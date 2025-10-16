@@ -22,7 +22,6 @@ isoutput = 1; % save output?
 comp = {'ZZ'};
 windir = 'window3hr';
 % windir = 'window3hr_Zcorr_tiltcomp';
-ftan_grv_path = 'ZZ_01S_grv'; % output directory of group velocities
 % Group velocity min and max
 vmin = 0.5;
 vmax = 6;
@@ -73,13 +72,13 @@ ccf_stack_path = ccf_fullstack_path;
 
 
 % output path
-ftan_out_path = ['./ftan/',windir,'/fullStack/ftan',comp{1},'/',num2str(1/frange_fit(2)),'_',num2str(1/frange_fit(1)),'s_br',num2str(opts.nBranches),'_',ftan_grv_path,'/'];
+ftan_out_path = ['./ftan/',windir,'/fullStack/ftan',comp{1},'/',num2str(1/frange_fit(2)),'_',num2str(1/frange_fit(1)),'s_br',num2str(opts.nBranches),'/'];
 if ~exist(ftan_out_path)
     mkdir(ftan_out_path)
 end
 
 % figure output path
-ftan_fig_path = ['./figs/',windir,'/fullStack/ftan/',comp{1},'_',num2str(1/frange_fit(2)),'_',num2str(1/frange_fit(1)),'s_br',num2str(opts.nBranches),'_',ftan_grv_path,'/'];
+ftan_fig_path = ['./figs/',windir,'/fullStack/ftan/',comp{1},'_',num2str(1/frange_fit(2)),'_',num2str(1/frange_fit(1)),'s_br',num2str(opts.nBranches),'/'];
 if ~exist(ftan_fig_path)
     mkdir(ftan_fig_path);
 end
