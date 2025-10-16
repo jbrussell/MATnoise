@@ -232,107 +232,104 @@ for ista1=1:nsta % loop over all stations
         
         %% Calculate correlation coefficients for pos, neg, and stack
         
-        if IsFigure
-            figure(4); clf;
-            set(gcf,'position',[527          40        1065         420],'color','w');
-            corr_mat = {};
-            corr_avg = [];
-            for ibr = 1:opts.nBranches 
-                [R,P,RLO,RUP] = corrcoef([grv_pos(:,ibr),grv_neg(:,ibr),grv_stack(:,ibr)],'rows', 'complete');
-                corr_mat{ibr} = R;
-                corr_avg(ibr) = mean(unique(R(R<1)));
-                
-                subplot(1,opts.nBranches,ibr);
-                colormap(jet);
-                imagesc(R);
-                cb = colorbar;
-                ylabel(cb,'Correlation Coeff.');
-                set(cb,'linewidth',1.5);
-                caxis([0.7 1]);
-                set(gca,'fontsize',15,'linewidth',1.5,'YDir','reverse');
-                yticks([1 2 3]);
-                xticks([1 2 3]);
-                yticklabels({'+Lag';'-Lag';'Stack'})
-                xticklabels({'+Lag';'-Lag';'Stack'})
-                ylim([0.5 3.5]);
-                xlim([0.5 3.5]);
-                axis square;
-                title(['Branch: ',num2str(ibr),'   R_{av}=',num2str(corr_avg(ibr))]);
-            end
-            sgtitle('Dispersion Curve Correlations','fontsize',16,'fontweight','bold');
-            if isoutput
-                save2pdf([ftan_fig_path,'/',sta1,'_',sta2,'_correlations.pdf'],4,300);
-            end
+        figure(4); clf;
+        set(gcf,'position',[527          40        1065         420],'color','w');
+        corr_mat = {};
+        corr_avg = [];
+        for ibr = 1:opts.nBranches 
+            [R,P,RLO,RUP] = corrcoef([grv_pos(:,ibr),grv_neg(:,ibr),grv_stack(:,ibr)],'rows', 'complete');
+            corr_mat{ibr} = R;
+            corr_avg(ibr) = mean(unique(R(R<1)));
+            
+            subplot(1,opts.nBranches,ibr);
+            colormap(jet);
+            imagesc(R);
+            cb = colorbar;
+            ylabel(cb,'Correlation Coeff.');
+            set(cb,'linewidth',1.5);
+            caxis([0.7 1]);
+            set(gca,'fontsize',15,'linewidth',1.5,'YDir','reverse');
+            yticks([1 2 3]);
+            xticks([1 2 3]);
+            yticklabels({'+Lag';'-Lag';'Stack'})
+            xticklabels({'+Lag';'-Lag';'Stack'})
+            ylim([0.5 3.5]);
+            xlim([0.5 3.5]);
+            axis square;
+            title(['Branch: ',num2str(ibr),'   R_{av}=',num2str(corr_avg(ibr))]);
+        end
+        sgtitle('Dispersion Curve Correlations','fontsize',16,'fontweight','bold');
+        if isoutput
+            save2pdf([ftan_fig_path,'/',sta1,'_',sta2,'_correlations.pdf'],4,300);
         end
         
         %% Plot group velocity measurements
-        if IsFigure
-            f3 = figure(3); clf; 
-            set(gcf, 'Color', 'w','position',[681         124        1055         420*2]);
-            cmap = parula;
-            colormap(cmap)
-            [PERIODS, GRV] = meshgrid(periods,grv_axis);
-            
-            clims = [-3 0];
-            
-            % CAUSAL (+LAG)
-            subplot(2,2,2); box on; hold on;
-            set(gca,'color',cmap(1,:))
-            levels = linspace(clims(1),clims(2),25);
-            contourf(PERIODS,GRV,log(ccf_ifft_env_pos./max(ccf_ifft_env_pos(:))),levels,'LineStyle','none'); shading flat;
-            plot(periods,grv_pos,'o-','color','r','linewidth',1.5);
-            cb = colorbar;
-            ylabel(cb,'Log(Amp.)');
-            set(cb,'linewidth',1.5);
-    %         caxis([0 1]);
-            caxis(clims);
-            axis tight;
-            xlabel('Period (s)','fontsize',15);
-            ylabel('Group Velocity (km/s)','fontsize',15);
-            set(gca,'fontsize',15);
-            ylim([vmin,vmax]);
-            xlim([periods(1) periods(end)]);
-            title(['Causal ',sta1,'-',sta2,': ',num2str(r),'km']);
-            
-            % ACAUSAL (-LAG)
-            subplot(2,2,1); box on; hold on;
-            set(gca,'color',cmap(1,:))
-            contourf(PERIODS,GRV,log(ccf_ifft_env_neg./max(ccf_ifft_env_neg(:))),levels,'LineStyle','none'); shading flat;
-            plot(periods,grv_neg,'o-','color','r','linewidth',1.5);
-            cb = colorbar;
-            ylabel(cb,'Log(Amp.)');
-            set(cb,'linewidth',1.5);
-    %         caxis([0 1]);
-            caxis(clims);
-            axis tight;
-            xlabel('Period (s)','fontsize',15);
-            ylabel('Group Velocity (km/s)','fontsize',15);
-            set(gca,'fontsize',15);
-            ylim([vmin,vmax]);
-            xlim([periods(1) periods(end)]);
-            title(['Acausal ',sta1,'-',sta2,': ',num2str(r),'km']);
-            
-            % STACKED (POS + NEG)
-            subplot(2,2,3); box on; hold on;
-            set(gca,'color',cmap(1,:))
-            contourf(PERIODS,GRV,log(ccf_ifft_env_stack./max(ccf_ifft_env_stack(:))),levels,'LineStyle','none'); shading flat;
-            plot(periods,grv_stack,'o-','color','r','linewidth',1.5);
-            cb = colorbar;
-            ylabel(cb,'Log(Amp.)');
-            set(cb,'linewidth',1.5);
-    %         caxis([0 1]);
-            caxis(clims);
-            axis tight;
-            xlabel('Period (s)','fontsize',15);
-            ylabel('Group Velocity (km/s)','fontsize',15);
-            set(gca,'fontsize',15);
-            ylim([vmin,vmax]);
-            xlim([periods(1) periods(end)]);
-            title(['Stacked ',sta1,'-',sta2,': ',num2str(r),'km']);
-            
-            if isoutput
-                save2pdf([ftan_fig_path,'/',sta1,'_',sta2,'_grv_panels.pdf'],f3,300);
-            end
+        
+        f3 = figure(3); clf; 
+        set(gcf, 'Color', 'w','position',[681         124        1055         420*2]);
+        cmap = parula;
+        colormap(cmap)
+        [PERIODS, GRV] = meshgrid(periods,grv_axis);
+        
+        clims = [-3 0];
+        
+        % CAUSAL (+LAG)
+        subplot(2,2,2); box on; hold on;
+        set(gca,'color',cmap(1,:))
+        levels = linspace(clims(1),clims(2),25);
+        contourf(PERIODS,GRV,log(ccf_ifft_env_pos./max(ccf_ifft_env_pos(:))),levels,'LineStyle','none'); shading flat;
+        plot(periods,grv_pos,'o-','color','r','linewidth',1.5);
+        cb = colorbar;
+        ylabel(cb,'Log(Amp.)');
+        set(cb,'linewidth',1.5);
+%         caxis([0 1]);
+        caxis(clims);
+        axis tight;
+        xlabel('Period (s)','fontsize',15);
+        ylabel('Group Velocity (km/s)','fontsize',15);
+        set(gca,'fontsize',15);
+        ylim([vmin,vmax]);
+        xlim([periods(1) periods(end)]);
+        title(['Causal ',sta1,'-',sta2,': ',num2str(r),'km']);
+        
+        % ACAUSAL (-LAG)
+        subplot(2,2,1); box on; hold on;
+        set(gca,'color',cmap(1,:))
+        contourf(PERIODS,GRV,log(ccf_ifft_env_neg./max(ccf_ifft_env_neg(:))),levels,'LineStyle','none'); shading flat;
+        plot(periods,grv_neg,'o-','color','r','linewidth',1.5);
+        cb = colorbar;
+        ylabel(cb,'Log(Amp.)');
+        set(cb,'linewidth',1.5);
+%         caxis([0 1]);
+        caxis(clims);
+        axis tight;
+        xlabel('Period (s)','fontsize',15);
+        ylabel('Group Velocity (km/s)','fontsize',15);
+        set(gca,'fontsize',15);
+        ylim([vmin,vmax]);
+        xlim([periods(1) periods(end)]);
+        title(['Acausal ',sta1,'-',sta2,': ',num2str(r),'km']);
+        
+        % STACKED (POS + NEG)
+        subplot(2,2,3); box on; hold on;
+        set(gca,'color',cmap(1,:))
+        contourf(PERIODS,GRV,log(ccf_ifft_env_stack./max(ccf_ifft_env_stack(:))),levels,'LineStyle','none'); shading flat;
+        plot(periods,grv_stack,'o-','color','r','linewidth',1.5);
+        cb = colorbar;
+        ylabel(cb,'Log(Amp.)');
+        set(cb,'linewidth',1.5);
+%         caxis([0 1]);
+        caxis(clims);
+        axis tight;
+        xlabel('Period (s)','fontsize',15);
+        ylabel('Group Velocity (km/s)','fontsize',15);
+        set(gca,'fontsize',15);
+        ylim([vmin,vmax]);
+        xlim([periods(1) periods(end)]);
+        title(['Stacked ',sta1,'-',sta2,': ',num2str(r),'km']);
+        
+        if isoutput
+            save2pdf([ftan_fig_path,'/',sta1,'_',sta2,'_grv_panels.pdf'],f3,300);
         end
         
         
