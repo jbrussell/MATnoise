@@ -23,7 +23,7 @@ Np = 4; % # of subplot columns
 
 setup_parameters_tomo;
 comp = parameters.grv.comp; % {'ZZ'};
-ftan_grv_path = parameters.grv.ftan_grv_path; % FTAN grv project
+% ftan_grv_path = parameters.grv.ftan_grv_path; % FTAN grv project
 windir = parameters.grv.windir; %'window3hr'; 
 % N_wl = parameters.N_wl;
 frange = parameters.grv.frange; %[1/10 1/5]; % [Hz]
@@ -86,7 +86,7 @@ Nx_azi = length(xnode_azi);
 Ny_azi = length(ynode_azi);
 
 % figure output path
-grv_fig_path = ['./figs/',windir,'/fullStack/raytomo_azi2theta_2D/',num2str(1/frange(2)),'_',num2str(1/frange(1)),'s_',ftan_grv_path,'/'];
+grv_fig_path = ['./figs/',windir,'/fullStack/raytomo_azi2theta_2D/',num2str(1/frange(2)),'_',num2str(1/frange(1)),'s/'];
 if ~exist(grv_fig_path)    
     mkdir(grv_fig_path);
 end
@@ -129,7 +129,7 @@ F_azi_damp = Areg_azi;
 
 %%
 % Initialize the ftan structure
-ftan_path = ['../ftan/',windir,'/fullStack/ftan',comp{1},'/',num2str(1/frange(2)),'_',num2str(1/frange(1)),'s_br',num2str(nBranches),'_',ftan_grv_path,'/'];
+ftan_path = ['../ftan/',windir,'/fullStack/ftan',comp{1},'/',num2str(1/frange(2)),'_',num2str(1/frange(1)),'s_br',num2str(nBranches),'/'];
 ftanfiles = dir([ftan_path,'*_ftan.mat']);
 
 disp('Looking at FTAN Files')

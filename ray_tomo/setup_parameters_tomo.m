@@ -37,7 +37,7 @@ parameters.min_dep = 9999; %-3500 for min station depth to use
 
 %% Parameters for GrV inversion
 parameters.grv.comp = {'ZZ'}; % component
-parameters.grv.ftan_grv_path = 'ZZ_01S_grv'; % FTAN grv project
+% parameters.grv.ftan_grv_path = 'ZZ_01S_grv'; % FTAN grv project
 parameters.grv.windir = 'window3hr'; % window type
 parameters.grv.nBranches = 2; % number of mode branches to consider
 parameters.grv.branch2analyze = 1; % which branch do you want to analyze?
