@@ -26,9 +26,10 @@ windir = 'window3hr';
 vmin = 0.5;
 vmax = 6;
 % Frequencies of intereset
-Npers = 100;
+Npers = 25; % number of periods to use
 frange_fit = [1/25 1/3]; % Frequency range to estimate grv
-periods = logspace(log10(1/frange_fit(2)),log10(1/frange_fit(1)),Npers); % Period of interest for Group Velocity
+% periods = logspace(log10(1/frange_fit(2)),log10(1/frange_fit(1)),Npers); % Period of interest for Group Velocity
+periods = 1./flip(linspace(frange_fit(1),frange_fit(2),Npers)); % Period of interest for Group Velocity
 %%% --- Parameters to build up gaussian filters --- %%% 
 % (effects the width of the filter in the frequency domain)
 % alpha = 100; % larger number = narrower bands
