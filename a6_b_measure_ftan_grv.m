@@ -226,7 +226,7 @@ for ista1=1:nsta % loop over all stations
         
         % Pick group times by ridge tracking with constraints (Stack + and -)
         ind_tneg = find(time<=0);
-        ccf_ifft_env_stack = ccf_ifft_env_pos+ccf_ifft_env_neg;
+        ccf_ifft_env_stack = 0.5*(ccf_ifft_env_pos+ccf_ifft_env_neg);
         [tg_stack, grv_stack, amp_stack, idx_tg_stack, meta_stack] = pick_ftan_ridges_robust(ccf_ifft_env_stack, time_pos, periods, r, vmin, vmax, opts);
         
         %% Calculate correlation coefficients for pos, neg, and stack
