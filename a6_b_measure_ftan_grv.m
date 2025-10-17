@@ -215,19 +215,23 @@ for ista1=1:nsta % loop over all stations
 
         % Pick group times by ridge tracking with constraints (causal +times)
         ind_tpos = find(time>=0);
+        ccf_ifft_pos = ccf_ifft(ind_tpos,:);
         ccf_ifft_env_pos = ccf_ifft_env(ind_tpos,:);
         time_pos = time(ind_tpos);
         [tg_pos, grv_pos, amp_pos, idx_tg_pos, meta_pos] = pick_ftan_ridges_robust(ccf_ifft_env_pos, time_pos, periods, r, vmin, vmax,opts);
         
         % Pick group times by ridge tracking with constraints (acausal -times)
         ind_tneg = find(time<=0);
+        ccf_ifft_neg = flip(ccf_ifft(ind_tneg,:));
         ccf_ifft_env_neg = flip(ccf_ifft_env(ind_tneg,:));
         time_neg = flip(abs(time(ind_tneg)));
         [tg_neg, grv_neg, amp_neg, idx_tg_neg, meta_neg] = pick_ftan_ridges_robust(ccf_ifft_env_neg, time_pos, periods, r, vmin, vmax, opts);
         
         % Pick group times by ridge tracking with constraints (Stack + and -)
         ind_tneg = find(time<=0);
-        ccf_ifft_env_stack = 0.5*(ccf_ifft_env_pos+ccf_ifft_env_neg);
+        % ccf_ifft_env_stack = 0.5*(ccf_ifft_env_pos+ccf_ifft_env_neg);
+        ccf_ifft_stack = 0.5*(ccf_ifft_pos+ccf_ifft_neg);
+        ccf_ifft_env_stack = abs(hilbert(ccf_ifft_stack));
         [tg_stack, grv_stack, amp_stack, idx_tg_stack, meta_stack] = pick_ftan_ridges_robust(ccf_ifft_env_stack, time_pos, periods, r, vmin, vmax, opts);
         
         %% Calculate correlation coefficients for pos, neg, and stack
@@ -347,6 +351,7 @@ for ista1=1:nsta % loop over all stations
                 ftan.pos.amp = amp_pos;
                 ftan.pos.idx_tg = idx_tg_pos;
                 ftan.pos.ccf_envs = ccf_ifft_env_pos;
+                ftan.pos.ccf = ccf_ifft_pos;
                 ftan.pos.snr = snr_pos;
                 ftan.pos.meta = meta_pos;
 
@@ -355,6 +360,7 @@ for ista1=1:nsta % loop over all stations
                 ftan.neg.amp = amp_neg;
                 ftan.neg.idx_tg = idx_tg_neg;
                 ftan.neg.ccf_envs = ccf_ifft_env_neg;
+                ftan.neg.ccf = ccf_ifft_neg;
                 ftan.neg.snr = snr_neg;
                 ftan.neg.meta = meta_neg;
 
@@ -363,6 +369,7 @@ for ista1=1:nsta % loop over all stations
                 ftan.stack.amp = amp_stack;
                 ftan.stack.idx_tg = idx_tg_stack;
                 ftan.stack.ccf_envs = ccf_ifft_env_stack;
+                ftan.stack.ccf = ccf_ifft_stack;
                 ftan.stack.meta = meta_stack;
             end
             ftan.corr_mat = corr_mat;
