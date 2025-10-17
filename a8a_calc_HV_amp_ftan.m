@@ -261,6 +261,20 @@ for ista1=1:nsta % loop over all stations
         hv.snr.RZ_stack = ftan_RZ.snr;
         hv.snr.ZR_stack = ftan_ZR.snr;
 
+        % Save group velocities
+        hv.grv.ZZ_pos = ftan_ZZ.pos.grv;
+        hv.grv.RR_pos = ftan_RR.pos.grv;
+        hv.grv.RZ_pos = ftan_RZ.pos.grv;
+        hv.grv.ZR_pos = ftan_ZR.pos.grv;
+        hv.grv.ZZ_neg = ftan_ZZ.neg.grv;
+        hv.grv.RR_neg = ftan_RR.neg.grv;
+        hv.grv.RZ_neg = ftan_RZ.neg.grv;
+        hv.grv.ZR_neg = ftan_ZR.neg.grv;
+        hv.grv.ZZ_stack = ftan_ZZ.stack.grv;
+        hv.grv.RR_stack = ftan_RR.stack.grv;
+        hv.grv.RZ_stack = ftan_RZ.stack.grv;
+        hv.grv.ZR_stack = ftan_ZR.stack.grv;
+
         % Save station info
         hv.stapairsinfo = ftan_ZZ.stapairsinfo;
         hv.periods = periods;
