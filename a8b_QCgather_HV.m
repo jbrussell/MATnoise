@@ -17,7 +17,7 @@ opts.nBranches = 1; %    (default 2)     % # dispersion branches to pick
 
 %QC Parameters
 snr_thresh = 8; % minimum SNR to consider. If any component (ZZ,RR,ZR,RZ) is less than this value then measurement is dropped
-wl_thresh = 3; % minimum wavelength to consider
+wl_thresh = 1; % minimum wavelength to consider
 dphi_thresh = 90+[-45 +45]; % ensure Rayleigh wave behavior
 tg_period_frac_thresh = 5; %1/4; % ensure traveltime of RR,RZ,ZR within fraction of period relative to ZZ
 hv_RZ_diff_thresh = 0.1; % (default 10%) fractional difference between H/V estimates for vertical and radial forces
