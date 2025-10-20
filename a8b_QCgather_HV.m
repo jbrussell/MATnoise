@@ -166,6 +166,9 @@ for ista=1:nsta % loop over all stations
     hv_stats.QC_params.snr_thresh = snr_thresh;
     hv_stats.QC_params.wl_thresh = wl_thresh;
     hv_stats.QC_params.dphi_thresh = dphi_thresh;
+    hv_stats.QC_params.tg_period_frac_thresh = tg_period_frac_thresh;
+    hv_stats.QC_params.hv_RZ_diff_thresh = hv_RZ_diff_thresh;
+    hv_stats.QC_params.is_3sig_removal = is_3sig_removal;
 
     if isoutput
         save(HV_out_filename,'hv_stats');
