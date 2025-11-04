@@ -25,6 +25,7 @@ windir = 'window3hr';
 % Group velocity min and max
 vmin = 0.5;
 vmax = 6;
+is_truncate_output = 1; % truncate output to only save times within vmin for smaller file sizes
 % Frequencies of intereset
 Npers = 25; % number of periods to use
 frange_fit = [1/25 1/3]; % Frequency range to estimate grv
@@ -342,36 +343,44 @@ for ista1=1:nsta % loop over all stations
         if isoutput
             % Package output
             ftan.periods = periods;
-            ftan.grv_axis = grv_axis;
-            ftan.time = time;
-            ftan.snr = snr;
-            for ibr = 1:opts.nBranches
-                ftan.pos.grv = grv_pos;
-                ftan.pos.tg = tg_pos;
-                ftan.pos.amp = amp_pos;
-                ftan.pos.idx_tg = idx_tg_pos;
-                ftan.pos.ccf_envs = ccf_ifft_env_pos;
-                ftan.pos.ccf = ccf_ifft_pos;
-                ftan.pos.snr = snr_pos;
-                ftan.pos.meta = meta_pos;
-
-                ftan.neg.grv = grv_neg;
-                ftan.neg.tg = tg_neg;
-                ftan.neg.amp = amp_neg;
-                ftan.neg.idx_tg = idx_tg_neg;
-                ftan.neg.ccf_envs = ccf_ifft_env_neg;
-                ftan.neg.ccf = ccf_ifft_neg;
-                ftan.neg.snr = snr_neg;
-                ftan.neg.meta = meta_neg;
-
-                ftan.stack.grv = grv_stack;
-                ftan.stack.tg = tg_stack;
-                ftan.stack.amp = amp_stack;
-                ftan.stack.idx_tg = idx_tg_stack;
-                ftan.stack.ccf_envs = ccf_ifft_env_stack;
-                ftan.stack.ccf = ccf_ifft_stack;
-                ftan.stack.meta = meta_stack;
+            ftan.time = time(time>=0); % save only positive times
+            % Index times to save within vmin
+            if is_truncate_output
+                itime_keep = ftan.time <= r/vmin;
+            else
+                itime_keep = true(size(ftan.time));
             end
+            ftan.time = ftan.time(itime_keep);
+            ftan.grv_axis = grv_axis(itime_keep);
+            ftan.snr = snr;
+            
+            % Positive
+            ftan.pos.grv = grv_pos;
+            ftan.pos.tg = tg_pos;
+            ftan.pos.amp = amp_pos;
+            ftan.pos.idx_tg = idx_tg_pos;
+            ftan.pos.ccf_envs = ccf_ifft_env_pos(itime_keep,:);
+            ftan.pos.ccf = ccf_ifft_pos(itime_keep,:);
+            ftan.pos.snr = snr_pos;
+            ftan.pos.meta = meta_pos;
+            % Negative    
+            ftan.neg.grv = grv_neg;
+            ftan.neg.tg = tg_neg;
+            ftan.neg.amp = amp_neg;
+            ftan.neg.idx_tg = idx_tg_neg;
+            ftan.neg.ccf_envs = ccf_ifft_env_neg(itime_keep,:);
+            ftan.neg.ccf = ccf_ifft_neg(itime_keep,:);
+            ftan.neg.snr = snr_neg;
+            ftan.neg.meta = meta_neg;
+            % Stacked
+            ftan.stack.grv = grv_stack;
+            ftan.stack.tg = tg_stack;
+            ftan.stack.amp = amp_stack;
+            ftan.stack.idx_tg = idx_tg_stack;
+            ftan.stack.ccf_envs = ccf_ifft_env_stack(itime_keep,:);
+            ftan.stack.ccf = ccf_ifft_stack(itime_keep,:);
+            ftan.stack.meta = meta_stack;
+            
             ftan.corr_mat = corr_mat;
             ftan.corr_avg = corr_avg;
             ftan.vmin = vmin;
