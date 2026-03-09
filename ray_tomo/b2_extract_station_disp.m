@@ -162,3 +162,86 @@ for ip=per_ind
     scatterm(sta_lats,sta_lons,80,phv_stas,'o','filled','markeredgecolor',[0 0 0]);
 %     [c,h] = contourm(age_grid.LAT,age_grid.LON,age_grid.AGE,'k','LevelStep',5);
 end
+
+
+%% Plot map of station uncertainties
+
+Mp = 2; Np = 3;
+fig34 = figure(34);
+% set(gcf,'position',[94     1   599   704]);
+set(gcf,'position',[1    1   1244   704],'color','w');
+clf
+ii = 0;
+cmap = tomo_cmap(200);
+sta_lats = [stadisp.lat];
+sta_lons = [stadisp.lon];
+for ip=per_ind
+    
+    % gather values at each period
+    phv_stas = [];
+    phv_std_stas = [];
+    for ista = 1:length(stadisp)
+        phv_stas(ista) = stadisp(ista).phv(ip);
+        phv_std_stas(ista) = stadisp(ista).phv_std(ip);
+    end
+
+    ii = ii + 1;
+    subplot(Mp,Np,ii)
+    ax = worldmap(lalim, lolim);
+    setm(gca,'MapProjection','mercator','FLineWidth',1.5,'FontSize',13)
+    tightmap
+%     set(ax, 'Visible', 'on')
+    set(gcf,'color','w')
+    setm(gca,'FFaceColor',[0.9 0.9 0.9])
+%     set(gca,'Color',[0.7 0.7 0.7])
+%     surfacem(xi,yi,raytomo(ip).GV);
+    levels = linspace(min(phv_std_stas), max(phv_std_stas),100);
+    contourfm(xi,yi,raytomo(ip).GV_std,levels,'edgecolor','none');
+%     drawlocal
+    title([num2str((periods(ip))),' s'],'fontsize',15)
+    % text(0.05,0.85,[num2str(round(Tperiods(ip))),' s'],'fontsize',15,'fontweight','bold','Units','normalized','HorizontalAlignment','left');
+    caxis([min(phv_std_stas), max(phv_std_stas)])
+    cb = colorbar;
+    ylabel(cb,'Phase Velocity Std. (km/s)','fontsize',15);
+    posax = get(ax,'Position');
+    pos=get(cb,'Position');
+    set(cb,'Position',[pos(1)+0.03 pos(2) pos(3)*0.8 pos(4)],'linewidth',1.5,'fontsize',15);
+    set(gca,'Position',[posax(1) posax(2:4)],'fontsize',15);
+%     colormap(seiscmap)
+%     rbc = flip(redbluecmap);
+%     rbc = rbc([1 2 3 4 5 7 8 9 10 11],:);
+%     colormap(rbc);
+    colormap(cmap);    
+    hold on;
+    plotm(sta_lats,sta_lons,'ok','markerfacecolor',[0 0 0]);
+%     [c,h] = contourm(age_grid.LAT,age_grid.LON,age_grid.AGE,'k','LevelStep',5);
+
+    subplot(Mp,Np,ii+Np)
+    ax = worldmap(lalim, lolim);
+    setm(gca,'MapProjection','mercator','FLineWidth',1.5,'FontSize',13)
+    tightmap
+%     set(ax, 'Visible', 'on')
+    set(gcf,'color','w')
+    setm(gca,'FFaceColor',[0.9 0.9 0.9])
+%     set(gca,'Color',[0.7 0.7 0.7])
+%     surfacem(xi,yi,raytomo(ip).GV);
+%     avgv = nanmean(raytomo(ip).GV(:));
+%     drawlocal
+    title([num2str((periods(ip))),' s'],'fontsize',15)
+    % text(0.05,0.85,[num2str(round(Tperiods(ip))),' s'],'fontsize',15,'fontweight','bold','Units','normalized','HorizontalAlignment','left');
+    caxis([min(phv_std_stas), max(phv_std_stas)])
+    cb = colorbar;
+    ylabel(cb,'Phase Velocity Std. (km/s)','fontsize',15);
+    posax = get(ax,'Position');
+    pos=get(cb,'Position');
+    set(cb,'Position',[pos(1)+0.03 pos(2) pos(3)*0.8 pos(4)],'linewidth',1.5,'fontsize',15);
+    set(gca,'Position',[posax(1) posax(2:4)],'fontsize',15);
+%     colormap(seiscmap)
+%     rbc = flip(redbluecmap);
+%     rbc = rbc([1 2 3 4 5 7 8 9 10 11],:);
+%     colormap(rbc);
+    colormap(cmap);    
+    hold on;
+    scatterm(sta_lats,sta_lons,80,phv_std_stas,'o','filled','markeredgecolor',[0 0 0]);
+%     [c,h] = contourm(age_grid.LAT,age_grid.LON,age_grid.AGE,'k','LevelStep',5);
+end
