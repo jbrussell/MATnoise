@@ -3,6 +3,7 @@
 % jbrussell - 11/2025
 
 clear all;
+setup_parameters_tomo;
 
 % Parameters
 Npixel_dist = 2; % Station must be within this many pixels of the nearest good pixel
