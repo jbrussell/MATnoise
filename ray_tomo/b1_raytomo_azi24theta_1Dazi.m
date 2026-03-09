@@ -15,7 +15,7 @@ clear; close all;
 
 % Save results?
 isoutput = 1;
-savefile = ['test'];
+outpath = './phvmaps/'; % path for .mat output
 fastdir = 78; % Fast direction for azimuthal anisotropy (only for plotting purposes);
 iscompare_aniso = 0; % compare to old anisotropic measurements
 Mp = 4; % # of subplot rows
@@ -600,8 +600,12 @@ lolim = [min(ynode) max(ynode)];
 [xi yi] = ndgrid(xnode,ynode);
 % isoutput = 1;
 if isoutput
-    save(savefile,'raytomo','xnode','ynode');
-    save('coor.mat','xi','yi','xnode','ynode','gridsize','lalim','lolim');
+    if ~exist(outpath)
+        mkdir(outpath)
+    end
+    savefile = [outpath,'/raytomo_',num2str(1/frange(2)),'_',num2str(1/frange(1)),'s_',num2str(N_wl),'wl_',xspdir,'.mat'];
+    save(savefile,'raytomo','xnode','ynode','xi','yi','parameters');
+%     save('coor.mat','xi','yi','xnode','ynode','gridsize','lalim','lolim');
 end
 
 %% Phase Velocity Maps (km/s)
