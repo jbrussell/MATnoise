@@ -1,4 +1,7 @@
 # MATnoise
+
+[![DOI](https://zenodo.org/badge/219804716.svg)](https://doi.org/10.5281/zenodo.18931059)
+
 ### MATLAB package to perform ambient noise tomography
 
 This package consists of two parts: (1) Calculation of ambient noise cross-spectra and measuring interstation phase velocities and (2) inverting interstation velocities for 1D or 2D isotropic phase velocity maps and 1D or 2D azimuthal anisotropy.
